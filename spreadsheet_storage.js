@@ -95,7 +95,6 @@ loadSpreadsheetStorage = function() {
     }
     if(row_no) {
       if(sheet.getRange("B"+row_no).getValue()) { // 出勤してないと退勤できない
-        sheet.getRange("A"+row_no).setValue(toDate(datetime));
         sheet.getRange("D"+row_no).setFormula("=C"+row_no+"-B"+row_no);
 
         // まだ退勤していないなら普通に入れる

@@ -20,7 +20,8 @@ function Settings(spreadsheetId, errorMessage) {
       var now = new Date();
       this.sheet.getRange("A1:C2").setValues([
         ["開始日", new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0), "変更しないでください"],
-        ["Slack Incoming URL", null, "SlackのIntegrationにIncoming WebhookからURLを転記して下さい"]
+        ["Slack Incoming URL", null, "SlackのIntegrationにIncoming WebhookからURLを転記して下さい"],
+        ["無視するユーザ", "hubot,slackbot","無視するユーザ名を,区切りで入力してください"]
       ]);
     }
   }
@@ -28,14 +29,14 @@ function Settings(spreadsheetId, errorMessage) {
 
 loadSettings = function() {
   loadSettings = function(){};
-  
+
   Settings.prototype.get = function(name, defaultValue) {
     var vals = _.find(this.sheet.getRange("A1:B"+this.sheet.getLastRow()).getValues(), function(v) {
       return(v[0] == name);
     });
     return vals ? vals[1] : defaultValue;
   };
-  
+
   Settings.prototype.set = function(name, val) {
     var vals = this.sheet.getRange("A1:A"+this.sheet.getLastRow()).getValues();
     for(var i = 0; i < this.sheet.getLastRow(); ++i) {

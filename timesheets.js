@@ -25,7 +25,8 @@ loadTimesheets = function() {
     if(message.match(/^\s*-/)) return;
 
     // 特定のアカウントには反応しない
-    if(_.contains(['hubot', 'takahashi', 'slackbot'], username.toLowerCase())) return;
+    var ignore_users = String(this.settings.get('無視するユーザ')).toLowerCase().trim().split(/\s*,\s*/);
+    if(_.contains(ignore_users, username.toLowerCase())) return;
 
     // コマンド集
     var commands = [
@@ -153,4 +154,7 @@ function testReceiveMessage() {
 
   timesheets.receiveMessage('test1', 'おはよう 10/2 10:00');
   timesheets.receiveMessage('test1', 'おつ 10/3 4:00');
+
+  // 無視される
+  timesheets.receiveMessage('Slackbot', 'おはよう 10/1 10:00');
 }
