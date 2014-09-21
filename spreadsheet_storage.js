@@ -28,6 +28,10 @@ function testSpreadsheetStorage() {
   console.log(storage.getProperty('休み'));
   console.log(storage.setProperty('休み', '火,水'));
   console.log(storage.getProperty('休み'));
+
+  storage.setRow(0, [1,2,3]);
+  console.log(storage.getRow(0));
+  console.log(storage.getRow(1));
 }
 
 function SpreadsheetStorage(spreadsheetId, name, schema) {
@@ -58,9 +62,9 @@ SpreadsheetStorage.prototype._getSheet = function(sheetName) {
         sheet.getRange("A1:C"+(properties.length)).setValues(properties);
 
         // ヘッダの書き出し
-        var row = properties.length + 2;
+        var rowNo = properties.length + 2;
         var cols = this.sheetSchema.columns.map(function(c) { return c.name; });
-        sheet.getRange("A"+row+":"+String.fromCharCode(65 + cols.length - 1)+row).setValues([cols]);
+        sheet.getRange("A"+rowNo+":"+String.fromCharCode(65 + cols.length - 1)+rowNo).setValues([cols]);
       }
       //this.on("newUser", username);
     }
@@ -95,4 +99,18 @@ SpreadsheetStorage.prototype.setProperty = function(name, value) {
     }
   });
   return value;
+}
+
+
+SpreadsheetStorage.prototype.getRow = function(idx) {
+  var rowNo = this.sheetSchema.properties.length + 4 + idx;
+  return this.sheet.getRange("A"+rowNo+":"+String.fromCharCode(65 + this.sheetSchema.columns.length - 1)+rowNo).getValues()[0];
+}
+
+SpreadsheetStorage.prototype.setRow = function(idx, data) {
+  if(data.length > 0) {
+     var rowNo = this.sheetSchema.properties.length + 4 + idx;
+     this.sheet.getRange("A"+rowNo+":"+String.fromCharCode(65 + data.length - 1)+rowNo).setValues([data]);
+  }
+  return data;
 }
