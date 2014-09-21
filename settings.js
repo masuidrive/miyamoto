@@ -52,7 +52,7 @@ loadSettings = function() {
 
 function testSettings() {
   var settings = new Settings(ScriptProperties.getProperty('spreadsheet'));
-  Logger.log(1231 == settings.set('Test1', 1231));
-  Logger.log(1231 == settings.get('Test1'));
-  Logger.log(1 == settings.get('unknow', 1) );
+  console.log(1231 == settings.set('Test1', 1231));
+  console.log(1231 == settings.get('Test1'));
+  console.log(1 == settings.get('unknow', 1) );
 }

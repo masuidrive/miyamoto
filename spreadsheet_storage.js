@@ -1,199 +1,98 @@
-function createSpreadsheetStorage(spreadsheetId, settings) {
+function createSpreadsheetStorage(spreadsheetId, properties) {
   loadSpreadsheetStorage();
-  return(new SpreadsheetStorage(spreadsheetId, settings));
+  return(new SpreadsheetStorage(spreadsheetId, properties));
 }
 
-function SpreadsheetStorage(spreadsheetId, settings) {
+function testSpreadsheetStorage() {
+  var spreadsheetId = PropertiesService.getScriptProperties().getProperty('spreadsheet');
+  var name = 'test_storage';
+  var ss = SpreadsheetApp.openById(spreadsheetId);
+  var sheet = ss.getSheetByName(name);
+  if(sheet) ss.deleteSheet(sheet);
+
+  var schema = {
+    columns: [
+      { name: '日付' },
+      { name: '出勤' },
+      { name: '退勤' },
+      { name: '時間数' },
+      { name: 'コメント' },
+    ],
+    properties: [
+      { name: 'アカウント', value: '有効', comment: '← 有効, Activeじゃない文字を入れると、アカウントを停止'},
+      { name: '休み', value: '土,日', comment: '← 月,火,水みたいに入力してください'},
+    ]
+  }
+
+  var storage = new SpreadsheetStorage(spreadsheetId, name, schema);
+  console.log(storage.getProperty('休み'));
+  console.log(storage.setProperty('休み', '火,水'));
+  console.log(storage.getProperty('休み'));
+}
+
+function SpreadsheetStorage(spreadsheetId, name, schema) {
   StorageInterface.call(this);
   this.spreadsheet = SpreadsheetApp.openById(spreadsheetId);
-  this.settings = settings;
-  this.start_date = this.settings.get('開始日');
+  this.sheetName = name;
+  this.sheetSchema = schema;
+  if(!this.sheetSchema.properties) this.sheetSchema.properties = [];
+  this.sheet = this._getSheet(this.sheetName);
 }
 
-loadSpreadsheetStorage = function() {
-  loadSpreadsheetStorage = function(){};
-  loadStorageInterface();
-
-  inherits(SpreadsheetStorage, StorageInterface);
-
-  // ユーザ名からシート
-  SpreadsheetStorage.prototype.getSheet = function(username) {
-    var sheet = this.spreadsheet.getSheetByName(username);
+// シートを取得
+SpreadsheetStorage.prototype._getSheet = function(sheetName) {
+  var sheet = this.spreadsheet.getSheetByName(sheetName);
+  if(!sheet) {
+    sheet = this.spreadsheet.insertSheet(sheetName);
     if(!sheet) {
-      sheet = this.spreadsheet.insertSheet(username);
-      if(!sheet) {
-        this.fireEvent("error", "エラー: "+username+"のシートが作れませんでした");
-      }
-      else {
-        // ヘッダがなかったら書き込み
-        if(sheet.getLastRow() == 0) {
-          sheet.getRange("A1:E3").setValues([
-            ["アカウント", "有効", "← 有効, Activeじゃない文字を入れると、アカウントを停止", null, null],
-            ["休み", "土,日", "← 月,火,水みたいに入力してください", null, null],
-            ["日付", "出勤", "退社", "時間数", "コメント"]
-          ]);
-        }
-        this.on("newUser", username);
-      }
-    }
-    return sheet;
-  }
-
-  // 行番号
-  SpreadsheetStorage.prototype.getRowNo = function(username, date) {
-    return(3 + parseInt((date.getTime() - date.getTimezoneOffset() * 60 * 1000) / (24 * 60 * 60 * 1000)) - parseInt((this.start_date.getTime() - this.start_date.getTimezoneOffset() * 60 * 1000) / (24 * 60 * 60 * 1000)));
-  };
-
-  // 出退勤の時間
-  SpreadsheetStorage.prototype.get = function(username, date) {
-    var sheet = this.getSheet(username);
-    var row_no = this.getRowNo(username, date);
-    if(row_no) {
-      var data = (sheet.getRange("B"+row_no+':D'+row_no).getValues())[0];
-      if(data) {
-        return({inTime: (data[0] == '' ? null : data[0]), outTime: (data[1] == '' ? null : data[1]), comment: data[2]});
-      }
-      else {
-        return({inTime: undefined, outTime:undefined, comment: undefined});
-      }
+      this.fireEvent("error", "エラー: "+sheetName+"のシートが作れませんでした");
     }
     else {
-      return null;
+      // 中身が無い場合は新規作成
+      if(sheet.getLastRow() == 0) {
+        // 設定部の書き出し
+        var properties = [["Properties count", this.sheetSchema.properties.length, null]];
+        this.sheetSchema.properties.forEach(function(s) {
+          properties.push([s.name, s.value, s.comment]);
+        });
+        sheet.getRange("A1:C"+(properties.length)).setValues(properties);
+
+        // ヘッダの書き出し
+        var row = properties.length + 2;
+        var cols = this.sheetSchema.columns.map(function(c) { return c.name; });
+        sheet.getRange("A"+row+":"+String.fromCharCode(65 + cols.length - 1)+row).setValues([cols]);
+      }
+      //this.on("newUser", username);
     }
-  };
-
-  // 出勤
-  SpreadsheetStorage.prototype.doIn = function(username, datetime, force, comment) {
-    var sheet = this.getSheet(username);
-    var row_no = this.getRowNo(username, datetime);
-    if(row_no) {
-      sheet.getRange("A"+row_no).setValue(toDate(datetime));
-
-      // まだ出勤していないなら普通に入れる
-      // 既に出勤していてもforce==trueなら、入れて色を変える
-      if(sheet.getRange("B"+row_no).getValue() == '') {
-        sheet.getRange("B"+row_no).setValue(datetime);
-        if(force) {
-          sheet.getRange("B"+row_no).setBackground("#dddddd");
-        }
-        return 'ok';
-      }
-      else if(force) {
-        sheet.getRange("B"+row_no).setValue(datetime);
-        sheet.getRange("B"+row_no).setBackground("#ffdddd");
-        return 'updated';
-      }
-    }
-    return false;
-  };
-
-  // 退勤
-  SpreadsheetStorage.prototype.doOut = function(username, datetime, force, comment, row_no) {
-    var sheet = this.getSheet(username);
-    if(!row_no) {
-      row_no = this.getRowNo(username, datetime);
-    }
-    if(row_no) {
-      if(sheet.getRange("B"+row_no).getValue()) { // 出勤してないと退勤できない
-        sheet.getRange("D"+row_no).setFormula("=C"+row_no+"-B"+row_no);
-
-        // まだ退勤していないなら普通に入れる
-        // 既に退勤していてもforce==trueなら、入れて色を変える
-        if(sheet.getRange("C"+row_no).getValue() == '') {
-          sheet.getRange("C"+row_no).setValue(datetime);
-          if(force) {
-            sheet.getRange("C"+row_no).setBackground("#dddddd");
-          }
-          return 'ok';
-        }
-        else if(force) {
-          sheet.getRange("C"+row_no).setValue(datetime);
-          sheet.getRange("C"+row_no).setBackground("#ffdddd");
-          return 'updated';
-        }
-      }
-      else { // 前日退勤していて居なく、午前6時前以前なら前日の退勤として扱う
-        var yesterday = new Date(datetime.getTime() - (24 * 60 * 60 * 1000));
-        var data = this.get(username, yesterday);
-        if(datetime.getHours() < 6 && !data.outTime) {
-          return(this.doOut(username, datetime, force, comment, this.getRowNo(username, yesterday)));
-        }
-      }
-    }
-    return false;
-  };
-
-  // その日は定休日か
-  SpreadsheetStorage.prototype.isActive = function(username) {
-    var sheet = this.getSheet(username);
-    return(_.indexOf(['有効', 'active', 'enable'], String(sheet.getRange("B1").getValue()).trim().toLowerCase()) >= 0);
-  };
-
-  // その日は定休日か
-  SpreadsheetStorage.prototype.isRegularOffDay = function(username, date) {
-    var sheet = this.getSheet(username);
-    var days = String(sheet.getRange("B2").getValue()).trim().split(/\s*,\s*/).map(function(day) {
-      var i = _.indexOf(['日','月','火','水','木','金','土'], day.substring(0,1));
-      if(i < 0) {
-        i = _.indexOf(['sun','mon','tue','wed','thu','fri','sat'], day.substring(0,3).toLowerCase());
-      }
-      return i;
-    });
-    return(_.indexOf(days, date.getDay()) >= 0);
   }
+  return sheet;
+}
 
-  // 休暇
-  SpreadsheetStorage.prototype.doOff = function(username, date, comment) {
-    var sheet = this.getSheet(username);
-    var row_no = this.getRowNo(username, date);
-    if(row_no) {
-      if(sheet.getRange("B"+row_no).getValue() == '') { // 出勤していると休暇にはできない
-        sheet.getRange("A"+row_no+":C"+row_no).setValues([[toDate(date), '-', '-']]);
-        return true;
-      }
+
+// プロパティーを全部取得
+SpreadsheetStorage.prototype._loadProperties = function(name) {
+  if(!this._properties) {
+    this._properties = this.sheet.getRange("A2:B"+(this.sheetSchema.properties.length+1)).getValues();
+  }
+  return this._properties;
+}
+
+// プロパティーを全部取得
+SpreadsheetStorage.prototype.getProperty = function(name) {
+  this._loadProperties();
+  var kv = _.find(this._properties, function(prop) { return(prop[0] == name); })
+  return kv ? kv[1] : null;
+}
+
+// プロパティーを取得
+SpreadsheetStorage.prototype.setProperty = function(name, value) {
+  this._loadProperties();
+  var sheet = this.sheet;
+  _.each(this._properties, function(prop, idx) {
+    if(prop[0] == name) {
+      prop[1] = value;
+      sheet.getRange("B"+(idx+2)).setValue(value);
     }
-    return false;
-  };
-
-  // 休暇取消
-  SpreadsheetStorage.prototype.doCancelOff = function(username, date) {
-    var sheet = this.getSheet(username);
-    var row_no = this.getRowNo(username, date);
-    if(row_no) {
-      if(sheet.getRange("B"+row_no).getValue() == '-') { // 休暇だとキャンセル
-        sheet.getRange("A"+row_no+":C"+row_no).setValues([[toDate(date), '', '']]);
-        return true;
-      }
-    }
-    return false;
-  };
-
-  // 誰が休みか
-  SpreadsheetStorage.prototype.whoIsOff = function(date) {
-    var self = this;
-    var names = [];
-    this.spreadsheet.getSheets().forEach(function(sheet) {
-      var data = self.get(sheet.getName(), date);
-      if(data.inTime == '-') {
-        names.push(sheet.getName());
-      }
-      else if(data.inTime == null && self.isActive(sheet.getName()) && self.isRegularOffDay(sheet.getName(), date)) {
-        names.push(sheet.getName());
-      }
-    });
-    return(names.length < 1 ? null : _.uniq(names));
-  };
-
-  // 誰が出勤中か
-  SpreadsheetStorage.prototype.whoIsIn = function(date) {
-    var self = this;
-    var names = [];
-    this.spreadsheet.getSheets().forEach(function(sheet) {
-      var data = self.get(sheet.getName(), date);
-      if(data.inTime != null && data.inTime == null) {
-        names.push(sheet.getName());
-      }
-    });
-    return(names.length < 1 ? null : names);
-  };
+  });
+  return value;
 }

@@ -1,19 +1,23 @@
-
 // テスト
 function testParseTime() {
-  Logger.log("Test: parseTime");
-  Logger.log(_.isEqual([13,1], parseTime("13:01")));
-  Logger.log(_.isEqual([14,2], parseTime("2:02pm")));
-  Logger.log(_.isEqual([16,3], parseTime("午後4:3")));
-  Logger.log(_.isEqual([17,0], parseTime("5pm")));
-  Logger.log(_.isEqual([17,1], parseTime("5:1pm")));
-  Logger.log(_.isEqual([18,0], parseTime("18時")));
-  Logger.log(_.isEqual([19,20], parseTime("19 : 20")));
-  Logger.log(_.isEqual([20,0], parseTime("午後８")));
-  
+  console.log("Test: parseTime");
+  console.log(_.isEqual([13,1], parseTime("13:01")));
+  console.log(_.isEqual([14,2], parseTime("2:02pm")));
+  console.log(_.isEqual([16,3], parseTime("午後4:3")));
+  console.log(_.isEqual([17,0], parseTime("5pm")));
+  console.log(_.isEqual([17,1], parseTime("5:1pm")));
+  console.log(_.isEqual([18,0], parseTime("18時")));
+  console.log(_.isEqual([19,20], parseTime("19 : 20")));
+  console.log(_.isEqual([20,0], parseTime("午後８")));
+
   // 下記の様な書き方はサポートしない
-  Logger.log(_.isEqual(null, parseTime("お昼")));
+  console.log(_.isEqual(null, parseTime("お昼")));
 }
+
+if(typeof(console) == 'undefined' && typeof(Logger) != 'undefined') {
+  console = Logger;
+}
+
 
 // 文章内から時間を取ってくる
 function parseTime(str) {
@@ -24,7 +28,7 @@ function parseTime(str) {
   var matches = str.match(reg);
   if(matches) {
     var hour, min;
-    
+
     // 1時20, 2:30, 3:00pm
     if(matches[2] != null) {
       hour = parseInt(matches[2]);
@@ -65,26 +69,26 @@ function parseTime(str) {
 
 // テスト
 function testParseDate() {
-  Logger.log("Test: parseDate");
-  
+  console.log("Test: parseDate");
+
   var y201601 = new Date(2016,1-1,1);
-  Logger.log(_.isEqual([2015,12,1], parseDate("12/1", y201601)));
-  Logger.log(_.isEqual([2016,1,1], parseDate("1/1", y201601)));
-  Logger.log(_.isEqual([2016,2,3], parseDate("2月3日", y201601)));
-  Logger.log(_.isEqual([2020,1,1], parseDate("2020/1/1", y201601)));
-  Logger.log(_.isEqual([1976,2,8], parseDate("1976年2月8日", y201601)));
-  Logger.log(_.isEqual([2015,12,31], parseDate("昨日", y201601)));
-  Logger.log(_.isEqual([2016,1,1], parseDate("今日", y201601)));
-  Logger.log(_.isEqual([2016,1,2], parseDate("明日", y201601)));
-  
+  console.log(_.isEqual([2015,12,1], parseDate("12/1", y201601)));
+  console.log(_.isEqual([2016,1,1], parseDate("1/1", y201601)));
+  console.log(_.isEqual([2016,2,3], parseDate("2月3日", y201601)));
+  console.log(_.isEqual([2020,1,1], parseDate("2020/1/1", y201601)));
+  console.log(_.isEqual([1976,2,8], parseDate("1976年2月8日", y201601)));
+  console.log(_.isEqual([2015,12,31], parseDate("昨日", y201601)));
+  console.log(_.isEqual([2016,1,1], parseDate("今日", y201601)));
+  console.log(_.isEqual([2016,1,2], parseDate("明日", y201601)));
+
   var y201612 = new Date(2016,12-1,1);
-  Logger.log(_.isEqual([2017,1,1], parseDate("1/1", y201612)));
-  Logger.log(_.isEqual([2016,11,30], parseDate("昨日", y201612)));
-  Logger.log(_.isEqual([2016,12,1], parseDate("今日", y201601)));
-  Logger.log(_.isEqual([2016,12,2], parseDate("明日", y201612)));
-  
+  console.log(_.isEqual([2017,1,1], parseDate("1/1", y201612)));
+  console.log(_.isEqual([2016,11,30], parseDate("昨日", y201612)));
+  console.log(_.isEqual([2016,12,1], parseDate("今日", y201601)));
+  console.log(_.isEqual([2016,12,2], parseDate("明日", y201612)));
+
   // 下記の様な書き方はサポートしない
-  Logger.log(_.isEqual(null, parseDate("3日後", y201612)));
+  console.log(_.isEqual(null, parseDate("3日後", y201612)));
 }
 
 // 文章内から日付を取ってくる
@@ -95,21 +99,21 @@ function parseDate(str, now) {
   str = str.toLowerCase().replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(s) {
     return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
   });
-  
+
   if(str.match(/(明日|tomorrow)/)) {
     var tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1);
     return [tomorrow.getFullYear(), tomorrow.getMonth()+1, tomorrow.getDate()]
   }
-  
+
   if(str.match(/(今日|today)/)) {
     return [now.getFullYear(), now.getMonth()+1, now.getDate()]
   }
-  
+
   if(str.match(/(昨日|yesterday)/)) {
     var yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate()-1);
     return [yesterday.getFullYear(), yesterday.getMonth()+1, yesterday.getDate()]
   }
-  
+
   var reg = /((\d{4})[-\/年]{1}|)(\d{1,2})[-\/月]{1}(\d{1,2})/;
   var matches = str.match(reg);
   if(matches) {
@@ -117,7 +121,7 @@ function parseDate(str, now) {
     var month = parseInt(matches[3]);
     var day = parseInt(matches[4]);
     if(_.isNaN(year) || year < 1970) {
-      // 
+      //
       if((now.getMonth() + 1) >= 11 && month <= 2) {
         year = now.getFullYear() + 1;
       }
@@ -128,10 +132,10 @@ function parseDate(str, now) {
         year = now.getFullYear();
       }
     }
-    
+
     return [year, month, day];
   }
-  
+
   return null;
 }
 
@@ -147,7 +151,7 @@ function normalizeDateTime(date, time) {
       time = [now.getHours(), now.getMinutes()];
     }
   }
-  
+
   // 日付を指定したけど、時間を書いてない場合は扱わない
   if(date && time) {
     return(new Date(date[0], date[1]-1, date[2], time[0], time[1], 0));
@@ -199,8 +203,8 @@ function debug(msg) {
     }
     sheet.getRange('a'+(sheet.getLastRow()+1)).setValue(msg);
   }
-  else if(Logger) {
-    Logger.log(msg);
+  else if(console) {
+    console.log(msg);
   }
   else if(console) {
     console.log(msg);
