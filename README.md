@@ -21,3 +21,67 @@ Slackで下記の様につぶやくと、宮本さんがGoogle Spreadsheetに記
 - 9/21は誰がお休み？ ← 指定日の休暇リスト
 
 ## 設置方法
+
+
+## ソースコード
+
+### main.js
+
+- HTTPを受け取る
+
+
+### timesheets.js
+
+- 入力内容を解析して、メソッドを呼び出す
+
+
+### slack.js
+
+- Slackへの入出力
+
+
+### gs_messages.js
+
+- Google Spreadsheetを使ったメッセージテンプレート
+
+
+### gs_settings.js
+
+- Google Spreadsheetを使った設定key-value store
+
+
+### gs_timesheets.js
+
+- timesheetsをGoogle Spreadsheetに保存する処理
+
+
+### utils.js
+
+- globalで使うユーティリティ集
+
+
+### gas_utils.js
+
+- Google Apps Script用のユーティリティ集
+
+
+### underscore.js
+
+- _.で始まるユーティリティ集
+- http://underscorejs.org
+
+### qunit.js
+
+- テストフレームワーク
+- http://qunitjs.com/
+
+
+## テストの実行
+
+### nodeで実行
+
+npm install
+
+
+
+### Google Apps Scriptで実行
