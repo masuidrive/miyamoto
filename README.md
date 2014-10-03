@@ -58,12 +58,17 @@ Slackで下記の様につぶやくと、宮本さんがGoogle Spreadsheetに記
 
 ### utils.js
 
-- globalで使うユーティリティ集
+- globalで使うユーティリティ
+
+
+### date_utils.js
+
+- 日付関係のユーティリティ
 
 
 ### gas_utils.js
 
-- Google Apps Script用のユーティリティ集
+- Google Apps Script用のユーティリティ
 
 
 ### underscore.js

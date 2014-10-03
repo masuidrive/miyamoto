@@ -1,3 +1,4 @@
 .DS_Store
 gas-config.json
 gas-project.json
+/node_modules/

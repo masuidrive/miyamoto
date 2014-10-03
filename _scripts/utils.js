@@ -18,7 +18,6 @@ if(typeof(console) == 'undefined' && typeof(Logger) != 'undefined') {
   console = Logger;
 }
 
-
 // 文章内から時間を取ってくる
 function parseTime(str) {
   str = str.toLowerCase().replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(s) {
