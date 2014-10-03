@@ -20,6 +20,7 @@ Slackで下記の様につぶやくと、宮本さんがGoogle Spreadsheetに記
 - 誰がお休み？ ← 休暇中のリスト
 - 9/21は誰がお休み？ ← 指定日の休暇リスト
 
+
 ## 設置方法
 
 
@@ -80,8 +81,10 @@ Slackで下記の様につぶやくと、宮本さんがGoogle Spreadsheetに記
 
 ### nodeで実行
 
+```
 npm install
-
+node ./node_modules/qunit/bin/cli.js -c utils.js -t test.js
+```
 
 
 ### Google Apps Scriptで実行
