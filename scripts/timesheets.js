@@ -47,17 +47,13 @@ loadTimesheets = function (exports) {
 
   // 出勤
   exports.Timesheets.prototype.actionIn = function(username, message) {
-    var date = DateUtils.parseDate(message, now());
-    var time = DateUtils.parseTime(message, now());
-console.log("!!!");
-console.log(now);
-console.log(now());
-    var datetime = DateUtils.normalizeDateTime(date, time, now());
+    var date = DateUtils.parseDate(message);
+    var time = DateUtils.parseTime(message);
+    var datetime = DateUtils.normalizeDateTime(date, time);
     if(datetime) {
-//      var result = this.storage.doIn(username, datetime, !!time, message);
-      var result = 'ok';
+      var result = this.storage.doIn(username, datetime, !!time, message);
       if(result == 'ok') {
-        this.responder.template("出勤", username, Utilities.formatDate(datetime, Session.getScriptTimeZone(), "yyyy/MM/dd HH:mm"));
+        this.responder.template("出勤", username, DateUtils.format("Y/m/d H:i", datetime));
       }
       else if(result == 'updated') {
         this.responder.template("出勤更新", username, Utilities.formatDate(datetime, Session.getScriptTimeZone(), "HH:mm"));

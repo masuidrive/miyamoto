@@ -1,17 +1,24 @@
 QUnit.test( "EventListener", function(assert) {
 
   var responder = {
-    last_message: undefined,
+    messages: [],
     template: function(label) {
-      this.last_message = [label];
+      message = [label];
       for (var i = 1; i < arguments.length; i++) {
-        this.last_message.push(arguments[i]);
+        message.push(arguments[i]);
       }
+      this.messages.push(message);
+    },
+    clearMessages: function() {
+      this.messages = [];
     }
   };
 
   var storage = {
-
+    doIn: function() {
+      /* noop */
+      return 'ok';
+    }
   };
 
   var settings = {
@@ -26,10 +33,11 @@ QUnit.test( "EventListener", function(assert) {
 
   var timesheets = new Timesheets(storage, settings, responder);
 
-  now(new Date(2014,0,2,12,34,0));
+  DateUtils.now(new Date(2014,0,2,12,34,0));
 
+  responder.clearMessages();
   timesheets.receiveMessage('test1', 'おはよう');
-  assert.ok(_.isEqual(['出勤', 'test1', "2014/01/02 12:34"], responder.last_message), 'おはよう');
+  assert.ok(_.isEqual([['出勤', 'test1', "2014/01/02 12:34"]], responder.messages), 'おはよう');
 /*
   timesheets.receiveMessage('test1', 'おはよう');
   timesheets.receiveMessage('test1', 'おつ');
