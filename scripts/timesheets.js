@@ -116,25 +116,32 @@ loadTimesheets = function (exports) {
 
   // 出勤中
   exports.Timesheets.prototype.actionWhoIsIn = function(username, message) {
-    var result = this.storage.whoIsIn(new Date());
-    if(result) {
-      this.responder.template("出勤中", result.join(', '));
+    var dateObj = DateUtils.toDate(DateUtils.now());
+    var result = _.compact(_.map(this.storage.getByDate(dateObj), function(row){
+      return _.isDate(row.signIn) && !_.isDate(row.signOut) ? row.user : undefined;
+    }));
+
+    if(_.isEmpty(result)) {
+      this.responder.template("出勤なし");
     }
     else {
-      this.responder.template("出勤なし");
+      this.responder.template("出勤中", result.sort().join(', '));
     }
   };
 
   // 休暇中
   exports.Timesheets.prototype.actionWhoIsOff = function(username, message) {
-    var date = parseDate(message);
-    var datetime = normalizeDateTime(date, [0,0]) || new Date();
-    var result = this.storage.whoIsOff(datetime);
-    if(result) {
-      this.responder.template("休暇中", result.join(', '), Utilities.formatString("%02d/%02d", datetime.getMonth()+1, datetime.getDate()));
+    var dateObj = DateUtils.toDate(DateUtils.now());
+    var dateStr = DateUtils.format("Y/m/d", dateObj);
+    var result = _.compact(_.map(this.storage.getByDate(dateObj), function(row){
+      return row.signIn === '-' ? row.user : undefined;
+    }));
+
+    if(_.isEmpty(result)) {
+      this.responder.template("休暇なし", dateStr);
     }
     else {
-      this.responder.template("休暇なし", Utilities.formatString("%02d/%02d", datetime.getMonth()+1, datetime.getDate()));
+      this.responder.template("休暇中", dateStr, result.sort().join(', '));
     }
   };
 
