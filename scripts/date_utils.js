@@ -1,9 +1,9 @@
 // 日付関係の関数
 // DateUtils = loadDateUtils();
 
-loadDateUtils = function (exports) {
-  if(typeof exports === 'undefined') exports = {};
-
+loadDateUtils = function () {
+  var DateUtils = {};
+  
   // 今を返す
   var _now = new Date();
   var now = function(datetime) {
@@ -12,10 +12,10 @@ loadDateUtils = function (exports) {
     }
     return _now;
   };
-  exports.now = now;
+  DateUtils.now = now;
 
   // テキストから時間を抽出
-  exports.parseTime = function(str) {
+  DateUtils.parseTime = function(str) {
     str = str.toLowerCase().replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(s) {
       return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
     });
@@ -63,7 +63,7 @@ loadDateUtils = function (exports) {
   };
 
   // テキストから日付を抽出
-  exports.parseDate = function(str) {
+  DateUtils.parseDate = function(str) {
     str = str.toLowerCase().replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(s) {
       return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
     });
@@ -108,7 +108,7 @@ loadDateUtils = function (exports) {
   };
 
   // 日付と時間の配列から、Dateオブジェクトを生成
-  exports.normalizeDateTime = function(date, time) {
+  DateUtils.normalizeDateTime = function(date, time) {
     // 時間だけの場合は日付を補完する
     if(date) {
       if(!time) date = null;
@@ -130,7 +130,7 @@ loadDateUtils = function (exports) {
   };
 
   // Dateから日付部分だけを取り出す
-  exports.toDate = function(date) {
+  DateUtils.toDate = function(date) {
     return(new Date(date.getFullYear(), date.getMonth(), date.getDate()));
   };
 
@@ -205,7 +205,7 @@ loadDateUtils = function (exports) {
     U: function() { return this.getTime() / 1000; }
   };
 
-  exports.format = function(format, date) {
+  DateUtils.format = function(format, date) {
     var returnStr = '';
     for (var i = 0; i < format.length; i++) {
       var curChar = format.charAt(i);
@@ -220,12 +220,11 @@ loadDateUtils = function (exports) {
       }
     }
     return returnStr;
-};
+  };
 
-
-  return exports;
+  return DateUtils;
 };
 
 if(typeof exports !== 'undefined') {
-  loadDateUtils(exports);
+  exports.DateUtils = loadDateUtils();
 }

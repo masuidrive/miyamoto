@@ -1,4 +1,3 @@
-
 // Script-as-app template.
 function doGet() {
   var app = UiApp.createApplication();

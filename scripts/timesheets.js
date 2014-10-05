@@ -2,21 +2,14 @@
 // Timesheets = loadTimesheets();
 
 loadTimesheets = function (exports) {
-  if(typeof exports === 'undefined') exports = {};
-
-  exports.Timesheets = function(storage, settings, responder) {
+  var Timesheets = function(storage, settings, responder) {
     this.storage = storage;
     this.settings = settings;
     this.responder = responder;
-/*
-    this.storage.on('newUser', function(username) {
-      responder.template('使い方', username);
-    });
-*/
-  }
+  };
 
   // メッセージを受信する
-  exports.Timesheets.prototype.receiveMessage = function(username, message) {
+  Timesheets.prototype.receiveMessage = function(username, message) {
     // -で始まると反応しない
     if(message.match(/^\s*-/)) return;
 
@@ -55,7 +48,7 @@ loadTimesheets = function (exports) {
   }
 
   // 出勤
-  exports.Timesheets.prototype.actionSignIn = function(username, message) {
+  Timesheets.prototype.actionSignIn = function(username, message) {
     if(this.datetime) {
       var data = this.storage.get(username, this.datetime);
       if(typeof data.signIn == 'undefined' || data.signIn === '-') {
@@ -73,7 +66,7 @@ loadTimesheets = function (exports) {
   };
 
   // 退勤
-  exports.Timesheets.prototype.actionSignOut = function(username, message) {
+  Timesheets.prototype.actionSignOut = function(username, message) {
     if(this.datetime) {
       var data = this.storage.get(username, this.datetime);
       if(typeof data.signOut == 'undefined' || data.signOut === '-') {
@@ -91,7 +84,7 @@ loadTimesheets = function (exports) {
   };
 
   // 休暇申請
-  exports.Timesheets.prototype.actionOff = function(username, message) {
+  Timesheets.prototype.actionOff = function(username, message) {
     if(this.date) {
       var dateObj = new Date(this.date[0], this.date[1]-1, this.date[2]);
       var data = this.storage.get(username, dateObj);
@@ -103,7 +96,7 @@ loadTimesheets = function (exports) {
   };
 
   // 休暇取消
-  exports.Timesheets.prototype.actionCancelOff = function(username, message) {
+  Timesheets.prototype.actionCancelOff = function(username, message) {
     if(this.date) {
       var dateObj = new Date(this.date[0], this.date[1]-1, this.date[2]);
       var data = this.storage.get(username, dateObj);
@@ -115,7 +108,7 @@ loadTimesheets = function (exports) {
   };
 
   // 出勤中
-  exports.Timesheets.prototype.actionWhoIsIn = function(username, message) {
+  Timesheets.prototype.actionWhoIsIn = function(username, message) {
     var dateObj = DateUtils.toDate(DateUtils.now());
     var result = _.compact(_.map(this.storage.getByDate(dateObj), function(row){
       return _.isDate(row.signIn) && !_.isDate(row.signOut) ? row.user : undefined;
@@ -130,7 +123,7 @@ loadTimesheets = function (exports) {
   };
 
   // 休暇中
-  exports.Timesheets.prototype.actionWhoIsOff = function(username, message) {
+  Timesheets.prototype.actionWhoIsOff = function(username, message) {
     var dateObj = DateUtils.toDate(DateUtils.now());
     var dateStr = DateUtils.format("Y/m/d", dateObj);
     var result = _.compact(_.map(this.storage.getByDate(dateObj), function(row){
@@ -145,9 +138,9 @@ loadTimesheets = function (exports) {
     }
   };
 
-  return exports.Timesheets;
+  return Timesheets;
 };
 
 if(typeof exports !== 'undefined') {
-  loadTimesheets(exports);
+  exports.Timesheets = loadTimesheets();
 }

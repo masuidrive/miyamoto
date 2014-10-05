@@ -2,6 +2,7 @@ QUnit.test( "EventListener", function(assert) {
 
   var responder = {
     messages: [],
+
     template: function(label) {
       message = [label];
       for (var i = 1; i < arguments.length; i++) {
@@ -9,6 +10,8 @@ QUnit.test( "EventListener", function(assert) {
       }
       this.messages.push(message);
     },
+
+    // for testing
     clearMessages: function() {
       this.messages = [];
     }

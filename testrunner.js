@@ -4,7 +4,7 @@
 var runner = require("./node_modules/qunit");
 runner.setup({
   log: {
-        assertions: true,
+    assertions: true,
     summary: true
   }
 });
@@ -12,10 +12,7 @@ runner.setup({
 runner.run([
   //
   {
-    code: {
-      path: "./scripts/date_utils.js",
-      namespace: "DateUtils"
-    },
+    code: "./scripts/date_utils.js",
     tests: "./tests/date_utils_test.js",
     deps: "./scripts/underscorejs.js"
   },
@@ -33,12 +30,8 @@ runner.run([
     tests: "./tests/timesheets_test.js",
     deps: [
       "./scripts/underscorejs.js",
-      "./scripts/utils.js",
       "./scripts/event_listener.js",
-      {
-        path: "./scripts/date_utils.js",
-        namespace: "DateUtils"
-      }
+      "./scripts/date_utils.js",
     ]
   }
 ]);

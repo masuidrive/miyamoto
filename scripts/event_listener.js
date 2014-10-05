@@ -1,15 +1,13 @@
 // 日付関係の関数
 // EventListener = loadEventListener();
 
-loadEventListener = function (exports) {
-  if(typeof exports === 'undefined') exports = {};
-
-  exports.EventListener = function() {
+loadEventListener = function () {
+  var EventListener = function() {
     this._events = {};
   }
 
   // イベントを捕捉
-  exports.EventListener.prototype.on = function(eventName, func) {
+  EventListener.prototype.on = function(eventName, func) {
     if(this._events[eventName]) {
       this._events[eventName].push(func);
     }
@@ -19,7 +17,7 @@ loadEventListener = function (exports) {
   };
 
   // イベント発行
-  exports.EventListener.prototype.fireEvent = function(eventName) {
+  EventListener.prototype.fireEvent = function(eventName) {
     var funcs = this._events[eventName];
     if(funcs) {
       for(var i = 0; i < funcs.length; ++i) {
@@ -28,9 +26,9 @@ loadEventListener = function (exports) {
     }
   };
 
-  return exports.EventListener;
+  return EventListener;
 };
 
 if(typeof exports !== 'undefined') {
-  loadEventListener(exports);
+  exports.EventListener = loadEventListener();
 }
