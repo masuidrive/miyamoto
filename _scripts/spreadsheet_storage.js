@@ -16,7 +16,7 @@ function testSpreadsheetStorage() {
       { name: '出勤' },
       { name: '退勤' },
       { name: '時間数' },
-      { name: 'コメント' },
+      { name: 'ノート' },
     ],
     properties: [
       { name: 'アカウント', value: '有効', comment: '← 有効, Activeじゃない文字を入れると、アカウントを停止'},
@@ -79,14 +79,14 @@ SpreadsheetStorage.prototype._loadProperties = function(name) {
     this._properties = this.sheet.getRange("A2:B"+(this.sheetSchema.properties.length+1)).getValues();
   }
   return this._properties;
-}
+};
 
 // プロパティーを全部取得
 SpreadsheetStorage.prototype.getProperty = function(name) {
   this._loadProperties();
   var kv = _.find(this._properties, function(prop) { return(prop[0] == name); })
   return kv ? kv[1] : null;
-}
+};
 
 // プロパティーを取得
 SpreadsheetStorage.prototype.setProperty = function(name, value) {
@@ -99,13 +99,12 @@ SpreadsheetStorage.prototype.setProperty = function(name, value) {
     }
   });
   return value;
-}
-
+};
 
 SpreadsheetStorage.prototype.getRow = function(idx) {
   var rowNo = this.sheetSchema.properties.length + 4 + idx;
   return this.sheet.getRange("A"+rowNo+":"+String.fromCharCode(65 + this.sheetSchema.columns.length - 1)+rowNo).getValues()[0];
-}
+};
 
 SpreadsheetStorage.prototype.setRow = function(idx, data) {
   if(data.length > 0) {
@@ -113,4 +112,4 @@ SpreadsheetStorage.prototype.setRow = function(idx, data) {
      this.sheet.getRange("A"+rowNo+":"+String.fromCharCode(65 + data.length - 1)+rowNo).setValues([data]);
   }
   return data;
-}
+};

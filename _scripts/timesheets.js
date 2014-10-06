@@ -12,7 +12,7 @@ function Timesheets(spreadsheetId, responder) {
   this.settings = createSettings(this.spreadsheetId);
   this.storage = createSpreadsheetStorage(this.spreadsheetId, this.settings);
   this.storage.on('newUser', function(username) {
-    responder.template('使い方', username);
+    responder.format('使い方', username);
   });
 }
 
@@ -57,14 +57,14 @@ loadTimesheets = function() {
     if(datetime) {
       var result = this.storage.doIn(username, datetime, !!time, message);
       if(result == 'ok') {
-        this.responder.template("出勤", username, Utilities.formatDate(datetime, Session.getScriptTimeZone(), "yyyy/MM/dd HH:mm"));
+        this.responder.format("出勤", username, Utilities.formatDate(datetime, Session.getScriptTimeZone(), "yyyy/MM/dd HH:mm"));
       }
       else if(result == 'updated') {
-        this.responder.template("出勤更新", username, Utilities.formatDate(datetime, Session.getScriptTimeZone(), "HH:mm"));
+        this.responder.format("出勤更新", username, Utilities.formatDate(datetime, Session.getScriptTimeZone(), "HH:mm"));
       }
     }
     else if(date) {
-      this.responder.template("休暇取消", username, Utilities.formatString("%02d/%02d", date[1], date[2]));
+      this.responder.format("休暇取消", username, Utilities.formatString("%02d/%02d", date[1], date[2]));
     }
   };
 
@@ -76,10 +76,10 @@ loadTimesheets = function() {
     if(datetime) {
       var result = this.storage.doOut(username, datetime, !!time, message);
       if(result == 'ok') {
-        this.responder.template("退勤", username, Utilities.formatDate(datetime, Session.getScriptTimeZone(), "yyyy/MM/dd HH:mm"));
+        this.responder.format("退勤", username, Utilities.formatDate(datetime, Session.getScriptTimeZone(), "yyyy/MM/dd HH:mm"));
       }
       else if(result == 'updated') {
-        this.responder.template("退勤更新", username, Utilities.formatDate(datetime, Session.getScriptTimeZone(), "HH:mm"));
+        this.responder.format("退勤更新", username, Utilities.formatDate(datetime, Session.getScriptTimeZone(), "HH:mm"));
       }
     }
   };
@@ -90,7 +90,7 @@ loadTimesheets = function() {
     if(date) {
       var result = this.storage.doOff(username, normalizeDateTime(date, [0,0]), message);
       if(result) {
-        this.responder.template("休暇", username, Utilities.formatString("%02d/%02d", date[1], date[2]));
+        this.responder.format("休暇", username, Utilities.formatString("%02d/%02d", date[1], date[2]));
       }
     }
   };
@@ -101,7 +101,7 @@ loadTimesheets = function() {
     if(date) {
       var result = this.storage.doCancelOff(username, normalizeDateTime(date, [0,0]), message);
       if(result) {
-        this.responder.template("休暇取消", username, Utilities.formatString("%02d/%02d", date[1], date[2]));
+        this.responder.format("休暇取消", username, Utilities.formatString("%02d/%02d", date[1], date[2]));
       }
     }
   };
@@ -110,10 +110,10 @@ loadTimesheets = function() {
   Timesheets.prototype.actionWhoIsIn = function(username, message) {
     var result = this.storage.whoIsIn(new Date());
     if(result) {
-      this.responder.template("出勤中", result.join(', '));
+      this.responder.format("出勤中", result.join(', '));
     }
     else {
-      this.responder.template("出勤なし");
+      this.responder.format("出勤なし");
     }
   };
 
@@ -123,10 +123,10 @@ loadTimesheets = function() {
     var datetime = normalizeDateTime(date, [0,0]) || new Date();
     var result = this.storage.whoIsOff(datetime);
     if(result) {
-      this.responder.template("休暇中", result.join(', '), Utilities.formatString("%02d/%02d", datetime.getMonth()+1, datetime.getDate()));
+      this.responder.format("休暇中", result.join(', '), Utilities.formatString("%02d/%02d", datetime.getMonth()+1, datetime.getDate()));
     }
     else {
-      this.responder.template("休暇なし", Utilities.formatString("%02d/%02d", datetime.getMonth()+1, datetime.getDate()));
+      this.responder.format("休暇なし", Utilities.formatString("%02d/%02d", datetime.getMonth()+1, datetime.getDate()));
     }
   };
 };

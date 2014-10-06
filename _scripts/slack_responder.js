@@ -1,7 +1,7 @@
 function testSlackResponder(spreadsheetId) {
   var SlackResponder = createSlackResponder(spreadsheetId);
   // SlackResponder.send("Test");
-  SlackResponder.template("出勤変更",'a','b');
+  Slackresponder.format("出勤変更",'a','b');
 };
 
 function createSlackResponder(spreadsheetId) {

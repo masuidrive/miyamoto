@@ -2,21 +2,18 @@
 // Timesheets = loadTimesheets();
 
 loadTimesheets = function (exports) {
-  var Timesheets = function(storage, settings, responder) {
+  var Timesheets = function(storage, responder) {
     this.storage = storage;
-    this.settings = settings;
     this.responder = responder;
+
+    var self = this;
+    this.responder.on('receiveMessage', function(username, message) {
+      self.receiveMessage(username, message);
+    });
   };
 
   // メッセージを受信する
   Timesheets.prototype.receiveMessage = function(username, message) {
-    // -で始まると反応しない
-    if(message.match(/^\s*-/)) return;
-
-    // 特定のアカウントには反応しない
-    var ignore_users = String(this.settings.get('無視するユーザ')).toLowerCase().trim().split(/\s*,\s*/);
-    if(_.contains(ignore_users, username.toLowerCase())) return;
-
     // 日付は先に処理しておく
     this.date = DateUtils.parseDate(message);
     this.time = DateUtils.parseTime(message);

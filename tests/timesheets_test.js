@@ -11,6 +11,8 @@ QUnit.test( "EventListener", function(assert) {
       this.messages.push(message);
     },
 
+    on: function() {},
+
     // for testing
     clearMessages: function() {
       this.messages = [];
@@ -48,9 +50,13 @@ QUnit.test( "EventListener", function(assert) {
       return _.compact(_.map(this.data, function(row) {
         return row[dateStr];
       }));
+    },
+
+    getDayOff: function(username) {
+      return [];
     }
   };
-
+/*
   var settings = {
     values: {},
     get: function(key) {
@@ -60,7 +66,7 @@ QUnit.test( "EventListener", function(assert) {
       return this.values[key] = val;
     }
   };
-
+*/
 
   var msgTest = function(user, msg, result) {
     responder.clearMessages();
@@ -76,7 +82,7 @@ QUnit.test( "EventListener", function(assert) {
   };
 
 
-  var timesheets = new Timesheets(storage, settings, responder);
+  var timesheets = new Timesheets(storage, responder);
 
   DateUtils.now(new Date(2014,0,2,12,34,0));
   var nowDateStr = String(new Date(2014,0,2));

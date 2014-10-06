@@ -12,7 +12,7 @@ function debug(msg) {
   if(SpreadsheetApp && ScriptProperties) {
     var spreadsheet = SpreadsheetApp.openById(ScriptProperties.getProperty('spreadsheet'));
     if(spreadsheet) {
-      var sheet = spreadsheet.getSheetByName("Debug");
+      var sheet = spreadsheet.getSheetByName("_debug");
       if(sheet) {
         sheet.getRange('a'+(sheet.getLastRow()+1)).setValue(msg);
       }
