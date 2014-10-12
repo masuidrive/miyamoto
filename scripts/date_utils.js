@@ -3,7 +3,7 @@
 
 loadDateUtils = function () {
   var DateUtils = {};
-  
+
   // 今を返す
   var _now = new Date();
   var now = function(datetime) {
@@ -134,6 +134,16 @@ loadDateUtils = function () {
     return(new Date(date.getFullYear(), date.getMonth(), date.getDate()));
   };
 
+  // 曜日を解析
+  DateUtils.parseWday = function(str) {
+    str = str.replace(/曜日/, '');
+    var result = [];
+    var wdays = [/(sun|日)/i, /(mon|月)/i, /(tue|火)/i, /(wed|水)/i, /(thu|木)/i, /(fri|金)/i, /(sat|土)/i];
+    for(var i=0; i<wdays.length; ++i) {
+      if(str.match(wdays[i])) result.push(i);
+    }
+    return result;
+  }
 
   var replaceChars = {
     shortMonths: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],

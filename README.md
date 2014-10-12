@@ -41,7 +41,7 @@ Slackで下記の様につぶやくと、宮本さんがGoogle Spreadsheetに記
 - Slackへの入出力
 
 
-### gs_messages.js
+### gs_template.js
 
 - Google Spreadsheetを使ったメッセージテンプレート
 
@@ -76,11 +76,6 @@ Slackで下記の様につぶやくと、宮本さんがGoogle Spreadsheetに記
 - _.で始まるユーティリティ集
 - http://underscorejs.org
 
-### qunit.js
-
-- テストフレームワーク
-- http://qunitjs.com/
-
 
 ## テストの実行
 
@@ -88,7 +83,7 @@ Slackで下記の様につぶやくと、宮本さんがGoogle Spreadsheetに記
 
 ```
 npm install
-node ./node_modules/qunit/bin/cli.js -c utils.js -t test.js
+make test
 ```
 
 

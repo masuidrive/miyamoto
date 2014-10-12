@@ -32,3 +32,10 @@ QUnit.test( "DateUtils.parseDate", function(assert) {
   // 下記の様な書き方はサポートしない
   assert.ok(_.isEqual(null, DateUtils.parseDate("3日後")), "3日後");
 });
+
+QUnit.test( "DateUtils.parseWday", function(assert) {
+  assert.ok(_.isEqual([3], DateUtils.parseWday("水曜日")), "水曜日");
+  assert.ok(_.isEqual([3], DateUtils.parseWday("Wed")), "Wed");
+  assert.ok(_.isEqual([], DateUtils.parseWday("あ")), "あ");
+  assert.ok(_.isEqual([0,1], DateUtils.parseWday("月日")), "月日");
+});

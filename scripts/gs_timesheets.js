@@ -18,8 +18,7 @@ loadGSTimesheets = function () {
         { name: 'DayOff', value: '土,日', comment: '← 月,火,水みたいに入力してください。アカウント停止のためには「全部」と入れてください。'},
       ]
     };
-
-  }
+  };
 
   GSTimesheets.prototype._getSheet = function(username) {
     if(this._sheets[username]) return this._sheets[username];
@@ -99,7 +98,7 @@ loadGSTimesheets = function () {
 
   // 休みの曜日を数字で返す
   GSTimesheets.prototype.getDayOff = function(username) {
-    return [0,6];
+    return DateUtils.parseWday(sheet.getRange("B1").getValues());
   };
 
   return GSTimesheets;
