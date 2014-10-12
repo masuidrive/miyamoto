@@ -53,7 +53,12 @@ QUnit.test( "EventListener", function(assert) {
     },
 
     getDayOff: function(username) {
-      return [];
+      if(username === 'test1') {
+        return [0, 6];
+      }
+      else {
+        return [];
+      }
     }
   };
 /*
@@ -68,10 +73,10 @@ QUnit.test( "EventListener", function(assert) {
   };
 */
 
-  var msgTest = function(user, msg, result) {
+  var msgTest = function(user, msg, expect_messages) {
     responder.clearMessages();
     timesheets.receiveMessage(user, msg);
-    assert.ok(_.isEqual(result, responder.messages), user+":"+msg);
+    assert.ok(_.isEqual(expect_messages, responder.messages), user+":"+msg);
   };
 
   var storageTest = function(initData, callback) {
@@ -81,11 +86,25 @@ QUnit.test( "EventListener", function(assert) {
     });
   };
 
+  var mockDate = function(date, func) {
+    if(!_.isDate(date)) {
+      date = DateUtils.parseDateTime(date);
+    }
+
+    var _now = DateUtils.now();
+    DateUtils.now(date);
+    var result = func();
+    DateUtils.now(_now);
+    return result;
+  };
+
 
   var timesheets = new Timesheets(storage, responder);
 
   DateUtils.now(new Date(2014,0,2,12,34,0));
-  var nowDateStr = String(new Date(2014,0,2));
+  var nowDateStr = function() {
+    return String(DateUtils.toDate(DateUtils.now()));
+  }
 
   // 出勤
   storageTest({}, function(msgTest) {
@@ -96,7 +115,7 @@ QUnit.test( "EventListener", function(assert) {
 
   // 出勤時間の変更
   var test1 = {};
-  test1[nowDateStr] = { user: 'test1', signIn: new Date(2014,0,2,0,0,0) };
+  test1[nowDateStr()] = { user: 'test1', signIn: new Date(2014,0,2,0,0,0) };
   storageTest({'test1': test1}, function(msgTest) {
     msgTest('test1', 'おはよう', []);
     msgTest('test1', 'おはよう 4:56', [['出勤更新', 'test1', "2014/01/02 04:56"]]);
@@ -111,7 +130,7 @@ QUnit.test( "EventListener", function(assert) {
 
   // 退勤時間の変更
   var test1 = {};
-  test1[nowDateStr] = { user: 'test1', signIn: new Date(2014,0,2,0,0,0), signOut: new Date(2014,0,2,12,0,0) };
+  test1[nowDateStr()] = { user: 'test1', signIn: new Date(2014,0,2,0,0,0), signOut: new Date(2014,0,2,12,0,0) };
   storageTest({'test1': test1}, function(msgTest) {
     msgTest('test1', 'おつ', []);
     msgTest('test1', 'お疲れさま 14:56', [['退勤更新', 'test1', "2014/01/02 14:56"]]);
@@ -119,7 +138,7 @@ QUnit.test( "EventListener", function(assert) {
 
   // 退勤時間の変更
   var test1 = {};
-  test1[nowDateStr] = { user: 'test1', signIn: new Date(2014,0,2,0,0,0), signOut: new Date(2014,0,2,12,0,0) };
+  test1[nowDateStr()] = { user: 'test1', signIn: new Date(2014,0,2,0,0,0), signOut: new Date(2014,0,2,12,0,0) };
   storageTest({'test1': test1}, function(msgTest) {
     msgTest('test1', 'おつ', []);
     msgTest('test1', 'お疲れさま 14:56', [['退勤更新', 'test1', "2014/01/02 14:56"]]);
@@ -135,7 +154,7 @@ QUnit.test( "EventListener", function(assert) {
 
   // 休暇取消
   var test1 = {};
-  test1[nowDateStr] = { user: 'test1', signIn: '-', singOut: '-' };
+  test1[nowDateStr()] = { user: 'test1', signIn: '-', singOut: '-' };
   storageTest({'test1': test1}, function(msgTest) {
     msgTest('test1', 'お休みしません', []);
     msgTest('test1', '今日はお休みしません', [['休暇取消', 'test1', "2014/01/02"]]);
@@ -150,31 +169,31 @@ QUnit.test( "EventListener", function(assert) {
 
   // 出勤確認
   var test1 = {};
-  test1[nowDateStr] = { user: 'test1', signIn: DateUtils.now() };
+  test1[nowDateStr()] = { user: 'test1', signIn: DateUtils.now() };
   storageTest({'test1': test1}, function(msgTest) {
     msgTest('test1', '誰がいる？', [['出勤中', 'test1']]);
   });
 
   // 出勤確認
   var test1 = {}, test2 = {};
-  test1[nowDateStr] = { user: 'test1', signIn: DateUtils.now() };
-  test2[nowDateStr] = { user: 'test2', signIn: DateUtils.now() };
+  test1[nowDateStr()] = { user: 'test1', signIn: DateUtils.now() };
+  test2[nowDateStr()] = { user: 'test2', signIn: DateUtils.now() };
   storageTest({'test1': test1, 'test2':test2}, function(msgTest) {
     msgTest('test1', '誰がいる？', [['出勤中', 'test1, test2']]);
   });
 
   // 出勤確認
   var test1 = {}, test2 = {};
-  test1[nowDateStr] = { user: 'test1', signIn: DateUtils.now(), signOut: DateUtils.now() };
-  test2[nowDateStr] = { user: 'test2', signIn: DateUtils.now() };
+  test1[nowDateStr()] = { user: 'test1', signIn: DateUtils.now(), signOut: DateUtils.now() };
+  test2[nowDateStr()] = { user: 'test2', signIn: DateUtils.now() };
   storageTest({'test1': test1, 'test2':test2}, function(msgTest) {
     msgTest('test1', '誰がいる？', [['出勤中', 'test2']]);
   });
 
   // 出勤確認
   var test1 = {}, test2 = {};
-  test1[nowDateStr] = { user: 'test1', signIn: DateUtils.now(), signOut: DateUtils.now() };
-  test2[nowDateStr] = { user: 'test2', signIn: '-' };
+  test1[nowDateStr()] = { user: 'test1', signIn: DateUtils.now(), signOut: DateUtils.now() };
+  test2[nowDateStr()] = { user: 'test2', signIn: '-' };
   storageTest({'test1': test1, 'test2':test2}, function(msgTest) {
     msgTest('test1', '誰がいる？', [['出勤なし']]);
   });
@@ -186,32 +205,40 @@ QUnit.test( "EventListener", function(assert) {
 
   // 出勤確認
   var test1 = {};
-  test1[nowDateStr] = { user: 'test1', signIn: '-' };
+  test1[nowDateStr()] = { user: 'test1', signIn: '-' };
   storageTest({'test1': test1}, function(msgTest) {
     msgTest('test1', '誰がお休み？', [['休暇中', '2014/01/02', 'test1']]);
   });
 
   // 出勤確認
   var test1 = {}, test2 = {};
-  test1[nowDateStr] = { user: 'test1', signIn: '-' };
-  test2[nowDateStr] = { user: 'test2', signIn: '-' };
+  test1[nowDateStr()] = { user: 'test1', signIn: '-' };
+  test2[nowDateStr()] = { user: 'test2', signIn: '-' };
   storageTest({'test1': test1, 'test2':test2}, function(msgTest) {
     msgTest('test1', '誰がお休み？', [['休暇中', '2014/01/02', 'test1, test2']]);
   });
 
   // 出勤確認
   var test1 = {}, test2 = {};
-  test1[nowDateStr] = { user: 'test1', signIn: undefined };
-  test2[nowDateStr] = { user: 'test2', signIn: '-' };
+  test1[nowDateStr()] = { user: 'test1', signIn: undefined };
+  test2[nowDateStr()] = { user: 'test2', signIn: '-' };
   storageTest({'test1': test1, 'test2':test2}, function(msgTest) {
     msgTest('test1', '誰がお休み？', [['休暇中', '2014/01/02', 'test2']]);
   });
 
   // 出勤確認
   var test1 = {}, test2 = {};
-  test1[nowDateStr] = { user: 'test1', signIn: DateUtils.now(), signOut: DateUtils.now() };
-  test2[nowDateStr] = { user: 'test2', signIn: undefined };
+  test1[nowDateStr()] = { user: 'test1', signIn: DateUtils.now(), signOut: DateUtils.now() };
+  test2[nowDateStr()] = { user: 'test2', signIn: undefined };
   storageTest({'test1': test1, 'test2':test2}, function(msgTest) {
     msgTest('test1', '誰がお休み？', [['休暇なし', '2014/01/02']]);
   });
+
+  // test1は土日休み
+  mockDate("2014/01/04", function() {
+    storageTest({'test1': {}, 'test2': {}}, function(msgTest) {
+      msgTest('test1', '誰がお休み？', [['休暇中', '2014/01/04', 'test1']]);
+    });
+  });
+
 });

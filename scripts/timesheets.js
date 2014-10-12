@@ -107,7 +107,7 @@ loadTimesheets = function (exports) {
   // 出勤中
   Timesheets.prototype.actionWhoIsIn = function(username, message) {
     var dateObj = DateUtils.toDate(DateUtils.now());
-    var result = _.compact(_.map(this.storage.getByDate(dateObj), function(row){
+    var result = _.compact(_.map(this.storage.getByDate(dateObj), function(row) {
       return _.isDate(row.signIn) && !_.isDate(row.signOut) ? row.user : undefined;
     }));
 
@@ -126,6 +126,16 @@ loadTimesheets = function (exports) {
     var result = _.compact(_.map(this.storage.getByDate(dateObj), function(row){
       return row.signIn === '-' ? row.user : undefined;
     }));
+
+    // 定休の処理
+    var wday = dateObj.getDay();
+    var self = this;
+    _.each(this.storage.getUsers(), function(username) {
+      if(_.indexOf(self.storage.getDayOff(username), wday) >= 0) {
+        result.push(username);
+      }
+    });
+    result = _.uniq(result);
 
     if(_.isEmpty(result)) {
       this.responder.template("休暇なし", dateStr);
