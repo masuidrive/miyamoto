@@ -1,5 +1,5 @@
-// 入力内容を解析して、メソッドを呼び出す
-// Timesheets = loadTimesheets();
+// KVS
+// でも今回は使ってないです
 
 loadGASProperties = function (exports) {
   var GASProperties = function() {

@@ -1,3 +1,4 @@
+// 各モジュールの読み込み
 var init = function() {
   if(typeof EventListener === 'undefined') EventListener = loadEventListener();
   if(typeof DateUtils === 'undefined') DateUtils = loadDateUtils();
@@ -7,7 +8,6 @@ var init = function() {
   if(typeof Timesheets === 'undefined') Timesheets = loadTimesheets();
   if(typeof Slack === 'undefined') Slack = loadSlack();
 }
-
 
 // SlackのOutgoingから来るメッセージ
 function doPost(e) {

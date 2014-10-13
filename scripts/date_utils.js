@@ -149,7 +149,7 @@ loadDateUtils = function () {
 
   // 曜日を解析
   DateUtils.parseWday = function(str) {
-    str = str.replace(/曜日/, '');
+    str = str.replace(/曜日/g, '');
     var result = [];
     var wdays = [/(sun|日)/i, /(mon|月)/i, /(tue|火)/i, /(wed|水)/i, /(thu|木)/i, /(fri|金)/i, /(sat|土)/i];
     for(var i=0; i<wdays.length; ++i) {

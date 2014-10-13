@@ -3,7 +3,7 @@
 
 loadDateUtils = function () {
   var DateUtils = {};
-  
+
   // 今を返す
   var _now = new Date();
   var now = function(datetime) {
@@ -129,11 +129,34 @@ loadDateUtils = function () {
     }
   };
 
+  // 日時をいれてparseする
+  DateUtils.parseDateTime = function(str) {
+    var date = DateUtils.parseDate(str);
+    var time = DateUtils.parseTime(str);
+    if(!date) return null;
+    if(time) {
+      return(new Date(date[0], date[1]-1, date[2], time[0], time[1], 0));
+    }
+    else {
+      return(new Date(date[0], date[1]-1, date[2], 0, 0, 0));
+    }
+  };
+
   // Dateから日付部分だけを取り出す
   DateUtils.toDate = function(date) {
     return(new Date(date.getFullYear(), date.getMonth(), date.getDate()));
   };
 
+  // 曜日を解析
+  DateUtils.parseWday = function(str) {
+    str = str.replace(/曜日/, '');
+    var result = [];
+    var wdays = [/(sun|日)/i, /(mon|月)/i, /(tue|火)/i, /(wed|水)/i, /(thu|木)/i, /(fri|金)/i, /(sat|土)/i];
+    for(var i=0; i<wdays.length; ++i) {
+      if(str.match(wdays[i])) result.push(i);
+    }
+    return result;
+  }
 
   var replaceChars = {
     shortMonths: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
@@ -400,8 +423,7 @@ loadGSTimesheets = function () {
         { name: 'DayOff', value: '土,日', comment: '← 月,火,水みたいに入力してください。アカウント停止のためには「全部」と入れてください。'},
       ]
     };
-
-  }
+  };
 
   GSTimesheets.prototype._getSheet = function(username) {
     if(this._sheets[username]) return this._sheets[username];
@@ -481,7 +503,7 @@ loadGSTimesheets = function () {
 
   // 休みの曜日を数字で返す
   GSTimesheets.prototype.getDayOff = function(username) {
-    return [0,6];
+    return DateUtils.parseWday(sheet.getRange("B1").getValues());
   };
 
   return GSTimesheets;
@@ -685,7 +707,7 @@ loadTimesheets = function (exports) {
   // 出勤中
   Timesheets.prototype.actionWhoIsIn = function(username, message) {
     var dateObj = DateUtils.toDate(DateUtils.now());
-    var result = _.compact(_.map(this.storage.getByDate(dateObj), function(row){
+    var result = _.compact(_.map(this.storage.getByDate(dateObj), function(row) {
       return _.isDate(row.signIn) && !_.isDate(row.signOut) ? row.user : undefined;
     }));
 
@@ -704,6 +726,16 @@ loadTimesheets = function (exports) {
     var result = _.compact(_.map(this.storage.getByDate(dateObj), function(row){
       return row.signIn === '-' ? row.user : undefined;
     }));
+
+    // 定休の処理
+    var wday = dateObj.getDay();
+    var self = this;
+    _.each(this.storage.getUsers(), function(username) {
+      if(_.indexOf(self.storage.getDayOff(username), wday) >= 0) {
+        result.push(username);
+      }
+    });
+    result = _.uniq(result);
 
     if(_.isEmpty(result)) {
       this.responder.template("休暇なし", dateStr);
