@@ -10,12 +10,22 @@ loadGSProperties = function (exports) {
     }
   };
 
-  GSProperties.prototype.get = function(key, defaultValue) {
+  GSProperties.prototype.get = function(key) {
     if(this.sheet.getLastRow() < 1) return defaultValue;
     var vals = _.find(this.sheet.getRange("A1:B"+this.sheet.getLastRow()).getValues(), function(v) {
-      return(v[0] == name);
+      return(v[0] == key);
     });
-    return vals ? vals[1] : defaultValue;
+    if(vals) {
+      if(_.isDate(vals[1])) {
+        return DateUtils.format("Y-m-d H:M:s", vals[1]);
+      }
+      else {
+        return String(vals[1]);
+      }
+    }
+    else {
+      return null;
+    }
   };
 
   GSProperties.prototype.set = function(key, val) {
@@ -23,7 +33,7 @@ loadGSProperties = function (exports) {
       var vals = this.sheet.getRange("A1:A"+this.sheet.getLastRow()).getValues();
       for(var i = 0; i < this.sheet.getLastRow(); ++i) {
         if(vals[i][0] == key) {
-          this.sheet.getRange("B"+(i+1)).setValue(val);
+          this.sheet.getRange("B"+(i+1)).setValue(String(val));
           return val;
         }
       }

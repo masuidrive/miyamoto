@@ -21,7 +21,7 @@ loadTimesheets = function (exports) {
     this.datetime = DateUtils.normalizeDateTime(this.date, this.time);
     if(this.datetime !== null) {
       this.dateStr = DateUtils.format("Y/m/d", this.datetime);
-      this.datetimeStr = DateUtils.format("Y/m/d H:i", this.datetime);
+      this.datetimeStr = DateUtils.format("Y/m/d H:M", this.datetime);
     }
 
     // コマンド集
@@ -51,7 +51,7 @@ loadTimesheets = function (exports) {
   Timesheets.prototype.actionSignIn = function(username, message) {
     if(this.datetime) {
       var data = this.storage.get(username, this.datetime);
-      if(typeof data.signIn == 'undefined' || data.signIn === '-') {
+      if(!data.signIn || data.signIn === '-') {
         this.storage.set(username, this.datetime, {signIn: this.datetime});
         this.responder.template("出勤", username, this.datetimeStr);
       }
@@ -69,7 +69,7 @@ loadTimesheets = function (exports) {
   Timesheets.prototype.actionSignOut = function(username, message) {
     if(this.datetime) {
       var data = this.storage.get(username, this.datetime);
-      if(typeof data.signOut == 'undefined' || data.signOut === '-') {
+      if(!data.signOut || data.signOut === '-') {
         this.storage.set(username, this.datetime, {signOut: this.datetime});
         this.responder.template("退勤", username, this.datetimeStr);
       }
@@ -88,7 +88,7 @@ loadTimesheets = function (exports) {
     if(this.date) {
       var dateObj = new Date(this.date[0], this.date[1]-1, this.date[2]);
       var data = this.storage.get(username, dateObj);
-      if(typeof data.signOut == 'undefined' || data.signOut === '-') {
+      if(!data.signOut || data.signOut === '-') {
         this.storage.set(username, dateObj, {signIn: '-', signOut: '-', note: message});
         this.responder.template("休暇", username, DateUtils.format("Y/m/d", dateObj));
       }
@@ -100,7 +100,7 @@ loadTimesheets = function (exports) {
     if(this.date) {
       var dateObj = new Date(this.date[0], this.date[1]-1, this.date[2]);
       var data = this.storage.get(username, dateObj);
-      if(typeof data.signOut == 'undefined' || data.signOut === '-') {
+      if(!data.signOut || data.signOut === '-') {
         this.storage.set(username, dateObj, {signIn: null, signOut: null, note: message});
         this.responder.template("休暇取消", username, DateUtils.format("Y/m/d", dateObj));
       }
@@ -134,7 +134,7 @@ loadTimesheets = function (exports) {
     var wday = dateObj.getDay();
     var self = this;
     _.each(this.storage.getUsers(), function(username) {
-      if(_.indexOf(self.storage.getDayOff(username), wday) >= 0) {
+      if(_.contains(self.storage.getDayOff(username), wday)) {
         result.push(username);
       }
     });
@@ -157,7 +157,7 @@ loadTimesheets = function (exports) {
     var today = DateUtils.toDate(DateUtils.now());
 
     // 休日ならチェックしない
-    if(_.indexOf(holidays, DateUtils.format("Y/m/d",today)) >= 0) return;
+    if(_.contains(holidays, DateUtils.format("Y/m/d",today))) return;
 
     var result = _.compact(_.map(this.storage.getByDate(today), function(row) {
       return _.isDate(row.signIn) && !_.isDate(row.signOut) ? row.user : undefined;

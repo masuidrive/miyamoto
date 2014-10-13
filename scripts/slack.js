@@ -2,10 +2,11 @@
 // Slack = loadSlack();
 
 loadSlack = function () {
-  var Slack = function(incomingURL, template) {
+  var Slack = function(incomingURL, template, settings) {
     EventListener.apply(this);
     this.incomingURL = incomingURL;
     this._template = template;
+    this.settings = settings;
   };
 
   if(typeof EventListener === 'undefined') EventListener = loadEventListener();
@@ -13,11 +14,11 @@ loadSlack = function () {
 
   // 受信したメッセージをtimesheetsに投げる
   Slack.prototype.receiveMessage = function(message) {
-    var username = String(message.parameters.user_name);
-    var body = String(message.parameters.text);
+    var username = String(message.user_name);
+    var body = String(message['text']);
 
     // 特定のアカウントには反応しない
-    var ignore_users = ['hubot', 'slackbot'];
+    var ignore_users = (this.settings.get("無視するユーザ") || '').toLowerCase().replace(/^\s*(.*?)\s*$/, "$1").split(/\s*,\s*/);
     if(_.contains(ignore_users, username.toLowerCase())) return;
 
     // -で始まるメッセージも無視

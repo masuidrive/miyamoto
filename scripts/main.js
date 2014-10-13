@@ -17,9 +17,9 @@ var init = function() {
   var spreadsheetId = global_settings.get('spreadsheet');
   if(spreadsheetId) {
     var spreadsheet = SpreadsheetApp.openById(spreadsheetId);
-    var settings = new GASProperties();
+    var settings = new GSProperties(spreadsheet);
     var template = new GSTemplate(spreadsheet);
-    var slack = new Slack(settings.get('Slack Incoming URL'), template);
+    var slack = new Slack(settings.get('Slack Incoming URL'), template, settings);
     var storage = new GSTimesheets(spreadsheet, settings);
     var timesheets = new Timesheets(storage, settings, slack);
     return slack;
@@ -29,6 +29,12 @@ var init = function() {
 
 // SlackのOutgoingから来るメッセージ
 function doPost(e) {
+  var receiver = init();
+  if(receiver) receiver.receiveMessage(e.parameters);
+}
+
+function test1() {
+  var e = {user_name: 'test1', text:"おはよう"};
   var receiver = init();
   if(receiver) receiver.receiveMessage(e);
 }
@@ -42,7 +48,7 @@ function setUp() {
   if(!global_settings.get('spreadsheet')) {
 
     // タイムシートを作る
-    var spreadsheet = SpreadsheetApp.create("Slack Timesheets test");
+    var spreadsheet = SpreadsheetApp.create("Slack Timesheets");
     var sheets = spreadsheet.getSheets();
     if(sheets.length == 1 && sheets[0].getLastRow() == 0) {
       sheets[0].setName('_設定');
@@ -50,10 +56,12 @@ function setUp() {
     global_settings.set('spreadsheet', spreadsheet.getId());
 
     var settings = new GSProperties(spreadsheet);
-    settings.set('Slack Incoming', '');
+    settings.set('Slack Incoming URL', '');
     settings.setNote('Slack Incoming URL', 'Slackのincoming URLを入力してください');
     settings.set('開始日', DateUtils.format("Y-m-d", DateUtils.now()));
     settings.setNote('開始日', '変更はしないでください');
+    settings.set('無視するユーザ', 'miyamoto,hubot,slackbot,incoming-webhook');
+    settings.setNote('無視するユーザ', '反応をしないユーザを,区切りで設定する。botは必ず指定してください。');
 
     // 休日を設定
     var url = 'http://www.google.com/calendar/feeds/japanese@holiday.calendar.google.com/public/full-noattendees?alt=json&max-results=1000&start-min='+DateUtils.format("Y-m-d", DateUtils.now());

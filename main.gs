@@ -16,7 +16,7 @@ loadDateUtils = function () {
 
   // テキストから時間を抽出
   DateUtils.parseTime = function(str) {
-    str = str.toLowerCase().replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(s) {
+    str = (str || "").toLowerCase().replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(s) {
       return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
     });
     var reg = /((\d{1,2})\s*[:時]{1}\s*(\d{1,2})\s*(pm|)|(am|pm|午前|午後)\s*(\d{1,2})(\s*[:時]\s*(\d{1,2})|)|(\d{1,2})(\s*[:時]{1}\s*(\d{1,2})|)(am|pm)|(\d{1,2})\s*時)/;
@@ -64,7 +64,7 @@ loadDateUtils = function () {
 
   // テキストから日付を抽出
   DateUtils.parseDate = function(str) {
-    str = str.toLowerCase().replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(s) {
+    str = (str || "").toLowerCase().replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(s) {
       return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
     });
 
@@ -144,7 +144,7 @@ loadDateUtils = function () {
 
   // Dateから日付部分だけを取り出す
   DateUtils.toDate = function(date) {
-    return(new Date(date.getFullYear(), date.getMonth(), date.getDate()));
+    return(new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0));
   };
 
   // 曜日を解析
@@ -330,12 +330,22 @@ loadGSProperties = function (exports) {
     }
   };
 
-  GSProperties.prototype.get = function(key, defaultValue) {
+  GSProperties.prototype.get = function(key) {
     if(this.sheet.getLastRow() < 1) return defaultValue;
     var vals = _.find(this.sheet.getRange("A1:B"+this.sheet.getLastRow()).getValues(), function(v) {
-      return(v[0] == name);
+      return(v[0] == key);
     });
-    return vals ? vals[1] : defaultValue;
+    if(vals) {
+      if(_.isDate(vals[1])) {
+        return DateUtils.format("Y-m-d H:i:s", vals[1]);
+      }
+      else {
+        return String(vals[1]);
+      }
+    }
+    else {
+      return null;
+    }
   };
 
   GSProperties.prototype.set = function(key, val) {
@@ -343,7 +353,7 @@ loadGSProperties = function (exports) {
       var vals = this.sheet.getRange("A1:A"+this.sheet.getLastRow()).getValues();
       for(var i = 0; i < this.sheet.getLastRow(); ++i) {
         if(vals[i][0] == key) {
-          this.sheet.getRange("B"+(i+1)).setValue(val);
+          this.sheet.getRange("B"+(i+1)).setValue(String(val));
           return val;
         }
       }
@@ -388,10 +398,10 @@ loadGSTemplate = function() {
       }
       else {
         var now = DateUtils.now();
-        this.sheet.getRange("A1:K2").setValues([
+        this.sheet.getRange("A1:M2").setValues([
           [
             "出勤", "出勤更新", "退勤", "退勤更新", "休暇", "休暇取消",
-            "出勤中", "出勤なし", "休暇中", "休暇なし", "使い方"
+            "出勤中", "出勤なし", "休暇中", "休暇なし", "出勤確認", "退勤確認", "使い方"
           ],
           [
             "<@#1> おはようございます (#2)", "<@#1> 出勤時間を#2へ変更しました",
@@ -399,6 +409,7 @@ loadGSTemplate = function() {
             "<@#1> #2を休暇として登録しました", "<@#1> #2の休暇を取り消しました",
             "#1が出勤しています", "全員退勤しています",
             "#1は#2が休暇です", "#1に休暇の人はいません",
+            "今日は休暇ですか？ #1", "退勤しましたか？ #1",
             "<@#1> 使い方は管理者へお問い合わせ下さい"]
           ]
         );
@@ -424,7 +435,14 @@ loadGSTemplate = function() {
 
         var message = template;
         for (var i = 1; i < arguments.length; i++) {
-          message = message.replace("#"+i, arguments[i]);
+          var arg = arguments[i]
+          if(_.isArray(arg)) {
+            arg = _.map(arg, function(u) {
+              return "<@"+u+">";
+            }).join(', ');
+          }
+
+          message = message.replace("#"+i, arg);
         }
 
         return message;
@@ -560,10 +578,36 @@ var initLibraries = function() {
   if(typeof Slack === 'undefined') Slack = loadSlack();
 }
 
-// SlackのOutgoingから来るメッセージ
-function doPost(e) {
+var init = function() {
+  initLibraries();
+
+  var global_settings = new GASProperties();
+  var spreadsheetId = global_settings.get('spreadsheet');
+  if(spreadsheetId) {
+    var spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+    var settings = new GSProperties(spreadsheet);
+    var template = new GSTemplate(spreadsheet);
+    var slack = new Slack(settings.get('Slack Incoming URL'), template, settings);
+    var storage = new GSTimesheets(spreadsheet, settings);
+    var timesheets = new Timesheets(storage, settings, slack);
+    return slack;
+  }
+  return null;
 }
 
+// SlackのOutgoingから来るメッセージ
+function doPost(e) {
+  var receiver = init();
+  if(receiver) receiver.receiveMessage(e.parameters);
+}
+
+function test1() {
+  var e = {user_name: 'test1', text:"おはよう"};
+  var receiver = init();
+  if(receiver) receiver.receiveMessage(e);
+}
+
+// 初期化する
 function setUp() {
   initLibraries();
 
@@ -572,20 +616,20 @@ function setUp() {
   if(!global_settings.get('spreadsheet')) {
 
     // タイムシートを作る
-    var spreadsheet = SpreadsheetApp.create("Slack Timesheets test");
+    var spreadsheet = SpreadsheetApp.create("Slack Timesheets");
     var sheets = spreadsheet.getSheets();
-    if(sheets.length == 0 && sheets[0].getLastRow() == 0) {
+    if(sheets.length == 1 && sheets[0].getLastRow() == 0) {
       sheets[0].setName('_設定');
     }
-    console.log(sheets.length, sheets[0].getLastRow());
-
     global_settings.set('spreadsheet', spreadsheet.getId());
 
     var settings = new GSProperties(spreadsheet);
-    settings.set('Slack Incoming', '');
-    settings.setNote('Slack Incoming', 'Slackのincoming URLを入力してください');
+    settings.set('Slack Incoming URL', '');
+    settings.setNote('Slack Incoming URL', 'Slackのincoming URLを入力してください');
     settings.set('開始日', DateUtils.format("Y-m-d", DateUtils.now()));
     settings.setNote('開始日', '変更はしないでください');
+    settings.set('無視するユーザ', 'miyamoto,hubot,slackbot,incoming-webhook');
+    settings.setNote('無視するユーザ', '反応をしないユーザを,区切りで設定する。botは必ず指定してください。');
 
     // 休日を設定
     var url = 'http://www.google.com/calendar/feeds/japanese@holiday.calendar.google.com/public/full-noattendees?alt=json&max-results=1000&start-min='+DateUtils.format("Y-m-d", DateUtils.now());
@@ -595,6 +639,9 @@ function setUp() {
     });
     settings.set('休日', holidays.join(', '));
     settings.setNote('休日', '日付を,区切りで。来年までは自動設定されているので、以後は適当に更新してください');
+
+    // メッセージ用のシートを作成
+    new GSTemplate(spreadsheet);
 
     // 毎日11時頃に出勤してるかチェックする
     ScriptApp.newTrigger('confirmSignIn')
@@ -611,29 +658,15 @@ function setUp() {
       .create();
   }
 };
-
-function test1() {
-  initLibraries();
-
-  var incomingURL = 'https://toreta.slack.com/services/hooks/incoming-webhook?token=lXfhZCSiZQNZZvt2hsAq0ej2';
-  var spreadsheet = SpreadsheetApp.openById("1GNNpwiOx3xmuGPvJnzsx0G-oDxQtxxryyPOCZ1CaduY");
-  var settings = new GASProperties();
-  var template = new GSTemplate(spreadsheet);
-  var slack = new Slack(incomingURL, template);
-  var storage = new GSTimesheets(spreadsheet, settings);
-  var timesheets = new Timesheets(storage, slack);
-
-  slack.receiveMessage({parameters:{user_name:'foo',text:'おはよう 10:00'}});
-
-};
 // Slackのインタフェース
 // Slack = loadSlack();
 
 loadSlack = function () {
-  var Slack = function(incomingURL, template) {
+  var Slack = function(incomingURL, template, settings) {
     EventListener.apply(this);
     this.incomingURL = incomingURL;
     this._template = template;
+    this.settings = settings;
   };
 
   if(typeof EventListener === 'undefined') EventListener = loadEventListener();
@@ -641,11 +674,11 @@ loadSlack = function () {
 
   // 受信したメッセージをtimesheetsに投げる
   Slack.prototype.receiveMessage = function(message) {
-    var username = String(message.parameters.user_name);
-    var body = String(message.parameters.text);
+    var username = String(message.user_name);
+    var body = String(message['text']);
 
     // 特定のアカウントには反応しない
-    var ignore_users = ['hubot', 'slackbot'];
+    var ignore_users = (this.settings.get("無視するユーザ") || '').toLowerCase().replace(/^\s*(.*?)\s*$/, "$1").split(/\s*,\s*/);
     if(_.contains(ignore_users, username.toLowerCase())) return;
 
     // -で始まるメッセージも無視
@@ -686,9 +719,10 @@ if(typeof exports !== 'undefined') {
 // Timesheets = loadTimesheets();
 
 loadTimesheets = function (exports) {
-  var Timesheets = function(storage, responder) {
+  var Timesheets = function(storage, settings, responder) {
     this.storage = storage;
     this.responder = responder;
+    this.settings = settings;
 
     var self = this;
     this.responder.on('receiveMessage', function(username, message) {
@@ -715,6 +749,8 @@ loadTimesheets = function (exports) {
       ['actionCancelOff', /(休|やす(ま|み|む)).*(キャンセル|消|止|やめ|ません)/],
       ['actionOff', /(休|やす(ま|み|む))/],
       ['actionSignIn', /(モ[ー〜]+ニン|も[ー〜]+にん|おっは|おは|へろ|はろ|ヘロ|ハロ|hi|hello|morning|出勤)/],
+      ['confirmSignIn', /__confirmSignIn__/],
+      ['confirmSignOut', /__confirmSignOut__/],
     ];
 
     // メッセージを元にメソッドを探す
@@ -732,7 +768,7 @@ loadTimesheets = function (exports) {
   Timesheets.prototype.actionSignIn = function(username, message) {
     if(this.datetime) {
       var data = this.storage.get(username, this.datetime);
-      if(typeof data.signIn == 'undefined' || data.signIn === '-') {
+      if(!data.signIn || data.signIn === '-') {
         this.storage.set(username, this.datetime, {signIn: this.datetime});
         this.responder.template("出勤", username, this.datetimeStr);
       }
@@ -750,7 +786,7 @@ loadTimesheets = function (exports) {
   Timesheets.prototype.actionSignOut = function(username, message) {
     if(this.datetime) {
       var data = this.storage.get(username, this.datetime);
-      if(typeof data.signOut == 'undefined' || data.signOut === '-') {
+      if(!data.signOut || data.signOut === '-') {
         this.storage.set(username, this.datetime, {signOut: this.datetime});
         this.responder.template("退勤", username, this.datetimeStr);
       }
@@ -769,7 +805,7 @@ loadTimesheets = function (exports) {
     if(this.date) {
       var dateObj = new Date(this.date[0], this.date[1]-1, this.date[2]);
       var data = this.storage.get(username, dateObj);
-      if(typeof data.signOut == 'undefined' || data.signOut === '-') {
+      if(!data.signOut || data.signOut === '-') {
         this.storage.set(username, dateObj, {signIn: '-', signOut: '-', note: message});
         this.responder.template("休暇", username, DateUtils.format("Y/m/d", dateObj));
       }
@@ -781,7 +817,7 @@ loadTimesheets = function (exports) {
     if(this.date) {
       var dateObj = new Date(this.date[0], this.date[1]-1, this.date[2]);
       var data = this.storage.get(username, dateObj);
-      if(typeof data.signOut == 'undefined' || data.signOut === '-') {
+      if(!data.signOut || data.signOut === '-') {
         this.storage.set(username, dateObj, {signIn: null, signOut: null, note: message});
         this.responder.template("休暇取消", username, DateUtils.format("Y/m/d", dateObj));
       }
@@ -815,7 +851,7 @@ loadTimesheets = function (exports) {
     var wday = dateObj.getDay();
     var self = this;
     _.each(this.storage.getUsers(), function(username) {
-      if(_.indexOf(self.storage.getDayOff(username), wday) >= 0) {
+      if(_.contains(self.storage.getDayOff(username), wday)) {
         result.push(username);
       }
     });
@@ -826,6 +862,39 @@ loadTimesheets = function (exports) {
     }
     else {
       this.responder.template("休暇中", dateStr, result.sort().join(', '));
+    }
+  };
+
+  // 出勤していない人にメッセージを送る
+  Timesheets.prototype.confirmSignIn = function(username, message) {
+    var holidays = _.compact(_.map((this.settings.get("休日") || "").split(','), function(s) {
+      var date = DateUtils.parseDateTime(s);
+      return date ? DateUtils.format("Y/m/d", date) : undefined;
+    }));
+    var today = DateUtils.toDate(DateUtils.now());
+
+    // 休日ならチェックしない
+    if(_.contains(holidays, DateUtils.format("Y/m/d",today))) return;
+
+    var result = _.compact(_.map(this.storage.getByDate(today), function(row) {
+      return _.isDate(row.signIn) && !_.isDate(row.signOut) ? row.user : undefined;
+    }));
+    var users = _.difference(this.storage.getUsers(), result);
+
+    if(!_.isEmpty(users)) {
+      this.responder.template("出勤確認", users.sort());
+    }
+  };
+
+  // 退勤していない人にメッセージを送る
+  Timesheets.prototype.confirmSignOut = function(username, message) {
+    var dateObj = DateUtils.toDate(DateUtils.now());
+    var users = _.compact(_.map(this.storage.getByDate(dateObj), function(row) {
+      return _.isDate(row.signIn) && !_.isDate(row.signOut) ? row.user : undefined;
+    }));
+
+    if(!_.isEmpty(users)) {
+      this.responder.template("退勤確認", users.sort());
     }
   };
 
