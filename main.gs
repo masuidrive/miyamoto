@@ -149,7 +149,7 @@ loadDateUtils = function () {
 
   // 曜日を解析
   DateUtils.parseWday = function(str) {
-    str = str.replace(/曜日/, '');
+    str = str.replace(/曜日/g, '');
     var result = [];
     var wdays = [/(sun|日)/i, /(mon|月)/i, /(tue|火)/i, /(wed|水)/i, /(thu|木)/i, /(fri|金)/i, /(sat|土)/i];
     for(var i=0; i<wdays.length; ++i) {
@@ -285,8 +285,8 @@ loadEventListener = function () {
 if(typeof exports !== 'undefined') {
   exports.EventListener = loadEventListener();
 }
-// 入力内容を解析して、メソッドを呼び出す
-// Timesheets = loadTimesheets();
+// KVS
+// でも今回は使ってないです
 
 loadGASProperties = function (exports) {
   var GASProperties = function() {
@@ -313,28 +313,64 @@ if(typeof exports !== 'undefined') {
 
 // GASのログ出力をブラウザ互換にする
 if(typeof(console) == 'undefined' && typeof(Logger) != 'undefined') {
-  console = Logger;
+  console = {};
+  console.log = function() {
+    Logger.log(Array.prototype.slice.call(arguments).join(', '));
+  }
 }
+// KVS
+// でも今回は使ってないです
 
-// デバッグ用メッセージ出力
-function debug(msg) {
-  // Google SpreadsheetにDebugシートがあればそれに出力
-  if(SpreadsheetApp && ScriptProperties) {
-    var spreadsheet = SpreadsheetApp.openById(ScriptProperties.getProperty('spreadsheet'));
-    if(spreadsheet) {
-      var sheet = spreadsheet.getSheetByName("_debug");
-      if(sheet) {
-        sheet.getRange('a'+(sheet.getLastRow()+1)).setValue(msg);
+loadGSProperties = function (exports) {
+  var GSProperties = function(spreadsheet) {
+    // 初期設定
+    this.sheet = spreadsheet.getSheetByName('_設定');
+    if(!this.sheet) {
+      this.sheet = spreadsheet.insertSheet('_設定');
+    }
+  };
+
+  GSProperties.prototype.get = function(key, defaultValue) {
+    if(this.sheet.getLastRow() < 1) return defaultValue;
+    var vals = _.find(this.sheet.getRange("A1:B"+this.sheet.getLastRow()).getValues(), function(v) {
+      return(v[0] == name);
+    });
+    return vals ? vals[1] : defaultValue;
+  };
+
+  GSProperties.prototype.set = function(key, val) {
+    if(this.sheet.getLastRow() > 0) {
+      var vals = this.sheet.getRange("A1:A"+this.sheet.getLastRow()).getValues();
+      for(var i = 0; i < this.sheet.getLastRow(); ++i) {
+        if(vals[i][0] == key) {
+          this.sheet.getRange("B"+(i+1)).setValue(val);
+          return val;
+        }
       }
     }
-  }
+    this.sheet.getRange("A"+(this.sheet.getLastRow()+1)+":B"+(this.sheet.getLastRow()+1)).setValues([[key, val]]);
+    return val;
+  };
 
-  // コンソールに出力
-  if(console) {
-    console.log(msg);
-  }
+  GSProperties.prototype.setNote = function(key, note) {
+    if(this.sheet.getLastRow() > 0) {
+      var vals = this.sheet.getRange("A1:A"+this.sheet.getLastRow()).getValues();
+      for(var i = 0; i < this.sheet.getLastRow(); ++i) {
+        if(vals[i][0] == key) {
+          this.sheet.getRange("C"+(i+1)).setValue(note);
+          return;
+        }
+      }
+    }
+    this.sheet.getRange("A"+(this.sheet.getLastRow()+1)+":C"+(this.sheet.getLastRow()+1)).setValues([[key, '', note]]);
+    return;
+  };
 
-  return msg;
+  return GSProperties;
+};
+
+if(typeof exports !== 'undefined') {
+  exports.GSProperties = loadGSProperties();
 }
 // メッセージテンプレート
 // GSTemplate = loadGSTemplate();
@@ -512,24 +548,72 @@ loadGSTimesheets = function () {
 if(typeof exports !== 'undefined') {
   exports.GSTimesheets = loadGSTimesheets();
 }
-var init = function() {
+// 各モジュールの読み込み
+var initLibraries = function() {
   if(typeof EventListener === 'undefined') EventListener = loadEventListener();
   if(typeof DateUtils === 'undefined') DateUtils = loadDateUtils();
   if(typeof GASProperties === 'undefined') GASProperties = loadGASProperties();
+  if(typeof GSProperties === 'undefined') GSProperties = loadGSProperties();
   if(typeof GSTemplate === 'undefined') GSTemplate = loadGSTemplate();
   if(typeof GSTimesheets === 'undefined') GSTimesheets = loadGSTimesheets();
   if(typeof Timesheets === 'undefined') Timesheets = loadTimesheets();
   if(typeof Slack === 'undefined') Slack = loadSlack();
 }
 
-
 // SlackのOutgoingから来るメッセージ
 function doPost(e) {
 }
 
+function setUp() {
+  initLibraries();
+
+  // spreadsheetが無かったら初期化
+  var global_settings = new GASProperties();
+  if(!global_settings.get('spreadsheet')) {
+
+    // タイムシートを作る
+    var spreadsheet = SpreadsheetApp.create("Slack Timesheets test");
+    var sheets = spreadsheet.getSheets();
+    if(sheets.length == 0 && sheets[0].getLastRow() == 0) {
+      sheets[0].setName('_設定');
+    }
+    console.log(sheets.length, sheets[0].getLastRow());
+
+    global_settings.set('spreadsheet', spreadsheet.getId());
+
+    var settings = new GSProperties(spreadsheet);
+    settings.set('Slack Incoming', '');
+    settings.setNote('Slack Incoming', 'Slackのincoming URLを入力してください');
+    settings.set('開始日', DateUtils.format("Y-m-d", DateUtils.now()));
+    settings.setNote('開始日', '変更はしないでください');
+
+    // 休日を設定
+    var url = 'http://www.google.com/calendar/feeds/japanese@holiday.calendar.google.com/public/full-noattendees?alt=json&max-results=1000&start-min='+DateUtils.format("Y-m-d", DateUtils.now());
+    var data = JSON.parse(UrlFetchApp.fetch(url).getContentText());
+    var holidays = _.map(data.feed.entry, function(e) {
+      return e['gd$when'][0]['startTime'];
+    });
+    settings.set('休日', holidays.join(', '));
+    settings.setNote('休日', '日付を,区切りで。来年までは自動設定されているので、以後は適当に更新してください');
+
+    // 毎日11時頃に出勤してるかチェックする
+    ScriptApp.newTrigger('confirmSignIn')
+      .timeBased()
+      .everyDays(1)
+      .atHour(11)
+      .create();
+
+    // 毎日22時頃に退勤してるかチェックする
+    ScriptApp.newTrigger('confirmSignOut')
+      .timeBased()
+      .everyDays(1)
+      .atHour(22)
+      .create();
+  }
+};
 
 function test1() {
-  init();
+  initLibraries();
 
   var incomingURL = 'https://toreta.slack.com/services/hooks/incoming-webhook?token=lXfhZCSiZQNZZvt2hsAq0ej2';
   var spreadsheet = SpreadsheetApp.openById("1GNNpwiOx3xmuGPvJnzsx0G-oDxQtxxryyPOCZ1CaduY");
