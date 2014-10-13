@@ -10,10 +10,30 @@ var initLibraries = function() {
   if(typeof Slack === 'undefined') Slack = loadSlack();
 }
 
-// SlackのOutgoingから来るメッセージ
-function doPost(e) {
+var init = function() {
+  initLibraries();
+
+  var global_settings = new GASProperties();
+  var spreadsheetId = global_settings.get('spreadsheet');
+  if(spreadsheetId) {
+    var spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+    var settings = new GASProperties();
+    var template = new GSTemplate(spreadsheet);
+    var slack = new Slack(settings.get('Slack Incoming URL'), template);
+    var storage = new GSTimesheets(spreadsheet, settings);
+    var timesheets = new Timesheets(storage, settings, slack);
+    return slack;
+  }
+  return null;
 }
 
+// SlackのOutgoingから来るメッセージ
+function doPost(e) {
+  var receiver = init();
+  if(receiver) receiver.receiveMessage(e);
+}
+
+// 初期化する
 function setUp() {
   initLibraries();
 
@@ -31,7 +51,7 @@ function setUp() {
 
     var settings = new GSProperties(spreadsheet);
     settings.set('Slack Incoming', '');
-    settings.setNote('Slack Incoming', 'Slackのincoming URLを入力してください');
+    settings.setNote('Slack Incoming URL', 'Slackのincoming URLを入力してください');
     settings.set('開始日', DateUtils.format("Y-m-d", DateUtils.now()));
     settings.setNote('開始日', '変更はしないでください');
 
@@ -43,6 +63,9 @@ function setUp() {
     });
     settings.set('休日', holidays.join(', '));
     settings.setNote('休日', '日付を,区切りで。来年までは自動設定されているので、以後は適当に更新してください');
+
+    // メッセージ用のシートを作成
+    new GSTemplate(spreadsheet);
 
     // 毎日11時頃に出勤してるかチェックする
     ScriptApp.newTrigger('confirmSignIn')
@@ -58,19 +81,4 @@ function setUp() {
       .atHour(22)
       .create();
   }
-};
-
-function test1() {
-  initLibraries();
-
-  var incomingURL = 'https://toreta.slack.com/services/hooks/incoming-webhook?token=lXfhZCSiZQNZZvt2hsAq0ej2';
-  var spreadsheet = SpreadsheetApp.openById("1GNNpwiOx3xmuGPvJnzsx0G-oDxQtxxryyPOCZ1CaduY");
-  var settings = new GASProperties();
-  var template = new GSTemplate(spreadsheet);
-  var slack = new Slack(incomingURL, template);
-  var storage = new GSTimesheets(spreadsheet, settings);
-  var timesheets = new Timesheets(storage, slack);
-
-  slack.receiveMessage({parameters:{user_name:'foo',text:'おはよう 10:00'}});
-
 };

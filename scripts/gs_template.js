@@ -14,10 +14,10 @@ loadGSTemplate = function() {
       }
       else {
         var now = DateUtils.now();
-        this.sheet.getRange("A1:K2").setValues([
+        this.sheet.getRange("A1:M2").setValues([
           [
             "出勤", "出勤更新", "退勤", "退勤更新", "休暇", "休暇取消",
-            "出勤中", "出勤なし", "休暇中", "休暇なし", "使い方"
+            "出勤中", "出勤なし", "休暇中", "休暇なし", "出勤確認", "退勤確認", "使い方"
           ],
           [
             "<@#1> おはようございます (#2)", "<@#1> 出勤時間を#2へ変更しました",
@@ -25,6 +25,7 @@ loadGSTemplate = function() {
             "<@#1> #2を休暇として登録しました", "<@#1> #2の休暇を取り消しました",
             "#1が出勤しています", "全員退勤しています",
             "#1は#2が休暇です", "#1に休暇の人はいません",
+            "今日は休暇ですか？ #1", "退勤しましたか？ #1"
             "<@#1> 使い方は管理者へお問い合わせ下さい"]
           ]
         );
@@ -50,7 +51,14 @@ loadGSTemplate = function() {
 
         var message = template;
         for (var i = 1; i < arguments.length; i++) {
-          message = message.replace("#"+i, arguments[i]);
+          var arg = arguments[i]
+          if(_.isArray(arg)) {
+            arg = _.map(arg, function(u) {
+              return "<@"+u+">";
+            }).join(', ');
+          }
+
+          message = message.replace("#"+i, arg);
         }
 
         return message;

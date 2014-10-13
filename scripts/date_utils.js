@@ -144,7 +144,7 @@ loadDateUtils = function () {
 
   // Dateから日付部分だけを取り出す
   DateUtils.toDate = function(date) {
-    return(new Date(date.getFullYear(), date.getMonth(), date.getDate()));
+    return(new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0));
   };
 
   // 曜日を解析

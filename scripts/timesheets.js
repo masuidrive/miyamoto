@@ -2,9 +2,10 @@
 // Timesheets = loadTimesheets();
 
 loadTimesheets = function (exports) {
-  var Timesheets = function(storage, responder) {
+  var Timesheets = function(storage, settings, responder) {
     this.storage = storage;
     this.responder = responder;
+    this.settings = settings;
 
     var self = this;
     this.responder.on('receiveMessage', function(username, message) {
@@ -31,6 +32,8 @@ loadTimesheets = function (exports) {
       ['actionCancelOff', /(休|やす(ま|み|む)).*(キャンセル|消|止|やめ|ません)/],
       ['actionOff', /(休|やす(ま|み|む))/],
       ['actionSignIn', /(モ[ー〜]+ニン|も[ー〜]+にん|おっは|おは|へろ|はろ|ヘロ|ハロ|hi|hello|morning|出勤)/],
+      ['confirmSignIn', /__confirmSignIn__/],
+      ['confirmSignOut', /__confirmSignOut__/],
     ];
 
     // メッセージを元にメソッドを探す
@@ -142,6 +145,39 @@ loadTimesheets = function (exports) {
     }
     else {
       this.responder.template("休暇中", dateStr, result.sort().join(', '));
+    }
+  };
+
+  // 出勤していない人にメッセージを送る
+  Timesheets.prototype.confirmSignIn = function(username, message) {
+    var holidays = _.compact(_.map((this.settings.get("休日") || "").split(','), function(s) {
+      var date = DateUtils.parseDateTime(s);
+      return date ? DateUtils.format("Y/m/d", date) : undefined;
+    }));
+    var today = DateUtils.toDate(DateUtils.now());
+
+    // 休日ならチェックしない
+    if(_.indexOf(holidays, DateUtils.format("Y/m/d",today)) >= 0) return;
+
+    var result = _.compact(_.map(this.storage.getByDate(today), function(row) {
+      return _.isDate(row.signIn) && !_.isDate(row.signOut) ? row.user : undefined;
+    }));
+    var users = _.difference(this.storage.getUsers(), result);
+
+    if(!_.isEmpty(users)) {
+      this.responder.template("出勤確認", users.sort());
+    }
+  };
+
+  // 退勤していない人にメッセージを送る
+  Timesheets.prototype.confirmSignOut = function(username, message) {
+    var dateObj = DateUtils.toDate(DateUtils.now());
+    var users = _.compact(_.map(this.storage.getByDate(dateObj), function(row) {
+      return _.isDate(row.signIn) && !_.isDate(row.signOut) ? row.user : undefined;
+    }));
+
+    if(!_.isEmpty(users)) {
+      this.responder.template("退勤確認", users.sort());
     }
   };
 

@@ -1,4 +1,4 @@
-QUnit.test( "EventListener", function(assert) {
+QUnit.test( "Timesheets", function(assert) {
 
   var responder = {
     messages: [],
@@ -61,7 +61,7 @@ QUnit.test( "EventListener", function(assert) {
       }
     }
   };
-/*
+
   var settings = {
     values: {},
     get: function(key) {
@@ -71,7 +71,6 @@ QUnit.test( "EventListener", function(assert) {
       return this.values[key] = val;
     }
   };
-*/
 
   var msgTest = function(user, msg, expect_messages) {
     responder.clearMessages();
@@ -99,7 +98,7 @@ QUnit.test( "EventListener", function(assert) {
   };
 
 
-  var timesheets = new Timesheets(storage, responder);
+  var timesheets = new Timesheets(storage, settings, responder);
 
   DateUtils.now(new Date(2014,0,2,12,34,0));
   var nowDateStr = function() {
@@ -234,11 +233,36 @@ QUnit.test( "EventListener", function(assert) {
     msgTest('test1', '誰がお休み？', [['休暇なし', '2014/01/02']]);
   });
 
-  // test1は土日休み
-  mockDate("2014/01/04", function() {
-    storageTest({'test1': {}, 'test2': {}}, function(msgTest) {
-      msgTest('test1', '誰がお休み？', [['休暇中', '2014/01/04', 'test1']]);
-    });
+  // 出勤確認
+  storageTest({'test1': {}, 'test2': {}}, function(msgTest) {
+    msgTest('test1', '__confirmSignIn__', [['出勤確認', ['test1', 'test2']]]);
   });
+
+  // 休日は出勤確認を行わない
+  settings.values = {"休日": "2014/01/02"};
+  storageTest({'test1': {}, 'test2': {}}, function(msgTest) {
+    msgTest('test1', '__confirmSignIn__', []);
+  });
+  settings.values = {};
+
+  // 退勤確認
+  storageTest({'test1': {}, 'test2': {}}, function(msgTest) {
+    msgTest('test1', '__confirmSignOut__', []);
+  });
+
+  // 退勤確認
+  var test1 = {};
+  test1[nowDateStr()] = { user: 'test1', signIn: new Date(2014,0,2,0,0,0), signOut: undefined };
+  storageTest({'test1': test1, 'test2': {}}, function(msgTest) {
+    msgTest('test1', '__confirmSignOut__', [['退勤確認', ['test1']]]);
+  });
+
+  // 退勤確認
+  var test1 = {};
+  test1[nowDateStr()] = { user: 'test1', signIn: new Date(2014,0,2,0,0,0), signOut: new Date(2014,0,2,12,0,0) };
+  storageTest({'test1': test1, 'test2': {}}, function(msgTest) {
+    msgTest('test1', '__confirmSignOut__', []);
+  });
+
 
 });
