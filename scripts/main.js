@@ -33,12 +33,6 @@ function doPost(e) {
   if(receiver) receiver.receiveMessage(e.parameters);
 }
 
-function test1() {
-  var e = {user_name: 'test1', text:"おはよう"};
-  var receiver = init();
-  if(receiver) receiver.receiveMessage(e);
-}
-
 // 初期化する
 function setUp() {
   initLibraries();
