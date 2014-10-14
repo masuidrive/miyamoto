@@ -1,0 +1,11 @@
+{
+  "src": {
+    "fileId": "1tbHmnH3gwNSVyNwPtj5wv60I81uj8Nq_tsAMmUhsoY8l3mUZl-O-1CoM",
+    "files": {
+      "main": {
+        "path": "./main.gs",
+        "type": "server_js"
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "gas-manager": "^0.4.3",
+    "qunit": "^0.7.5"
+  }
+}
