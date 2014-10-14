@@ -529,16 +529,29 @@ var init = function() {
     var slack = new Slack(settings.get('Slack Incoming URL'), template, settings);
     var storage = new GSTimesheets(spreadsheet, settings);
     var timesheets = new Timesheets(storage, settings, slack);
-    return slack;
+    return({receiver: slack, timesheets: timesheets});
   }
   return null;
 }
 
 // SlackのOutgoingから来るメッセージ
 function doPost(e) {
-  var receiver = init();
-  if(receiver) receiver.receiveMessage(e.parameters);
+  var miyamoto = init();
+  miyamoto.receiver.receiveMessage(e.parameters);
 }
+
+// Time-based triggerで実行
+function confirmSignIn() {
+  var miyamoto = init();
+  miyamoto.timesheets.confirmSignIn();
+}
+
+// Time-based triggerで実行
+function confirmSignOut() {
+  var miyamoto = init();
+  miyamoto.timesheets.confirmSignOut();
+}
+
 
 // 初期化する
 function setUp() {
