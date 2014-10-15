@@ -453,8 +453,8 @@ loadGSTimesheets = function () {
   GSTimesheets.prototype._getRowNo = function(username, date) {
     var rowNo = this.scheme.properties.length + 4;
     var startAt = DateUtils.parseDate(this.settings.get("開始日"));
-    var n = DateUtils.now(), s = new Date(startAt[0], startAt[1]-1, startAt[2]);
-    rowNo += parseInt(n/(1000*24*60*60)+n.getTimezoneOffset()/(60*24)) - parseInt(s/(1000*24*60*60)+s.getTimezoneOffset()/(60*24));
+    var n = DateUtils.now(), s = new Date(startAt[0], startAt[1]-1, startAt[2], 0, 0, 0);
+    rowNo += parseInt((n.getTime()-n.getTimezoneOffset()*60*1000)/(1000*24*60*60)) - parseInt((s.getTime()-s.getTimezoneOffset()*60*1000)/(1000*24*60*60));
     return rowNo;
   };
 
@@ -532,6 +532,10 @@ var init = function() {
     return({receiver: slack, timesheets: timesheets});
   }
   return null;
+}
+function test1(e) {
+  var miyamoto = init();
+  miyamoto.receiver.receiveMessage({user_name:"masuidrive", text:"hello 8:00"});
 }
 
 // SlackのOutgoingから来るメッセージ
@@ -689,7 +693,7 @@ loadTimesheets = function (exports) {
 
     // コマンド集
     var commands = [
-      ['actionSignOut', /(バ[ー〜ァ]*イ|ば[ー〜ぁ]*い|おやすみ|お[つっ]|お先|お疲|帰|乙|bye|night|(c|see)\s*(u|you)|退勤|ごきげんよう|グッバイ|ばい)/],
+      ['actionSignOut', /(バ[ー〜ァ]*イ|ば[ー〜ぁ]*い|おやすみ|お[つっ]ー|お先|お疲|帰|乙|bye|night|(c|see)\s*(u|you)|退勤|ごきげんよう|グッバイ)/],
       ['actionWhoIsOff', /(だれ|誰|who\s*is).*(休|やす(ま|み|む))/],
       ['actionWhoIsIn', /(だれ|誰|who\s*is)/],
       ['actionCancelOff', /(休|やす(ま|み|む)).*(キャンセル|消|止|やめ|ません)/],

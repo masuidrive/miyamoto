@@ -4,7 +4,9 @@ Google Apps Scriptで書かれた、Slack用勤怠管理Bot。
 
 Slackで下記の様につぶやくと、宮本さんがGoogle Spreadsheetに記録してくれます。
 
+
 ## 会話例
+
 - おはようございます ← 現在時刻で出勤
 - おはようございます 12:00 ← 指定時刻で出勤
 - 12:00に出勤しました ← 指定時刻で出勤
@@ -22,6 +24,16 @@ Slackで下記の様につぶやくと、宮本さんがGoogle Spreadsheetに記
 
 
 ## 設置方法
+
+### Google Apps Scriptに設置
+
+- https://drive.google.com/ を開いて
+
+- 左上の「無題のプロジェクト」をクリックして、「Miyamoto-san」に変更します。
+- [main.gs](https://raw.githubusercontent.com/masuidrive/miyamoto/master/main.gs)をコピーして、ブラウザ内のエディタに貼り付けます。
+- メニューから「ファイル」→「保存」を選択して保存します
+- メニューから「公開」→「ウェブアプリケーションとして導入...」を選びます。
+
 
 
 ## ソースコード
@@ -46,7 +58,7 @@ Slackで下記の様につぶやくと、宮本さんがGoogle Spreadsheetに記
 - Google Spreadsheetを使ったメッセージテンプレート
 
 
-### gs_settings.js
+### gs_properties.js
 
 - Google Spreadsheetを使った設定key-value store
 
@@ -85,6 +97,3 @@ Slackで下記の様につぶやくと、宮本さんがGoogle Spreadsheetに記
 npm install
 make test
 ```
-
-
-### Google Apps Scriptで実行

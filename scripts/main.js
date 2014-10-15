@@ -97,3 +97,10 @@ function setUp() {
       .create();
   }
 };
+
+/*
+function test1(e) {
+  var miyamoto = init();
+  miyamoto.receiver.receiveMessage({user_name:"masuidrive", text:"hello 8:00"});
+}
+*/

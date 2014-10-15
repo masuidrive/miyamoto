@@ -26,7 +26,7 @@ loadTimesheets = function (exports) {
 
     // コマンド集
     var commands = [
-      ['actionSignOut', /(バ[ー〜ァ]*イ|ば[ー〜ぁ]*い|おやすみ|お[つっ]|お先|お疲|帰|乙|bye|night|(c|see)\s*(u|you)|退勤|ごきげんよう|グッバイ|ばい)/],
+      ['actionSignOut', /(バ[ー〜ァ]*イ|ば[ー〜ぁ]*い|おやすみ|お[つっ]ー|お先|お疲|帰|乙|bye|night|(c|see)\s*(u|you)|退勤|ごきげんよう|グッバイ)/],
       ['actionWhoIsOff', /(だれ|誰|who\s*is).*(休|やす(ま|み|む))/],
       ['actionWhoIsIn', /(だれ|誰|who\s*is)/],
       ['actionCancelOff', /(休|やす(ま|み|む)).*(キャンセル|消|止|やめ|ません)/],
