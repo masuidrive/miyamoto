@@ -46,10 +46,13 @@ Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheet
 - もう一度「作成」ボタンを押して「スクリプト」選択します。
 - 「スクリプトを作成」の下にある「空のプロジェクト」を選択します。
 - 新しいスクリプトを作る画面へ遷移するので、左上の「無題のプロジェクト」をクリックして、「Miyamoto-san」に変更します。
+
+![gas03](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gas03.png)
+
+
 - [main.gs](https://raw.githubusercontent.com/masuidrive/miyamoto/master/main.gs)をコピーして、ブラウザ内のエディタ部に貼り付けます。
 - メニューから「ファイル」→「保存」を選択して保存します。
 
-![gas03](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gas03.png)
 
 
 ### 初期化
@@ -66,13 +69,14 @@ Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheet
 
 - メニューから「公開」→「ウェブアプリケーションとして導入...」を選びます。
 - 先に「新しいバージョンを保存」ボタンを押した後、「アプリケーションにアクセスできるユーザ」から「全員（匿名ユーザを含む）」を選択します。
+- 登録完了後に出るウインドーの「現在のウェブアプリケーションのURL」をどこかにメモしておいてください。
 
 ![gas20](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gas20.png)
 
+
 - 「全員（匿名ユーザを含む）」が見つからない場合は、https://admin.google.com/ から「Google Apps」→「ドライブ」を選択して、「共有設定」の「ユーザは組織外のユーザとファイルを共有できる」を選択します。
-- ![admin1](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/admin1.png)
-- ![admin2](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/admin2.png)
-- 登録完了後に出るウインドーの「現在のウェブアプリケーションのURL」をどこかにメモしておいてください。
+- ![admin0](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/admin0.png)
+
 
 
 ## Slackへの設定
