@@ -119,7 +119,7 @@ Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheet
 - 下のタブから「_設定」を開き、「Slack Imcoming URL」がある「B1」に「Slackへの設定」でメモした「Your Unique Webhook URL」を入力します。
 - このbotの名前を変更した場合は、「無視するユーザ」にその名前を加えてください。
 
-![gs1](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gs1.png)
+![gs3](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gs3.png)
 
 # 動かす
 
