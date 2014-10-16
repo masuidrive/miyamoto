@@ -53,7 +53,7 @@ Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheet
 
 - [main.gs](https://raw.githubusercontent.com/masuidrive/miyamoto/master/main.gs)をコピーして、ブラウザ内のエディタ部に貼り付けます。
 - メニューから「ファイル」→「保存」を選択して保存します。
-
+- メニューの「ファイル」→「プロジェクトのプロパティ」を開いて「Time zone」を「東京」に合わせてください。
 
 
 ### 初期化
@@ -114,6 +114,7 @@ Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheet
 ## みやもとさんの設定
 
 - https://drive.google.com/ から「Slack Timesheets」を選びます。
+- メニューの「ファイル」→「スプレッドシートの設定」を開いて「タイムゾーン」を「東京」に合わせてください。
 - 下のタブから「_設定」を開き、「Slack Imcoming URL」がある「B1」に「Slackへの設定」でメモした「Your Unique Webhook URL」を入力します。
 - このbotの名前を変更した場合は、「無視するユーザ」にその名前を加えてください。
 
