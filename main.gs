@@ -533,10 +533,6 @@ var init = function() {
   }
   return null;
 }
-function test1(e) {
-  var miyamoto = init();
-  miyamoto.receiver.receiveMessage({user_name:"masuidrive", text:"hello 8:00"});
-}
 
 // SlackのOutgoingから来るメッセージ
 function doPost(e) {
@@ -608,6 +604,13 @@ function setUp() {
       .create();
   }
 };
+
+/*
+function test1(e) {
+  var miyamoto = init();
+  miyamoto.receiver.receiveMessage({user_name:"masuidrive", text:"hello 8:00"});
+}
+*/
 // Slackのインタフェース
 // Slack = loadSlack();
 
@@ -693,7 +696,7 @@ loadTimesheets = function (exports) {
 
     // コマンド集
     var commands = [
-      ['actionSignOut', /(バ[ー〜ァ]*イ|ば[ー〜ぁ]*い|おやすみ|お[つっ]ー|お先|お疲|帰|乙|bye|night|(c|see)\s*(u|you)|退勤|ごきげんよう|グッバイ)/],
+      ['actionSignOut', /(バ[ー〜ァ]*イ|ば[ー〜ぁ]*い|おやすみ|お[つっ]ー|おつ|お先|お疲|帰|乙|bye|night|(c|see)\s*(u|you)|退勤|ごきげんよ|グ[ッ]?バイ)/],
       ['actionWhoIsOff', /(だれ|誰|who\s*is).*(休|やす(ま|み|む))/],
       ['actionWhoIsIn', /(だれ|誰|who\s*is)/],
       ['actionCancelOff', /(休|やす(ま|み|む)).*(キャンセル|消|止|やめ|ません)/],
