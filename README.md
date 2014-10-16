@@ -4,7 +4,7 @@ Google Apps Scriptで書かれた、Slack上で動く勤怠管理Bot。
 
 Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheetに勤怠を記録してくれます。
 
-[demo1.png]
+![demo1](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/demo1.png)
 
 
 ## 会話例
@@ -34,14 +34,17 @@ Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheet
 
 ## Google Apps Scriptへ設置
 
-### に設置
+### プログラム本体を設置
 
-- https://drive.google.com/ を開いて画面右にある、赤い「作成」ボタンを押します。　[drive1.png]
+- https://drive.google.com/ を開いて画面右にある、赤い「作成」ボタンを押します。
+![drive1](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/drive1.png)
 - 最下部の「アプリを追加」を押してダイアログを開きます。
-- ダイアログの検索ボックスに「script」と入力してリストに出てきた「Google Apps Script」の「＋接続」ボタンを押します。 [drive2.png]
+- ダイアログの検索ボックスに「script」と入力してリストに出てきた「Google Apps Script」の「＋接続」ボタンを押します。 ![drive2](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/drive2.png)
 - もう一度「作成」ボタンを押して「スクリプト」選択します。
-- 「スクリプトを作成」の下にある「空のプロジェクト」を選択します。[gas1.png]
-- 新しいスクリプトを作る画面へ遷移するので、左上の「無題のプロジェクト」をクリックして、「Miyamoto-san」に変更します。[gas2.png]
+- 「スクリプトを作成」の下にある「空のプロジェクト」を選択します。
+- ![gas01](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gas01.png)
+- 新しいスクリプトを作る画面へ遷移するので、左上の「無題のプロジェクト」をクリックして、「Miyamoto-san」に変更します。
+- ![gas02](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gas02.png)
 - [main.gs](https://raw.githubusercontent.com/masuidrive/miyamoto/master/main.gs)をコピーして、ブラウザ内のエディタ部に貼り付けます。
 - メニューから「ファイル」→「保存」を選択して保存します。
 
@@ -49,15 +52,22 @@ Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheet
 ### 初期化
 
 - ツールバーの「関数を選択」から「setUp」を選び、左の再生ボタンを押します。
+- ![gas11](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gas11.png)
 - 権限の承認画面が出たら「承認する」を押してください。
+- ![gas12](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gas12.png)
 - Google Drive上に「Slack Timesheets」というSpreadsheetが生成されます。
 
 
 ### APIの公開
 
-- メニューから「公開」→「ウェブアプリケーションとして導入...」を選びます。[gas21.png]
-- 先に「新しいバージョンを保存」ボタンを押した後、「アプリケーションにアクセスできるユーザ」から「全員（匿名ユーザを含む）」を選択します。[gas22.png]
-- 「全員（匿名ユーザを含む）」が見つからない場合は、https://admin.google.com/ から「Google Apps」→「ドライブ」を選択して、「共有設定」の「ユーザは組織外のユーザとファイルを共有できる」を選択します。[admin1.png][admin2.png]
+- メニューから「公開」→「ウェブアプリケーションとして導入...」を選びます。
+- ![gas21](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gas21.png)
+- 先に「新しいバージョンを保存」ボタンを押した後、「アプリケーションにアクセスできるユーザ」から「全員（匿名ユーザを含む）」を選択します。
+- ![gas22](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gas22.png)
+
+- 「全員（匿名ユーザを含む）」が見つからない場合は、https://admin.google.com/ から「Google Apps」→「ドライブ」を選択して、「共有設定」の「ユーザは組織外のユーザとファイルを共有できる」を選択します。
+- ![admin1](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/admin1.png)
+- ![admin2](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/admin2.png)
 - 登録完了後に出るウインドーの「現在のウェブアプリケーションのURL」をどこかにメモしておいてください。
 
 
@@ -68,16 +78,20 @@ Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheet
 ### Slack Outgoingの設定
 
 - 左上のメニューから「Configure Integration」を選びます。
+- !(slack11)[]
 - ページ下部の「DIY Integrations & Customizations」から「Outgoing WebHooks」を選びます。
 - 緑の「Add Outgoing Webhook」を押します。
 - 「Integration Settings」の「Channel」を「#timesheets」を選択し、「URL(s)」には「APIの公開」でメモをした「現在のウェブアプリケーションのURL」を入力し、「Save Integration」を押します。
+- !(slack13)[]
 
 ### Slack Imcomingの設定
 
 - 左のサイドバーの「Add New Integration」から「Incoming WebHooks」を選びます。
 - ページ最下部の「Choose a channel...」から「#timesheets」を選択して、「Add Incoming WebHook」を選択します。
 - 遷移したページの「Your Unique Webhook URL」の下に書かれているURLをどこかにメモしておきます。
+- !(slack21)[]
 - 「Integration Settings」右の「Expand」を押して、「change the name of your bot」をクリックし「miyamoto」を指定します。
+- !(slack22)[]
 - 「miyamoto」以外の名前を指定する場合は、Spreadsheetの「_設定」の「無視するユーザ」にその名前を加えてください。
 
 ## みやもとさんの設定
@@ -99,6 +113,8 @@ Slackの#timesheetsチャンネルで「おはよう」って発言すると、�
 
 
 # 開発
+
+- コードを変更したときには、メニューの「ファイル」→「版の管理...」で「新しいバージョンを保存」してから、「公開」→「ウェブアプリケーションとして導入...」の「プロジェクトバージョン」を最新のモノにする必要があります。
 
 ## Todo
 

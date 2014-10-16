@@ -87,14 +87,14 @@ loadGSTimesheets = function () {
   };
 
   GSTimesheets.prototype.getUsers = function() {
-    return _.keys(this.data);
+    return _.map(this.spreadsheet.getSheets(), function(s) { return s.getName(); });
   };
 
   GSTimesheets.prototype.getByDate = function(date) {
-    dateStr = String(DateUtils.toDate(date));
-    return _.compact(_.map(this.data, function(row) {
-      return row[dateStr];
-    }));
+    var self = this;
+    return _.map(this.getUsers(), function(username) {
+      return self.get(username, date)
+    });
   };
 
   // 休みの曜日を数字で返す
