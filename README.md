@@ -78,11 +78,11 @@ Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheet
 ### Slack Outgoingの設定
 
 - 左上のメニューから「Configure Integration」を選びます。
-- ![slack11](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/.png)
+- ![slack11](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/slack11.png)
 - ページ下部の「DIY Integrations & Customizations」から「Outgoing WebHooks」を選びます。
 - 緑の「Add Outgoing Webhook」を押します。
 - 「Integration Settings」の「Channel」を「#timesheets」を選択し、「URL(s)」には「APIの公開」でメモをした「現在のウェブアプリケーションのURL」を入力し、「Save Integration」を押します。
-- ![slack13](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/.png)
+- ![slack13](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/slack13.png)
 
 ### Slack Imcomingの設定
 
@@ -107,11 +107,15 @@ Slackの#timesheetsチャンネルで「おはよう」って発言すると、�
 
 当日の日付が二つ並んでいますが、B〜C列を時間表示に切り替える必要があります。範囲指定をしてメニューの「表示形式」→「数字」→「時間」を選択してください。
 
-週の休日は「Day Off」の欄に「,」(カンマ)区切りで入力します。
+週の休日は「Day Off」の欄に,(カンマ)区切りで入力します。
 
 - ![gs2](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gs2.png)
 
 これで設置が終わりました。どんなメッセージに反応するかは、[timesheets.js](https://github.com/masuidrive/miyamoto/blob/master/scripts/timesheets.js#L29)の正規表現を読み解いてください。
+
+## 仕様
+
+- ユーザ名に.(ドット)が入っている場合に、mentionにならないのはSlack Webhookの仕様です。
 
 
 # 開発
