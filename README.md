@@ -11,6 +11,7 @@ Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheet
 
 - おはようございます ← 現在時刻で出勤
 - おはようございます 12:00 ← 指定時刻で出勤
+- おはようございます 10/2 12:00 ← 過去に遡って出勤を記録する
 - 12:00に出勤しました ← 指定時刻で出勤
 - お疲れ様でした ← 現在時刻で退勤
 - お疲れ様でした 20:00 ← 指定時刻で退勤
@@ -86,20 +87,28 @@ Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheet
 ### Slack Outgoingの設定
 
 - 左上のメニューから「Configure Integration」を選びます。
-- ![slack11](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/slack11.png)
+
+![slack11](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/slack11.png)
+
 - ページ下部の「DIY Integrations & Customizations」から「Outgoing WebHooks」を選びます。
 - 緑の「Add Outgoing Webhook」を押します。
 - 「Integration Settings」の「Channel」を「#timesheets」を選択し、「URL(s)」には「APIの公開」でメモをした「現在のウェブアプリケーションのURL」を入力し、「Save Integration」を押します。
-- ![slack13](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/slack13.png)
+
+![slack13](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/slack13.png)
+
 
 ### Slack Imcomingの設定
 
 - 左のサイドバーの「Add New Integration」から「Incoming WebHooks」を選びます。
 - ページ最下部の「Choose a channel...」から「#timesheets」を選択して、「Add Incoming WebHook」を選択します。
 - 遷移したページの「Your Unique Webhook URL」の下に書かれているURLをどこかにメモしておきます。
-- ![slack21](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/slack21.png)
+
+![slack21](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/slack21.png)
+
 - 「Integration Settings」右の「Expand」を押して、「change the name of your bot」をクリックし「miyamoto」を指定します。
-- ![slack22](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/slack22.png)
+
+![slack22](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/slack22.png)
+
 - 「miyamoto」以外の名前を指定する場合は、Spreadsheetの「_設定」の「無視するユーザ」にその名前を加えてください。
 
 ## みやもとさんの設定
@@ -107,7 +116,8 @@ Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheet
 - https://drive.google.com/ から「Slack Timesheets」を選びます。
 - 下のタブから「_設定」を開き、「Slack Imcoming URL」がある「B1」に「Slackへの設定」でメモした「Your Unique Webhook URL」を入力します。
 - このbotの名前を変更した場合は、「無視するユーザ」にその名前を加えてください。
-- ![gs1](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gs1.png)
+
+![gs1](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gs1.png)
 
 # 動かす
 
@@ -117,7 +127,7 @@ Slackの#timesheetsチャンネルで「おはよう」って発言すると、�
 
 週の休日は「Day Off」の欄に,(カンマ)区切りで入力します。
 
-- ![gs2](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gs2.png)
+![gs2](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gs2.png)
 
 これで設置が終わりました。どんなメッセージに反応するかは、[timesheets.js](https://github.com/masuidrive/miyamoto/blob/master/scripts/timesheets.js#L29)の正規表現を読み解いてください。
 
@@ -128,7 +138,7 @@ Slackの#timesheetsチャンネルで「おはよう」って発言すると、�
 
 # 開発
 
-- コードを変更したときには、メニューの「ファイル」→「版の管理...」で「新しいバージョンを保存」してから、「公開」→「ウェブアプリケーションとして導入...」の「プロジェクトバージョン」を最新のモノにする必要があります。
+- コードを変更したときには、メニューの「ファイル」→「版の管理...」で「新しいバージョンを保存」してから、「公開」→「ウェブアプリケーションとして導入...」の「プロジェクトバージョン」を最新にする必要があります。
 
 ## Todo
 
