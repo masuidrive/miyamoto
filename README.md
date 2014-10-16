@@ -76,7 +76,8 @@ Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheet
 
 
 - 「全員（匿名ユーザを含む）」が見つからない場合は、https://admin.google.com/ から「Google Apps」→「ドライブ」を選択して、「共有設定」の「ユーザは組織外のユーザとファイルを共有できる」を選択します。
-- ![admin0](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/admin0.png)
+
+![admin2](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/admin2.png)
 
 
 
