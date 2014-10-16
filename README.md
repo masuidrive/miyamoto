@@ -37,33 +37,37 @@ Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheet
 ### プログラム本体を設置
 
 - https://drive.google.com/ を開いて画面右にある、赤い「作成」ボタンを押します。
-![drive1](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/drive1.png)
 - 最下部の「アプリを追加」を押してダイアログを開きます。
-- ダイアログの検索ボックスに「script」と入力してリストに出てきた「Google Apps Script」の「＋接続」ボタンを押します。 ![drive2](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/drive2.png)
+- ダイアログの検索ボックスに「script」と入力してリストに出てきた「Google Apps Script」の「＋接続」ボタンを押します。
+
+![drive0](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/drive0.png)
+
+
 - もう一度「作成」ボタンを押して「スクリプト」選択します。
 - 「スクリプトを作成」の下にある「空のプロジェクト」を選択します。
-- ![gas01](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gas01.png)
 - 新しいスクリプトを作る画面へ遷移するので、左上の「無題のプロジェクト」をクリックして、「Miyamoto-san」に変更します。
-- ![gas02](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gas02.png)
 - [main.gs](https://raw.githubusercontent.com/masuidrive/miyamoto/master/main.gs)をコピーして、ブラウザ内のエディタ部に貼り付けます。
 - メニューから「ファイル」→「保存」を選択して保存します。
+
+![gas03](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gas03.png)
 
 
 ### 初期化
 
 - ツールバーの「関数を選択」から「setUp」を選び、左の再生ボタンを押します。
-- ![gas11](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gas11.png)
+
+![gas11](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gas11.png)
+
 - 権限の承認画面が出たら「承認する」を押してください。
-- ![gas12](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gas12.png)
 - Google Drive上に「Slack Timesheets」というSpreadsheetが生成されます。
 
 
 ### APIの公開
 
 - メニューから「公開」→「ウェブアプリケーションとして導入...」を選びます。
-- ![gas21](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gas21.png)
 - 先に「新しいバージョンを保存」ボタンを押した後、「アプリケーションにアクセスできるユーザ」から「全員（匿名ユーザを含む）」を選択します。
-- ![gas22](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gas22.png)
+
+![gas20](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gas20.png)
 
 - 「全員（匿名ユーザを含む）」が見つからない場合は、https://admin.google.com/ から「Google Apps」→「ドライブ」を選択して、「共有設定」の「ユーザは組織外のユーザとファイルを共有できる」を選択します。
 - ![admin1](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/admin1.png)
