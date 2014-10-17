@@ -37,7 +37,7 @@ Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheet
 
 ### プログラム本体を設置
 
-- https://drive.google.com/ を開いて画面右にある、赤い「作成」ボタンを押します。
+- https://drive.google.com/ を開いて画面左にある、赤い「作成」ボタンを押します。
 - 最下部の「アプリを追加」を押してダイアログを開きます。
 - ダイアログの検索ボックスに「script」と入力してリストに出てきた「Google Apps Script」の「＋接続」ボタンを押します。
 
@@ -70,6 +70,7 @@ Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheet
 
 - メニューから「公開」→「ウェブアプリケーションとして導入...」を選びます。
 - 先に「新しいバージョンを保存」ボタンを押した後、「アプリケーションにアクセスできるユーザ」から「全員（匿名ユーザを含む）」を選択します。
+- 同時に「次のユーザーとしてアプリケーションを実行」を「自分」に変更します。
 - 登録完了後に出るウインドーの「現在のウェブアプリケーションのURL」をどこかにメモしておいてください。
 
 ![gas20](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gas20.png)
@@ -120,6 +121,7 @@ Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheet
 - このbotの名前を変更した場合は、「無視するユーザ」にその名前を加えてください。
 
 ![gs3](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gs3.png)
+
 
 # 動かす
 
