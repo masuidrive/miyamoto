@@ -14,7 +14,6 @@ var init = function() {
   initLibraries();
 
   var global_settings = new GASProperties();
-  global_settings.set('version', "::VERSION::");
 
   var spreadsheetId = global_settings.get('spreadsheet');
   if(spreadsheetId) {
@@ -103,6 +102,16 @@ function setUp() {
       .create();
   }
 };
+
+/* バージョンアップ処理を行う */
+function migrate() {
+  var global_settings = new GASProperties();
+  
+  global_settings.set('version', "::VERSION::");
+  console.log("バージョンアップが完了しました。");
+}
+
+
 
 /*
 function test1(e) {

@@ -1,3 +1,6 @@
+/* Miyamoto-san https://github.com/masuidrive/miyamoto/ */
+/* (c) masuidrive 2014- License: MIT */
+/* ------------------- */
 // 日付関係の関数
 // DateUtils = loadDateUtils();
 
@@ -538,7 +541,6 @@ var init = function() {
   initLibraries();
 
   var global_settings = new GASProperties();
-  global_settings.set('version', "20141016.1");
 
   var spreadsheetId = global_settings.get('spreadsheet');
   if(spreadsheetId) {
@@ -627,6 +629,16 @@ function setUp() {
       .create();
   }
 };
+
+/* バージョンアップ処理を行う */
+function migrate() {
+  var global_settings = new GASProperties();
+  
+  global_settings.set('version', "20141016.1");
+  console.log("バージョンアップが完了しました。");
+}
+
+
 
 /*
 function test1(e) {
