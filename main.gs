@@ -261,16 +261,17 @@ checkUpdate = function(responder) {
   if(typeof GASProperties === 'undefined') GASProperties = loadGASProperties();
   var current_version = parseFloat(new GASProperties().get('version')) || 0;
 
-  var response = UrlFetchApp.fetch("https://raw.githubusercontent.com/masuidrive/miyamoto/master/VERSION", {muteHttpExceptions: true});
+  // var response = UrlFetchApp.fetch("https://raw.githubusercontent.com/masuidrive/miyamoto/master/VERSION", {muteHttpExceptions: true});
+  var response = UrlFetchApp.fetch("https://raw.githubusercontent.com/masuidrive/miyamoto/feature/check_update/VERSION", {muteHttpExceptions: true});
+
   if(response.getResponseCode() == 200) {
     var latest_version = parseFloat(response.getContentText());
-    if(latest_version > current_version) {
+    if(latest_version > 0 && latest_version > current_version) {
       responder.send("最新版がリリースされています。 https://github.com/masuidrive/miyamoto/blob/master/UPDATE.md を実行してください。");
     }
   }
 };
 // KVS
-// でも今回は使ってないです
 
 loadGSProperties = function (exports) {
   var GSProperties = function(spreadsheet) {
@@ -537,7 +538,7 @@ var init = function() {
   initLibraries();
 
   var global_settings = new GASProperties();
-  global_settings.set('version', "20141016.0");
+  global_settings.set('version', "20141016.1");
 
   var spreadsheetId = global_settings.get('spreadsheet');
   if(spreadsheetId) {

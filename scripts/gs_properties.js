@@ -1,5 +1,4 @@
 // KVS
-// でも今回は使ってないです
 
 loadGSProperties = function (exports) {
   var GSProperties = function(spreadsheet) {

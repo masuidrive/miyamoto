@@ -13,7 +13,9 @@ checkUpdate = function(responder) {
   if(typeof GASProperties === 'undefined') GASProperties = loadGASProperties();
   var current_version = parseFloat(new GASProperties().get('version')) || 0;
 
-  var response = UrlFetchApp.fetch("https://raw.githubusercontent.com/masuidrive/miyamoto/master/VERSION", {muteHttpExceptions: true});
+  // var response = UrlFetchApp.fetch("https://raw.githubusercontent.com/masuidrive/miyamoto/master/VERSION", {muteHttpExceptions: true});
+  var response = UrlFetchApp.fetch("https://raw.githubusercontent.com/masuidrive/miyamoto/feature/check_update/VERSION", {muteHttpExceptions: true});
+
   if(response.getResponseCode() == 200) {
     var latest_version = parseFloat(response.getContentText());
     if(latest_version > 0 && latest_version > current_version) {
