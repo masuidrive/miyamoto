@@ -171,6 +171,9 @@ loadTimesheets = function (exports) {
     if(!_.isEmpty(users)) {
       this.responder.template("出勤確認", users.sort());
     }
+
+    // バージョンチェックを行う
+    if(typeof checkUpdate == 'function') checkUpdate(this.responder);
   };
 
   // 退勤していない人にメッセージを送る
