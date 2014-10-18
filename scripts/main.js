@@ -14,6 +14,8 @@ var init = function() {
   initLibraries();
 
   var global_settings = new GASProperties();
+  global_settings.set('version', "::VERSION::");
+
   var spreadsheetId = global_settings.get('spreadsheet');
   if(spreadsheetId) {
     var spreadsheet = SpreadsheetApp.openById(spreadsheetId);
@@ -22,7 +24,11 @@ var init = function() {
     var slack = new Slack(settings.get('Slack Incoming URL'), template, settings);
     var storage = new GSTimesheets(spreadsheet, settings);
     var timesheets = new Timesheets(storage, settings, slack);
-    return({receiver: slack, timesheets: timesheets});
+    return({
+      receiver: slack,
+      timesheets: timesheets,
+      storage: storage
+    });
   }
   return null;
 }
