@@ -483,7 +483,10 @@ loadGSTimesheets = function () {
   };
 
   GSTimesheets.prototype.getUsers = function() {
-    return _.map(this.spreadsheet.getSheets(), function(s) { return s.getName(); });
+    return _.compact(_.map(this.spreadsheet.getSheets(), function(s) {
+      var name = s.getName();
+      return String(name).substr(0, 1) == '_' ? undefined : name;
+    }));
   };
 
   GSTimesheets.prototype.getByDate = function(date) {
@@ -695,7 +698,7 @@ loadTimesheets = function (exports) {
 
     // コマンド集
     var commands = [
-      ['actionSignOut', /(バ[ー〜ァ]*イ|ば[ー〜ぁ]*い|おやすみ|お[つっ]ー|おつ|お先|お疲|帰|乙|bye|night|(c|see)\s*(u|you)|退勤|ごきげんよ|グ[ッ]?バイ)/],
+      ['actionSignOut', /(バ[ー〜ァ]*イ|ば[ー〜ぁ]*い|おやすみ|お[つっ]ー|おつ|さらば|お先|お疲|帰|乙|bye|night|(c|see)\s*(u|you)|退勤|ごきげんよ|グ[ッ]?バイ)/],
       ['actionWhoIsOff', /(だれ|誰|who\s*is).*(休|やす(ま|み|む))/],
       ['actionWhoIsIn', /(だれ|誰|who\s*is)/],
       ['actionCancelOff', /(休|やす(ま|み|む)).*(キャンセル|消|止|やめ|ません)/],
@@ -819,6 +822,7 @@ loadTimesheets = function (exports) {
 
   // 出勤していない人にメッセージを送る
   Timesheets.prototype.confirmSignIn = function(username, message) {
+    var self = this;
     var holidays = _.compact(_.map((this.settings.get("休日") || "").split(','), function(s) {
       var date = DateUtils.parseDateTime(s);
       return date ? DateUtils.format("Y/m/d", date) : undefined;
@@ -828,10 +832,13 @@ loadTimesheets = function (exports) {
     // 休日ならチェックしない
     if(_.contains(holidays, DateUtils.format("Y/m/d",today))) return;
 
-    var result = _.compact(_.map(this.storage.getByDate(today), function(row) {
-      return _.isDate(row.signIn) && !_.isDate(row.signOut) ? row.user : undefined;
+    var wday = DateUtils.now().getDay();
+    var signedInUsers = _.compact(_.map(this.storage.getByDate(today), function(row) {
+      var signedIn = _.isDate(row.signIn);
+      var off = (row.signIn === '-') || _.contains(self.storage.getDayOff(row.user), wday);
+      return (signedIn || off) ? row.user : undefined;
     }));
-    var users = _.difference(this.storage.getUsers(), result);
+    var users = _.difference(this.storage.getUsers(), signedInUsers);
 
     if(!_.isEmpty(users)) {
       this.responder.template("出勤確認", users.sort());

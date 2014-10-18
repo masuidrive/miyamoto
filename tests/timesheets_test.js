@@ -46,10 +46,10 @@ QUnit.test( "Timesheets", function(assert) {
     },
 
     getByDate: function(date) {
-      dateStr = String(DateUtils.toDate(date));
-      return _.compact(_.map(this.data, function(row) {
-        return row[dateStr];
-      }));
+      var self = this;
+      return _.map(this.getUsers(), function(username) {
+        return self.get(username, date)
+      });
     },
 
     getDayOff: function(username) {
@@ -244,6 +244,14 @@ QUnit.test( "Timesheets", function(assert) {
     msgTest('test1', '__confirmSignIn__', []);
   });
   settings.values = {};
+
+  // 休日は出勤確認を行わない
+  mockDate(new Date(2014,0,4,0,0,0), function() {
+    storageTest({'test1': {}, 'test2': {}}, function(msgTest) {
+      msgTest('test1', '__confirmSignIn__', [['出勤確認', ['test2']]]);
+    });
+  });
+
 
   // 退勤確認
   storageTest({'test1': {}, 'test2': {}}, function(msgTest) {
