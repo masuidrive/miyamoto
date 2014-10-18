@@ -1,3 +1,6 @@
+/* Miyamoto-san https://github.com/masuidrive/miyamoto/ */
+/* (c) masuidrive 2014- License: MIT */
+/* ------------------- */
 // 日付関係の関数
 // DateUtils = loadDateUtils();
 
@@ -16,7 +19,7 @@ loadDateUtils = function () {
 
   // テキストから時間を抽出
   DateUtils.parseTime = function(str) {
-    str = (str || "").toLowerCase().replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(s) {
+    str = String(str || "").toLowerCase().replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(s) {
       return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
     });
     var reg = /((\d{1,2})\s*[:時]{1}\s*(\d{1,2})\s*(pm|)|(am|pm|午前|午後)\s*(\d{1,2})(\s*[:時]\s*(\d{1,2})|)|(\d{1,2})(\s*[:時]{1}\s*(\d{1,2})|)(am|pm)|(\d{1,2})\s*時)/;
@@ -64,7 +67,7 @@ loadDateUtils = function () {
 
   // テキストから日付を抽出
   DateUtils.parseDate = function(str) {
-    str = (str || "").toLowerCase().replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(s) {
+    str = String(str || "").toLowerCase().replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(s) {
       return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
     });
 
@@ -149,7 +152,7 @@ loadDateUtils = function () {
 
   // 曜日を解析
   DateUtils.parseWday = function(str) {
-    str = str.replace(/曜日/g, '');
+    str = String(str).replace(/曜日/g, '');
     var result = [];
     var wdays = [/(sun|日)/i, /(mon|月)/i, /(tue|火)/i, /(wed|水)/i, /(thu|木)/i, /(fri|金)/i, /(sat|土)/i];
     for(var i=0; i<wdays.length; ++i) {
@@ -248,7 +251,6 @@ if(typeof exports !== 'undefined') {
 }
 // Google Apps Script専用ユーティリティ
 
-
 // GASのログ出力をブラウザ互換にする
 if(typeof(console) == 'undefined' && typeof(Logger) != 'undefined') {
   console = {};
@@ -256,8 +258,23 @@ if(typeof(console) == 'undefined' && typeof(Logger) != 'undefined') {
     Logger.log(Array.prototype.slice.call(arguments).join(', '));
   }
 }
+
+// サーバに新しいバージョンが無いかチェックする
+checkUpdate = function(responder) {
+  if(typeof GASProperties === 'undefined') GASProperties = loadGASProperties();
+  var current_version = parseFloat(new GASProperties().get('version')) || 0;
+
+  // var response = UrlFetchApp.fetch("https://raw.githubusercontent.com/masuidrive/miyamoto/master/VERSION", {muteHttpExceptions: true});
+  var response = UrlFetchApp.fetch("https://raw.githubusercontent.com/masuidrive/miyamoto/feature/check_update/VERSION", {muteHttpExceptions: true});
+
+  if(response.getResponseCode() == 200) {
+    var latest_version = parseFloat(response.getContentText());
+    if(latest_version > 0 && latest_version > current_version) {
+      responder.send("最新版がリリースされています。 https://github.com/masuidrive/miyamoto/blob/master/UPDATE.md を実行してください。");
+    }
+  }
+};
 // KVS
-// でも今回は使ってないです
 
 loadGSProperties = function (exports) {
   var GSProperties = function(spreadsheet) {
@@ -492,13 +509,14 @@ loadGSTimesheets = function () {
   GSTimesheets.prototype.getByDate = function(date) {
     var self = this;
     return _.map(this.getUsers(), function(username) {
-      return self.get(username, date)
+      return self.get(username, date);
     });
   };
 
   // 休みの曜日を数字で返す
   GSTimesheets.prototype.getDayOff = function(username) {
-    return DateUtils.parseWday(sheet.getRange("B1").getValues());
+    var sheet = this._getSheet(username);
+    return DateUtils.parseWday(sheet.getRange("B2").getValue());
   };
 
   return GSTimesheets;
@@ -523,6 +541,7 @@ var init = function() {
   initLibraries();
 
   var global_settings = new GASProperties();
+
   var spreadsheetId = global_settings.get('spreadsheet');
   if(spreadsheetId) {
     var spreadsheet = SpreadsheetApp.openById(spreadsheetId);
@@ -531,7 +550,11 @@ var init = function() {
     var slack = new Slack(settings.get('Slack Incoming URL'), template, settings);
     var storage = new GSTimesheets(spreadsheet, settings);
     var timesheets = new Timesheets(storage, settings, slack);
-    return({receiver: slack, timesheets: timesheets});
+    return({
+      receiver: slack,
+      timesheets: timesheets,
+      storage: storage
+    });
   }
   return null;
 }
@@ -606,6 +629,16 @@ function setUp() {
       .create();
   }
 };
+
+/* バージョンアップ処理を行う */
+function migrate() {
+  var global_settings = new GASProperties();
+  
+  global_settings.set('version', "20141016.1");
+  console.log("バージョンアップが完了しました。");
+}
+
+
 
 /*
 function test1(e) {
@@ -843,6 +876,9 @@ loadTimesheets = function (exports) {
     if(!_.isEmpty(users)) {
       this.responder.template("出勤確認", users.sort());
     }
+
+    // バージョンチェックを行う
+    if(typeof checkUpdate == 'function') checkUpdate(this.responder);
   };
 
   // 退勤していない人にメッセージを送る

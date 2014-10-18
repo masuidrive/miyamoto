@@ -96,13 +96,14 @@ loadGSTimesheets = function () {
   GSTimesheets.prototype.getByDate = function(date) {
     var self = this;
     return _.map(this.getUsers(), function(username) {
-      return self.get(username, date)
+      return self.get(username, date);
     });
   };
 
   // 休みの曜日を数字で返す
   GSTimesheets.prototype.getDayOff = function(username) {
-    return DateUtils.parseWday(sheet.getRange("B1").getValues());
+    var sheet = this._getSheet(username);
+    return DateUtils.parseWday(sheet.getRange("B2").getValue());
   };
 
   return GSTimesheets;
