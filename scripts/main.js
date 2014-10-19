@@ -105,8 +105,9 @@ function setUp() {
 
 /* バージョンアップ処理を行う */
 function migrate() {
+  if(typeof GASProperties === 'undefined') GASProperties = loadGASProperties();
+
   var global_settings = new GASProperties();
-  
   global_settings.set('version', "::VERSION::");
   console.log("バージョンアップが完了しました。");
 }

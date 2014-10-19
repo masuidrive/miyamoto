@@ -632,9 +632,10 @@ function setUp() {
 
 /* バージョンアップ処理を行う */
 function migrate() {
+  if(typeof GASProperties === 'undefined') GASProperties = loadGASProperties();
+
   var global_settings = new GASProperties();
-  
-  global_settings.set('version', "20141016.1");
+  global_settings.set('version', "20141019.0");
   console.log("バージョンアップが完了しました。");
 }
 
