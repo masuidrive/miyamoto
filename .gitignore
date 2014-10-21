@@ -1,3 +1,4 @@
 .DS_Store
+.ruby-version
 gas-config.json
 /node_modules/
