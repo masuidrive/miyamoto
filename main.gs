@@ -467,10 +467,11 @@ loadGSTimesheets = function () {
   };
 
   GSTimesheets.prototype._getRowNo = function(username, date) {
+    if(!date) date = DateUtils.now();
     var rowNo = this.scheme.properties.length + 4;
     var startAt = DateUtils.parseDate(this.settings.get("開始日"));
-    var n = DateUtils.now(), s = new Date(startAt[0], startAt[1]-1, startAt[2], 0, 0, 0);
-    rowNo += parseInt((n.getTime()-n.getTimezoneOffset()*60*1000)/(1000*24*60*60)) - parseInt((s.getTime()-s.getTimezoneOffset()*60*1000)/(1000*24*60*60));
+    var s = new Date(startAt[0], startAt[1]-1, startAt[2], 0, 0, 0);
+    rowNo += parseInt((date.getTime()-date.getTimezoneOffset()*60*1000)/(1000*24*60*60)) - parseInt((s.getTime()-s.getTimezoneOffset()*60*1000)/(1000*24*60*60));
     return rowNo;
   };
 
@@ -635,7 +636,7 @@ function migrate() {
   if(typeof GASProperties === 'undefined') GASProperties = loadGASProperties();
 
   var global_settings = new GASProperties();
-  global_settings.set('version', "20141019.0");
+  global_settings.set('version', "20141021.0");
   console.log("バージョンアップが完了しました。");
 }
 
@@ -735,8 +736,8 @@ loadTimesheets = function (exports) {
       ['actionSignOut', /(バ[ー〜ァ]*イ|ば[ー〜ぁ]*い|おやすみ|お[つっ]ー|おつ|さらば|お先|お疲|帰|乙|bye|night|(c|see)\s*(u|you)|退勤|ごきげんよ|グ[ッ]?バイ)/],
       ['actionWhoIsOff', /(だれ|誰|who\s*is).*(休|やす(ま|み|む))/],
       ['actionWhoIsIn', /(だれ|誰|who\s*is)/],
-      ['actionCancelOff', /(休|やす(ま|み|む)).*(キャンセル|消|止|やめ|ません)/],
-      ['actionOff', /(休|やす(ま|み|む))/],
+      ['actionCancelOff', /(休|やす(ま|み|む)|休暇).*(キャンセル|消|止|やめ|ません)/],
+      ['actionOff', /(休|やす(ま|み|む)|休暇)/],
       ['actionSignIn', /(モ[ー〜]+ニン|も[ー〜]+にん|おっは|おは|へろ|はろ|ヘロ|ハロ|hi|hello|morning|出勤)/],
       ['confirmSignIn', /__confirmSignIn__/],
       ['confirmSignOut', /__confirmSignOut__/],
