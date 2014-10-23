@@ -137,6 +137,12 @@ Slackの#timesheetsチャンネルで「おはよう」と発言すると、先�
 
 また、このシートを編集不可で共有することで、勤務時間の確認などが簡単に行えるようになります。
 
+## ご協力ください
+
+みやもとさんを使ってる方は、ぜひ[みやもとさん調査](https://docs.google.com/forms/d/1Rnis14t2OImkwvfOc2L0B3GmvByxu6jVRoAcxJLY1tc/viewform?usp=send_form)にご協力ください。
+
+開発の参考にさせていただきます。
+
 
 ## メッセージの変更
 
