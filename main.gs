@@ -269,7 +269,7 @@ checkUpdate = function(responder) {
   if(response.getResponseCode() == 200) {
     var latest_version = parseFloat(response.getContentText());
     if(latest_version > 0 && latest_version > current_version) {
-      responder.send("最新版がリリースされています。\nhttps://github.com/masuidrive/miyamoto/blob/master/UPDATE.md を実行してください。");
+      responder.send("最新のみやもとさんの準備ができました！\nhttps://github.com/masuidrive/miyamoto/blob/master/UPDATE.md を読んでください。");
 
       var response = UrlFetchApp.fetch("https://raw.githubusercontent.com/masuidrive/miyamoto/master/HISTORY.md", {muteHttpExceptions: true});
       if(response.getResponseCode() == 200) {
@@ -641,7 +641,7 @@ function migrate() {
   if(typeof GASProperties === 'undefined') GASProperties = loadGASProperties();
 
   var global_settings = new GASProperties();
-  global_settings.set('version', "20141021.0");
+  global_settings.set('version', "20141027.0");
   console.log("バージョンアップが完了しました。");
 }
 
