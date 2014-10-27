@@ -641,7 +641,7 @@ function migrate() {
   if(typeof GASProperties === 'undefined') GASProperties = loadGASProperties();
 
   var global_settings = new GASProperties();
-  global_settings.set('version', "20141021.0");
+  global_settings.set('version', "20141027.0");
   console.log("バージョンアップが完了しました。");
 }
 
