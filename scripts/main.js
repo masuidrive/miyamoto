@@ -76,11 +76,16 @@ function setUp() {
     settings.setNote('無視するユーザ', '反応をしないユーザを,区切りで設定する。botは必ず指定してください。');
 
     // 休日を設定
-    var url = 'http://www.google.com/calendar/feeds/japanese@holiday.calendar.google.com/public/full-noattendees?alt=json&max-results=1000&start-min='+DateUtils.format("Y-m-d", DateUtils.now());
-    var data = JSON.parse(UrlFetchApp.fetch(url).getContentText());
-    var holidays = _.map(data.feed.entry, function(e) {
-      return e['gd$when'][0]['startTime'];
-    });
+    // apiKey が設定されている場合のみ自動追加
+    var holidays = [];
+    if (global_settings.get('apiKey')) {
+      var url = 'https://www.googleapis.com/calendar/v3/calendars/japanese@holiday.calendar.google.com/events?maxResults=1000&orderBy=startTime&singleEvents=true&timeMin='+DateUtils.format("Y-m-dT00:00:00Z", DateUtils.now())+'&key='+global_settings.get('apiKey');
+
+      var data = JSON.parse(UrlFetchApp.fetch(url).getContentText());
+      holidays = _.map(data.items, function(e) {
+        return e.start.date;
+      });
+    }
     settings.set('休日', holidays.join(', '));
     settings.setNote('休日', '日付を,区切りで。来年までは自動設定されているので、以後は適当に更新してください');
 
