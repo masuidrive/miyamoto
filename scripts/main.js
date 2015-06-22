@@ -60,7 +60,8 @@ function setUp() {
   if(!global_settings.get('spreadsheet')) {
 
     // タイムシートを作る
-    var spreadsheet = SpreadsheetApp.create("Slack Timesheets");
+    // sheetName が設定されている場合は設定名でタイムシート作成
+    var spreadsheet = (global_settings.get('sheetName')) ? global_settings.get('sheetName') : SpreadsheetApp.create("Slack Timesheets");
     var sheets = spreadsheet.getSheets();
     if(sheets.length == 1 && sheets[0].getLastRow() == 0) {
       sheets[0].setName('_設定');
@@ -79,7 +80,7 @@ function setUp() {
     // apiKey が設定されている場合のみ自動追加
     var holidays = [];
     if (global_settings.get('apiKey')) {
-      var url = 'https://www.googleapis.com/calendar/v3/calendars/japanese@holiday.calendar.google.com/events?maxResults=1000&orderBy=startTime&singleEvents=true&timeMin='+DateUtils.format("Y-m-dT00:00:00Z", DateUtils.now())+'&key='+global_settings.get('apiKey');
+      var url = 'https://www.googleapis.com/calendar/v3/calendars/japanese__ja@holiday.calendar.google.com/events?maxResults=1000&orderBy=startTime&singleEvents=true&timeMin='+DateUtils.format("Y-m-dT00:00:00Z", DateUtils.now())+'&key='+global_settings.get('apiKey');
 
       var data = JSON.parse(UrlFetchApp.fetch(url).getContentText());
       holidays = _.map(data.items, function(e) {

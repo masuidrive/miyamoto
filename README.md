@@ -74,6 +74,7 @@ Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheet
 
 - 権限の承認画面が出たら「承認する」を押してください。
 - Google Drive上に「Slack Timesheets」というSpreadsheetが生成されます。
+- Google Apps Scriptに戻り「ファイル」→「プロジェクトのプロパティ」を開き「スクリプトのプロパティ」に「sheetNameという名前でタイムシート名を設定することで、任意のSpreadsheetが作成できます。
 
 
 ### APIの公開
