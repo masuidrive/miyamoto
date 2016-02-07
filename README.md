@@ -99,7 +99,7 @@ Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheet
 ![slack13](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/slack13.png)
 
 
-### Slack Imcomingの設定
+### Slack Incomingの設定
 
 - 左のサイドバーの「Add New Integration」から「Incoming WebHooks」を選びます。
 - ページ最下部の「Choose a channel...」から「#timesheets」を選択して、「Add Incoming WebHook」を選択します。
@@ -117,7 +117,7 @@ Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheet
 
 - https://drive.google.com/ から「Slack Timesheets」を選びます。
 - メニューの「ファイル」→「スプレッドシートの設定」を開いて「タイムゾーン」を「東京」に合わせてください。
-- 下のタブから「_設定」を開き、「Slack Imcoming URL」がある「B1」に「Slackへの設定」でメモした「Your Unique Webhook URL」を入力します。
+- 下のタブから「_設定」を開き、「Slack Incoming URL」がある「B1」に「Slackへの設定」でメモした「Your Unique Webhook URL」を入力します。
 - このbotの名前を変更した場合は、「無視するユーザ」にその名前を加えてください。
 
 ![gs3](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gs3.png)
