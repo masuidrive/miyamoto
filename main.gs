@@ -609,7 +609,7 @@ function setUp() {
     settings.setNote('無視するユーザ', '反応をしないユーザを,区切りで設定する。botは必ず指定してください。');
 
     // 休日を設定
-    var url = 'http://www.google.com/calendar/feeds/japanese@holiday.calendar.google.com/public/full-noattendees?alt=json&max-results=1000&start-min='+DateUtils.format("Y-m-d", DateUtils.now());
+    var url = 'http://www.google.com/calendar/feeds/japanese__ja@holiday.calendar.google.com/public/basic?alt=json&max-results=1000&start-min='+DateUtils.format("Y-m-d", DateUtils.now());
     var data = JSON.parse(UrlFetchApp.fetch(url).getContentText());
     var holidays = _.map(data.feed.entry, function(e) {
       return e['gd$when'][0]['startTime'];
