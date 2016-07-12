@@ -75,11 +75,13 @@ function setUp() {
     settings.set('無視するユーザ', 'miyamoto,hubot,slackbot,incoming-webhook');
     settings.setNote('無視するユーザ', '反応をしないユーザを,区切りで設定する。botは必ず指定してください。');
 
-    // 休日を設定
-    var url = 'http://www.google.com/calendar/feeds/japanese@holiday.calendar.google.com/public/full-noattendees?alt=json&max-results=1000&start-min='+DateUtils.format("Y-m-d", DateUtils.now());
-    var data = JSON.parse(UrlFetchApp.fetch(url).getContentText());
-    var holidays = _.map(data.feed.entry, function(e) {
-      return e['gd$when'][0]['startTime'];
+    // 休日を設定 (iCal)
+    var calendarId = 'ja.japanese#holiday@group.v.calendar.google.com';
+    var calendar = CalendarApp.getCalendarById(calendarId);
+    var startDate = DateUtils.now();
+    var endDate = new Date(startDate.getFullYear() + 1, startDate.getMonth());
+    var holidays = _.map(calendar.getEvents(startDate, endDate), function(ev) {
+      return DateUtils.format("Y-m-d", ev.getAllDayStartDate());
     });
     settings.set('休日', holidays.join(', '));
     settings.setNote('休日', '日付を,区切りで。来年までは自動設定されているので、以後は適当に更新してください');
