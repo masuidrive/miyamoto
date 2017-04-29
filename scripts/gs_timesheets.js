@@ -13,6 +13,9 @@ loadGSTimesheets = function () {
         { name: '出勤' },
         { name: '退勤' },
         { name: 'ノート' },
+        { name: '休憩' },
+        { name: '就業時間' },
+        { name: '累計' }
       ],
       properties: [
         { name: 'DayOff', value: '土,日', comment: '← 月,火,水みたいに入力してください。アカウント停止のためには「全部」と入れてください。'},
@@ -43,6 +46,8 @@ loadGSTimesheets = function () {
           var rowNo = properties.length + 2;
           var cols = this.scheme.columns.map(function(c) { return c.name; });
           sheet.getRange("A"+rowNo+":"+String.fromCharCode(65 + cols.length - 1)+rowNo).setValues([cols]);
+          sheet.getRange("B5:B").setNumberFormat("H:MM");
+          sheet.getRange("C5:C").setNumberFormat("H:MM");
         }
         //this.on("newUser", username);
       }
@@ -55,7 +60,7 @@ loadGSTimesheets = function () {
 
   GSTimesheets.prototype._getRowNo = function(username, date) {
     if(!date) date = DateUtils.now();
-    var rowNo = this.scheme.properties.length + 4;
+    var rowNo = this.scheme.properties.length + 7;
     var startAt = DateUtils.parseDate(this.settings.get("開始日"));
     var s = new Date(startAt[0], startAt[1]-1, startAt[2], 0, 0, 0);
     rowNo += parseInt((date.getTime()-date.getTimezoneOffset()*60*1000)/(1000*24*60*60)) - parseInt((s.getTime()-s.getTimezoneOffset()*60*1000)/(1000*24*60*60));
@@ -69,17 +74,17 @@ loadGSTimesheets = function () {
       return v === '' ? undefined : v;
     });
 
-    return({ user: username, date: row[0], signIn: row[1], signOut: row[2], note: row[3] });
+    return({ user: username, date: row[0], signIn: row[1], signOut: row[2], note: row[3], kyuukei: row[4], workedHours: row[5], totalWorkedInMonth: row[6] });
   };
 
   GSTimesheets.prototype.set = function(username, date, params) {
     var row = this.get(username, date);
-    _.extend(row, _.pick(params, 'signIn', 'signOut', 'note'));
+    _.extend(row, _.pick(params, 'signIn', 'signOut', 'note', 'kyuukei', 'workedHours', 'totalWorkedInMonth'));
 
     var sheet = this._getSheet(username);
     var rowNo = this._getRowNo(username, date);
 
-    var data = [DateUtils.toDate(date), row.signIn, row.signOut, row.note].map(function(v) {
+    var data = [DateUtils.toDate(date), row.signIn, row.signOut, row.note, row.kyuukei, row.workedHours, row.totalWorkedInMonth].map(function(v) {
       return v == null ? '' : v;
     });
     sheet.getRange("A"+rowNo+":"+String.fromCharCode(65 + this.scheme.columns.length - 1)+rowNo).setValues([data]);
@@ -105,6 +110,43 @@ loadGSTimesheets = function () {
   GSTimesheets.prototype.getDayOff = function(username) {
     var sheet = this._getSheet(username);
     return DateUtils.parseWday(sheet.getRange("B2").getValue());
+  };
+
+  // １ヶ月分の集計
+  GSTimesheets.prototype.getRawValue = function (username, month, year) {
+    var matomeSheet = this._getSheet(username);
+    var lastRow = matomeSheet.getLastRow();
+    var matomeRange = "B5:B" + lastRow;
+    var matomeData = matomeSheet.getRange(matomeRange).getValues();
+    var firstDay = null;
+    var lastDay = null;
+
+    var actualMonth = month+1;
+    var helperStringInit = username+"さんが"+year+"年"+actualMonth+"月には";
+    var helperStringFin = "時間働きました";
+
+    for (var i = 0; i < matomeData.length; i++) {
+      if (matomeData[i][0].getMonth() == month && matomeData[i][0].getYear() == year) {
+        firstDay = i+5;
+        break;
+      }
+    }
+    for (var j = matomeData.length-1; j >= 0; j--) {
+      if (matomeData[j][0].getMonth() == month && matomeData[j][0].getYear() == year) {
+        lastDay = j+5;
+        break;
+      }
+    }
+    if (firstDay != null && lastDay != null) {
+      var hoursData = 0;
+      for (var n = firstDay; n <= lastDay; n++) {
+        hoursData += matomeSheet.getRange("F"+n).getValue();
+      }
+      return helperStringInit+hoursData+helperStringFin;
+    }
+    else {
+      return helperStringInit+"出勤しませんでした";
+    }
   };
 
   return GSTimesheets;
