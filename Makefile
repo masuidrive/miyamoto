@@ -1,5 +1,5 @@
 upload:
-	echo "/* Miyamoto-san https://github.com/masuidrive/miyamoto/ */" > main.gs
+	echo "/* Nodir https://github.com/nodirashidov/slack-timesheets/ */" > main.gs
 	echo "/* (c) masuidrive 2014- License: MIT */" >> main.gs
 	echo "/* ------------------- */" >> main.gs
 	cat scripts/*.js | sed -e "s/::VERSION::/`head VERSION`/g" >> main.gs

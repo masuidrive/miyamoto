@@ -146,9 +146,9 @@ QUnit.test( "Timesheets", function(assert) {
   // 休暇申請
   storageTest({}, function(msgTest) {
     msgTest('test1', 'お休み', []);
-    msgTest('test1', '今日はお休み', [['休暇', 'test1', "2014/01/02"]]);
-    msgTest('test1', '明日はお休み', [['休暇', 'test1', "2014/01/03"]]);
-    msgTest('test1', '12/3はお休みでした', [['休暇', 'test1', "2013/12/03"]]);
+    msgTest('test1', '昨日はやすみでした', [['休暇', 'test1', "2014/01/01"]]);
+    msgTest('test1', '今日はやすみでした', [['休暇', 'test1', "2014/01/02"]]);
+    msgTest('test1', '明日はやすみでした', [['休暇', 'test1', "2014/01/03"]]);
   });
 
   // 休暇取消
@@ -156,8 +156,8 @@ QUnit.test( "Timesheets", function(assert) {
   test1[nowDateStr()] = { user: 'test1', signIn: '-', singOut: '-' };
   storageTest({'test1': test1}, function(msgTest) {
     msgTest('test1', 'お休みしません', []);
-    msgTest('test1', '今日はお休みしません', [['休暇取消', 'test1', "2014/01/02"]]);
-    msgTest('test1', '明日はお休みしません', [['休暇取消', 'test1', "2014/01/03"]]);
+    msgTest('test1', '今日はやすみしません', [['休暇取消', 'test1', "2014/01/02"]]);
+    msgTest('test1', '明日はやすみしません', [['休暇取消', 'test1', "2014/01/03"]]);
   });
 
 
@@ -269,6 +269,13 @@ QUnit.test( "Timesheets", function(assert) {
   var test1 = {};
   test1[nowDateStr()] = { user: 'test1', signIn: new Date(2014,0,2,0,0,0), signOut: new Date(2014,0,2,12,0,0) };
   storageTest({'test1': test1, 'test2': {}}, function(msgTest) {
+    msgTest('test1', '__confirmSignOut__', []);
+  });
+
+  // なかぬけ
+  var test1 = {};
+  test1[nowDateStr()] = { user: 'test1', signIn: new Date(2014,0,2,0,0,0), signOut: new Date(2014,0,2,12,0,0) };
+  storageTest({'test1': test1}, function(msgTest) {
     msgTest('test1', '__confirmSignOut__', []);
   });
 

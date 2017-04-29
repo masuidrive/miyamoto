@@ -26,14 +26,17 @@ loadTimesheets = function (exports) {
 
     // コマンド集
     var commands = [
-      ['actionSignOut', /(バ[ー〜ァ]*イ|ば[ー〜ぁ]*い|おやすみ|お[つっ]ー|おつ|さらば|お先|お疲|帰|乙|bye|night|(c|see)\s*(u|you)|退勤|ごきげんよ|グ[ッ]?バイ)/],
-      ['actionWhoIsOff', /(だれ|誰|who\s*is).*(休|やす(ま|み|む))/],
-      ['actionWhoIsIn', /(だれ|誰|who\s*is)/],
-      ['actionCancelOff', /(休|やす(ま|み|む)|休暇).*(キャンセル|消|止|やめ|ません)/],
-      ['actionOff', /(休|やす(ま|み|む)|休暇)/],
-      ['actionSignIn', /(モ[ー〜]+ニン|も[ー〜]+にん|おっは|おは|へろ|はろ|ヘロ|ハロ|hi|hello|morning|出勤)/],
+      ['actionSignOut', /(バ[ー〜ァ]*イ|ば[ー〜ぁ]*い|おやすみ|お[つっ]ー|おつ|さらば|お先|お疲|帰|乙|退勤|ごきげんよ|グ[ッ]?バイ)/],
+      ['actionWhoIsOff', /(だれ|誰).*(休|やす(ま|み|む))/],
+      ['actionWhoIsIn', /(だれ|誰)/],
+      ['actionCancelOff', /(やす(ま|み|む)|休暇).*(キャンセル|消|止|やめ|ません)/],
+      ['actionOff', /(やす(ま|み|む)|休暇)/],
+      ['actionSignIn', /(モ[ー〜]+ニン|も[ー〜]+にん|おっは|おは|へろ|はろ|ヘロ|ハロ|出勤)/],
+      ['actionNoKyuukei', /(休憩なし)/],
+      ['actionNakanuke', /(なかぬけ)/],
+      ['actionMonthTotal', /(集計)/],
       ['confirmSignIn', /__confirmSignIn__/],
-      ['confirmSignOut', /__confirmSignOut__/],
+      ['confirmSignOut', /__confirmSignOut__/]
     ];
 
     // メッセージを元にメソッドを探す
@@ -45,14 +48,69 @@ loadTimesheets = function (exports) {
     if(command && this[command[0]]) {
       return this[command[0]](username, message);
     }
-  }
+  };
+
+  // calculatemonthtotal
+  Timesheets.prototype.actionMonthTotal = function(username, message) {
+    var userReg = /:([^\s]+)/;
+    var user = userReg.exec(message);
+    user = user[1];
+
+    var yearReg = /\d+(?=\/)/;
+    var year = yearReg.exec(message);
+    year = year[0];
+
+    var monthReg = /\d+$/;
+    var month = monthReg.exec(message);
+    month = month[0]-1;
+
+    var calculateMonth = this.storage.getRawValue(user, month, year);
+    this.responder.send(calculateMonth);
+  };
+
+  // なかぬけ
+  Timesheets.prototype.actionNakanuke = function(username, message) {
+    if(this.date) {
+      var dateObj = new Date(this.date[0], this.date[1]-1, this.date[2]);
+      var data = this.storage.get(username, dateObj);
+      var nakanukeTime = message.replace(/^\D+|\D+$/g, "");
+      // if hasnt done お疲れ yet, dont touch workedHours, else change workedHours
+      if(!data.signOut) {
+        this.storage.set(username, dateObj, {kyuukei: nakanukeTime});
+      }
+      else {
+        var workedHours = data.signOut - data.signIn;
+        workedHours = workedHours/ 1000 / 60 / 60;
+        this.storage.set(username, dateObj, {kyuukei: nakanukeTime, workedHours: rounder(workedHours)-nakanukeTime});
+      }
+    }
+    this.responder.template("なかぬけ", username, nakanukeTime);
+  };
+
+  // 休憩なし
+  Timesheets.prototype.actionNoKyuukei = function(username, message) {
+    if(this.date) {
+      var dateObj = new Date(this.date[0], this.date[1]-1, this.date[2]);
+      var data = this.storage.get(username, dateObj);
+      // if hasnt done お疲れ yet, dont touch workedHours, else change workedHours
+      if(!data.signOut) {
+        this.storage.set(username, dateObj, {kyuukei: '0'});
+      }
+      else {
+        var workedHours = data.signOut - data.signIn;
+        workedHours = workedHours/ 1000 / 60 / 60;
+        this.storage.set(username, dateObj, {kyuukei: '0', workedHours: rounder(workedHours)});
+      }
+      this.responder.template("休憩なし", username);
+    }
+  };
 
   // 出勤
   Timesheets.prototype.actionSignIn = function(username, message) {
     if(this.datetime) {
       var data = this.storage.get(username, this.datetime);
       if(!data.signIn || data.signIn === '-') {
-        this.storage.set(username, this.datetime, {signIn: this.datetime});
+        this.storage.set(username, this.datetime, {signIn: this.datetime, kyuukei: '1'});
         this.responder.template("出勤", username, this.datetimeStr);
       }
       else {
@@ -70,7 +128,9 @@ loadTimesheets = function (exports) {
     if(this.datetime) {
       var data = this.storage.get(username, this.datetime);
       if(!data.signOut || data.signOut === '-') {
-        this.storage.set(username, this.datetime, {signOut: this.datetime});
+        var workedHours = Math.abs(this.datetime - data.signIn);
+        workedHours = workedHours/ 1000 / 60 / 60;
+        this.storage.set(username, this.datetime, { signOut: this.datetime, workedHours: rounder(workedHours) - data.kyuukei });
         this.responder.template("退勤", username, this.datetimeStr);
       }
       else {
@@ -88,10 +148,10 @@ loadTimesheets = function (exports) {
     if(this.date) {
       var dateObj = new Date(this.date[0], this.date[1]-1, this.date[2]);
       var data = this.storage.get(username, dateObj);
-      if(!data.signOut || data.signOut === '-') {
-        this.storage.set(username, dateObj, {signIn: '-', signOut: '-', note: message});
+      // if(!data.signOut || data.signOut === '-') {　// day-off does not work if the row isnt empty, so i commented the if() out
+        this.storage.set(username, dateObj, {signIn: '-', signOut: '-', note: message, kyuukei: '-', workedHours: '-'});
         this.responder.template("休暇", username, DateUtils.format("Y/m/d", dateObj));
-      }
+      // }
     }
   };
 
@@ -101,7 +161,7 @@ loadTimesheets = function (exports) {
       var dateObj = new Date(this.date[0], this.date[1]-1, this.date[2]);
       var data = this.storage.get(username, dateObj);
       if(!data.signOut || data.signOut === '-') {
-        this.storage.set(username, dateObj, {signIn: null, signOut: null, note: message});
+        this.storage.set(username, dateObj, {signIn: null, signOut: null, note: message, kyuukei: null, workedHours: null});
         this.responder.template("休暇取消", username, DateUtils.format("Y/m/d", dateObj));
       }
     }
@@ -193,4 +253,21 @@ loadTimesheets = function (exports) {
 
 if(typeof exports !== 'undefined') {
   exports.Timesheets = loadTimesheets();
+}
+function rounder(num) {
+  var intPart = Math.floor(num);
+
+  var decimalPart = num - intPart;
+  if (decimalPart >= 0.75) {
+    return intPart+".75";
+  }
+  else if (decimalPart >= 0.5) {
+    return intPart+".5";
+  }
+  else if (decimalPart >= 0.25) {
+    return intPart+".25";
+  }
+  else {
+    return intPart;
+  }
 }

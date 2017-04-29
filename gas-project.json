@@ -1,9 +1,9 @@
 {
   "src": {
-    "fileId": "1tbHmnH3gwNSVyNwPtj5wv60I81uj8Nq_tsAMmUhsoY8l3mUZl-O-1CoM",
+    "fileId": "1FbW6eWrl67smmlgXojHWFeCrt60XXJ-obnAK_6XVXfZXI4XjU0CCiC_M",
     "files": {
       "main": {
-        "path": "./main.gs",
+        "path": "/Users/nodir/projects/slack-timesheets/main.gs",
         "type": "server_js"
       }
     }
