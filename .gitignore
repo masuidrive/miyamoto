@@ -2,3 +2,5 @@
 .ruby-version
 gas-config.json
 /node_modules/
+/.idea/*
+main.gs
