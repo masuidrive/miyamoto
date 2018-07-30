@@ -887,7 +887,8 @@ loadTimesheets = function (exports) {
     }
 
     // バージョンチェックを行う
-    if(typeof checkUpdate == 'function') checkUpdate(this.responder);
+    // どのみち更新止まっているのでバージョンチェックは削除
+    // if(typeof checkUpdate == 'function') checkUpdate(this.responder);
   };
 
   // 退勤していない人にメッセージを送る
