@@ -89,18 +89,19 @@ function setUp() {
     // メッセージ用のシートを作成
     new GSTemplate(spreadsheet);
 
-    // 毎日11時頃に出勤してるかチェックする
+    // 毎日12時頃に出勤してるかチェックする
     ScriptApp.newTrigger('confirmSignIn')
       .timeBased()
       .everyDays(1)
-      .atHour(11)
+      .atHour(12)
       .create();
 
-    // 毎日22時頃に退勤してるかチェックする
+    // 毎日23時45分頃に退勤してるかチェックする
     ScriptApp.newTrigger('confirmSignOut')
       .timeBased()
       .everyDays(1)
-      .atHour(22)
+      .atHour(23)
+      .nearMinute(45)
       .create();
   }
 };
