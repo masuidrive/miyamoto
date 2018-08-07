@@ -1,5 +1,3 @@
-'use strict';
-
 // 日付関係の関数
 // DateUtils = loadDateUtils();
 
@@ -199,8 +197,6 @@ loadDateUtils = function loadDateUtils() {
 if (typeof exports !== 'undefined') {
   exports.DateUtils = loadDateUtils();
 }
-'use strict';
-
 // 日付関係の関数
 // EventListener = loadEventListener();
 
@@ -234,8 +230,6 @@ loadEventListener = function loadEventListener() {
 if (typeof exports !== 'undefined') {
   exports.EventListener = loadEventListener();
 }
-'use strict';
-
 // KVS
 // でも今回は使ってないです
 
@@ -259,8 +253,6 @@ loadGASProperties = function loadGASProperties(exports) {
 if (typeof exports !== 'undefined') {
   exports.GASProperties = loadGASProperties();
 }
-'use strict';
-
 // Google Apps Script専用ユーティリティ
 
 // GASのログ出力をブラウザ互換にする
@@ -291,8 +283,6 @@ checkUpdate = function checkUpdate(responder) {
     }
   }
 };
-'use strict';
-
 // KVS
 
 loadGSProperties = function loadGSProperties(exports) {
@@ -354,8 +344,6 @@ loadGSProperties = function loadGSProperties(exports) {
 if (typeof exports !== 'undefined') {
   exports.GSProperties = loadGSProperties();
 }
-'use strict';
-
 // メッセージテンプレート
 // GSTemplate = loadGSTemplate();
 
@@ -411,8 +399,6 @@ loadGSTemplate = function loadGSTemplate() {
 if (typeof exports !== 'undefined') {
   exports.GSTemplate = loadGSTemplate();
 }
-'use strict';
-
 // 入力内容を解析して、メソッドを呼び出す
 // Timesheets = loadTimesheets();
 
@@ -522,8 +508,6 @@ loadGSTimesheets = function loadGSTimesheets() {
 if (typeof exports !== 'undefined') {
   exports.GSTimesheets = loadGSTimesheets();
 }
-'use strict';
-
 // 各モジュールの読み込み
 var initLibraries = function initLibraries() {
   if (typeof EventListener === 'undefined') EventListener = loadEventListener();
@@ -639,8 +623,6 @@ function test1(e) {
   miyamoto.receiver.receiveMessage({user_name:"masuidrive", text:"hello 8:00"});
 }
 */
-'use strict';
-
 // Slackのインタフェース
 // Slack = loadSlack();
 
@@ -698,8 +680,6 @@ loadSlack = function loadSlack() {
 if (typeof exports !== 'undefined') {
   exports.Slack = loadSlack();
 }
-"use strict";
-
 // 入力内容を解析して、メソッドを呼び出す
 // Timesheets = loadTimesheets();
 
@@ -884,8 +864,6 @@ loadTimesheets = function loadTimesheets(exports) {
 if (typeof exports !== 'undefined') {
   exports.Timesheets = loadTimesheets();
 }
-"use strict";
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 //     Underscore.js 1.7.0
@@ -1367,5 +1345,5 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   }, "function" == typeof define && define.amd && define("underscore", [], function () {
     return h;
   });
-}).call(undefined);
+}).call(this);
 //# sourceMappingURL=underscore-min.map
