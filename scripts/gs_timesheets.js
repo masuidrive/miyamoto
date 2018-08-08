@@ -45,7 +45,8 @@ loadGSTimesheets = function () {
     const new_ss = SpreadsheetApp.create(username);
     const prop_sheet = this._createOrOpenSheet(new_ss, '_設定');
     this._fillPropertiesSheet(prop_sheet);
-    const new_ss_file = DriveApp.getFileById(new_ss.getId());
+    const new_ss_file = DriveApp.getFileById(new_ss.getId())
+      .setSharing(DriveApp.Access.DOMAIN, DriveApp.Permission.VIEW);
     folder.addFile(new_ss_file);
     DriveApp.getRootFolder().removeFile(new_ss_file);
 
