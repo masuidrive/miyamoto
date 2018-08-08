@@ -478,14 +478,14 @@ loadGSTimesheets = function loadGSTimesheets() {
     //this.on("newUser", username);
   };
 
-  GSTimesheets.prototype._getMonthlySheet = function (username, dateArray) {
-    var sheetName = dateArray[0] + '\u5E74' + dateArray[1] + '\u6708';
+  GSTimesheets.prototype._getMonthlySheet = function (username, date) {
+    var sheetName = date.getFullYear() + '\u5E74' + date.getMonth() + '\u6708';
     var monthly_sheet = this._getSheet(username, sheetName);
-    this._fillMonthlySheet(monthly_sheet, dateArray);
+    this._fillMonthlySheet(monthly_sheet, date);
     return monthly_sheet;
   };
 
-  GSTimesheets.prototype._fillMonthlySheet = function (sheet, dateArray) {
+  GSTimesheets.prototype._fillMonthlySheet = function (sheet, date) {
     // 中身が無い場合は新規作成
     if (sheet.getLastRow() == 0) {
       // ヘッダの書き出し
@@ -494,12 +494,12 @@ loadGSTimesheets = function loadGSTimesheets() {
       });
       sheet.getRange(2, 1, 1, cols.length).setValues([cols]);
 
-      var year = dateArray[0];
-      var month = dateArray[1];
+      var year = date.getFullYear();
+      var month = date.getMonth();
       var rows = [];
 
-      for (var date = new Date(year, month, 1); date.getMonth() === month; date.setDate(date.getDate() + 1)) {
-        var columns = [date.toLocaleDateString()];
+      for (var _date = new Date(year, month, 1); _date.getMonth() === month; _date.setDate(_date.getDate() + 1)) {
+        var columns = [_date.toLocaleDateString()];
         for (var i = 1; i < this.scheme.columns.length; i++) {
           columns.push(this.scheme.columns[i].hasOwnProperty('value') ? this.scheme.columns[i].value : '');
         }
@@ -523,36 +523,31 @@ loadGSTimesheets = function loadGSTimesheets() {
     }
   };
 
-  GSTimesheets.prototype._getRowNo = function (username, date) {
-    if (!date) date = DateUtils.now();
-    var rowNo = this.scheme.properties.length + 4;
-    var startAt = DateUtils.parseDate(this.settings.get("開始日"));
-    var s = new Date(startAt[0], startAt[1] - 1, startAt[2], 0, 0, 0);
-    rowNo += parseInt((date.getTime() - date.getTimezoneOffset() * 60 * 1000) / (1000 * 24 * 60 * 60)) - parseInt((s.getTime() - s.getTimezoneOffset() * 60 * 1000) / (1000 * 24 * 60 * 60));
-    return rowNo;
+  GSTimesheets.prototype._getRowNo = function (date) {
+    return date.getDate() + 2;
   };
 
   GSTimesheets.prototype.get = function (username, date) {
-    var sheet = this._getSheet(username);
-    var rowNo = this._getRowNo(username, date);
-    var row = sheet.getRange("A" + rowNo + ":" + String.fromCharCode(65 + this.scheme.columns.length - 1) + rowNo).getValues()[0].map(function (v) {
+    var sheet = this._getMonthlySheet(username, date);
+    var rowNo = this._getRowNo(date);
+    var row = sheet.getRange(rowNo, 1, 1, this.scheme.columns.length).getValues()[0].map(function (v) {
       return v === '' ? undefined : v;
     });
 
-    return { user: username, date: row[0], signIn: row[1], signOut: row[2], note: row[3] };
+    return { user: username, date: row[0], signIn: row[1], signOut: row[2], rest: row[3], work: row[4], note: row[5], supervisor: row[6] };
   };
 
   GSTimesheets.prototype.set = function (username, date, params) {
     var row = this.get(username, date);
-    _.extend(row, _.pick(params, 'signIn', 'signOut', 'note'));
+    _.extend(row, _.pick(params, 'signIn', 'signOut', 'rest', 'work', 'note', 'supervisor'));
 
     var sheet = this._getSheet(username);
-    var rowNo = this._getRowNo(username, date);
+    var rowNo = this._getRowNo(date);
 
-    var data = [DateUtils.toDate(date), row.signIn, row.signOut, row.note].map(function (v) {
+    var data = [DateUtils.toDate(date), row.signIn, row.signOut, row.rest, row.work, row.note, row.supervisor].map(function (v) {
       return v == null ? '' : v;
     });
-    sheet.getRange("A" + rowNo + ":" + String.fromCharCode(65 + this.scheme.columns.length - 1) + rowNo).setValues([data]);
+    sheet.getRange(rowNo, 1, 1, this.scheme.columns.length).setValues([data]);
 
     return row;
   };
@@ -817,12 +812,12 @@ loadTimesheets = function loadTimesheets(exports) {
     if (this.datetime) {
       var data = this.storage.get(username, this.datetime);
       if (!data.signOut || data.signOut === '-') {
-        this.storage.set(username, this.datetime, { signOut: this.datetime });
+        this.storage.set(username, this.datetime, { signOut: this.datetime, rest: this.settings.get('休憩時間') });
         this.responder.template("退勤", username, this.datetimeStr);
       } else {
         // 更新の場合は時間を明示する必要がある
         if (!!this.time) {
-          this.storage.set(username, this.datetime, { signOut: this.datetime });
+          this.storage.set(username, this.datetime, { signOut: this.datetime, rest: this.settings.get('休憩時間') });
           this.responder.template("退勤更新", username, this.datetimeStr);
         }
       }

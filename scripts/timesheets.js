@@ -70,13 +70,13 @@ loadTimesheets = function (exports) {
     if(this.datetime) {
       var data = this.storage.get(username, this.datetime);
       if(!data.signOut || data.signOut === '-') {
-        this.storage.set(username, this.datetime, {signOut: this.datetime});
+        this.storage.set(username, this.datetime, { signOut: this.datetime, rest: this.settings.get('休憩時間') });
         this.responder.template("退勤", username, this.datetimeStr);
       }
       else {
         // 更新の場合は時間を明示する必要がある
         if(!!this.time) {
-          this.storage.set(username, this.datetime, {signOut: this.datetime});
+          this.storage.set(username, this.datetime, { signOut: this.datetime, rest: this.settings.get('休憩時間') });
           this.responder.template("退勤更新", username, this.datetimeStr);
         }
       }
