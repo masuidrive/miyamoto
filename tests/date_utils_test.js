@@ -39,3 +39,8 @@ QUnit.test( "DateUtils.parseWday", function(assert) {
   assert.ok(_.isEqual([], DateUtils.parseWday("あ")), "あ");
   assert.ok(_.isEqual([0,1], DateUtils.parseWday("月日")), "月日");
 });
+
+QUnit.test('DateUtils.round30', (assert) => {
+  assert.ok(_.isEqual(new Date(2018, 7, 8, 19, 30, 0), DateUtils.ceil30(new Date(2018, 7, 8, 19, 20, 0))), 'ceil30');
+  assert.ok(_.isEqual(new Date(2018, 7, 8, 19, 0, 0), DateUtils.floor30(new Date(2018, 7, 8, 19, 20, 0))), 'floor30');
+});

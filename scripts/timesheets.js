@@ -50,16 +50,18 @@ loadTimesheets = function (exports) {
   // 出勤
   Timesheets.prototype.actionSignIn = function(username, message) {
     if(this.datetime) {
-      var data = this.storage.get(username, this.datetime);
+      const signInTime = DateUtils.ceil30(this.datetime);
+      const signInTimeStr = DateUtils.format("Y/m/d H:M", signInTime);
+      var data = this.storage.get(username, signInTime);
       if(!data.signIn || data.signIn === '-') {
-        this.storage.set(username, this.datetime, {signIn: this.datetime});
-        this.responder.template("出勤", username, this.datetimeStr);
+        this.storage.set(username, signInTime, {signIn: signInTime});
+        this.responder.template("出勤", username, signInTimeStr);
       }
       else {
         // 更新の場合は時間を明示する必要がある
         if(!!this.time) {
-          this.storage.set(username, this.datetime, {signIn: this.datetime});
-          this.responder.template("出勤更新", username, this.datetimeStr);
+          this.storage.set(username, signInTime, {signIn: signInTime});
+          this.responder.template("出勤更新", username, signInTimeStr);
         }
       }
     }
@@ -68,18 +70,20 @@ loadTimesheets = function (exports) {
   // 退勤
   Timesheets.prototype.actionSignOut = function(username, message) {
     if(this.datetime) {
-      var data = this.storage.get(username, this.datetime);
+      const signOutTime = DateUtils.floor30(this.datetime);
+      const signOutTimeStr = DateUtils.format("Y/m/d H:M", signOutTime);
+      var data = this.storage.get(username, signOutTime);
       const rest = DateUtils.parseTime(this.settings.get('休憩時間'));
       const rest_string = `${rest[0]}:${rest[1]}:00`;
       if(!data.signOut || data.signOut === '-') {
-        this.storage.set(username, this.datetime, { signOut: this.datetime, rest: rest_string });
-        this.responder.template("退勤", username, this.datetimeStr);
+        this.storage.set(username, signOutTime, { signOut: signOutTime, rest: rest_string });
+        this.responder.template("退勤", username, signOutTimeStr);
       }
       else {
         // 更新の場合は時間を明示する必要がある
         if(!!this.time) {
-          this.storage.set(username, this.datetime, { signOut: this.datetime, rest: rest_string });
-          this.responder.template("退勤更新", username, this.datetimeStr);
+          this.storage.set(username, signOutTime, { signOut: signOutTime, rest: rest_string });
+          this.responder.template("退勤更新", username, signOutTimeStr);
         }
       }
     }
