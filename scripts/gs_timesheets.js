@@ -65,11 +65,19 @@ loadGSTimesheets = function () {
 
   GSTimesheets.prototype._createOrOpenSheet = function (spreadsheet, sheetName) {
     let sheet = spreadsheet.getSheetByName(sheetName);
+    if (sheet) {
+      return sheet;
+    }
+
+    sheet = spreadsheet.getSheetByName('シート1');
+    if (sheet) {
+      sheet.setName(sheetName);
+      return sheet;
+    }
+
+    sheet = spreadsheet.insertSheet(sheetName, spreadsheet.getNumSheets());
     if (!sheet) {
-      sheet = spreadsheet.insertSheet(sheetName, spreadsheet.getNumSheets());
-      if (!sheet) {
-        throw `エラー: ${sheetName}のシートが作れませんでした`;
-      }
+      throw `エラー: ${sheetName}のシートが作れませんでした`;
     }
     return sheet;
   };
@@ -145,20 +153,24 @@ loadGSTimesheets = function () {
       return v === '' ? undefined : v;
     });
 
-    return({ user: username, date: row[0], signIn: row[1], signOut: row[2], rest: row[3], work: row[4], note: row[5], supervisor: row[6] });
+    return({ user: username, date: row[0], signIn: row[1], signOut: row[2], rest: row[3], note: row[5], supervisor: row[6] });
   };
 
   GSTimesheets.prototype.set = function(username, date, params) {
     var row = this.get(username, date);
-    _.extend(row, _.pick(params, 'signIn', 'signOut', 'rest', 'work', 'note', 'supervisor'));
+    _.extend(row, _.pick(params, 'signIn', 'signOut', 'rest', 'note', 'supervisor'));
 
-    var sheet = this._getSheet(username);
+    var sheet = this._getMonthlySheet(username, date);
     var rowNo = this._getRowNo(date);
 
-    var data = [DateUtils.toDate(date), row.signIn, row.signOut, row.rest, row.work, row.note, row.supervisor].map(function(v) {
+    var data = [row.signIn, row.signOut, row.rest].map(function(v) {
       return v == null ? '' : v;
     });
-    sheet.getRange(rowNo, 1, 1, this.scheme.columns.length).setValues([data]);
+    sheet.getRange(rowNo, 2, 1, 3).setValues([data]);
+    data = [row.note, row.supervisor].map(function(v) {
+      return v == null ? '' : v;
+    });
+    sheet.getRange(rowNo, 6, 1, 2).setValues([data]);
 
     return row;
   };
