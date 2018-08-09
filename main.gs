@@ -191,12 +191,14 @@ loadDateUtils = function loadDateUtils() {
     return result;
   };
 
-  DateUtils.ceil30 = function (date) {
+  DateUtils.ceil30 = function (original_date) {
+    var date = new Date(original_date.getTime());
     date.setMinutes(Math.ceil(date.getMinutes() / 30) * 30);
     return date;
   };
 
-  DateUtils.floor30 = function (date) {
+  DateUtils.floor30 = function (original_date) {
+    var date = new Date(original_date.getTime());
     date.setMinutes(Math.floor(date.getMinutes() / 30) * 30);
     return date;
   };
@@ -422,7 +424,7 @@ loadGSTimesheets = function loadGSTimesheets() {
     this.employees_folder = DriveApp.searchFolders('"' + this.master_folder.getId() + '" in parents and title = "Employees"').next();
 
     this.scheme = {
-      columns: [{ name: '日付', format: 'yyyy"年"m"月"d"日（"ddd"）"', width: 150 }, { name: '出勤（打刻）', format: 'H:mm', width: 50 }, { name: '退勤（打刻）', format: 'H:mm', width: 50 }, { name: '出勤', format: 'H:mm', formula: '=CEILING(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0)', width: 50 }, { name: '退勤', format: 'H:mm', formula: '=FLOOR(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0)', width: 50 }, { name: '休憩時間', format: '[h]:mm', width: 50 }, { name: '勤務時間', format: '[h]:mm', formula: '=MAX(RC[-2]-RC[-3]-RC[-1],0)', width: 100 }, { name: 'メモ', width: 300 }, { name: '承認者', width: 100 }],
+      columns: [{ name: '日付', format: 'yyyy"年"m"月"d"日（"ddd"）"', width: 150 }, { name: '出勤（打刻）', format: 'H:mm', width: 50 }, { name: '退勤（打刻）', format: 'H:mm', width: 50 }, { name: '出勤', format: 'H:mm', formula: '=CEILING(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 }, { name: '退勤', format: 'H:mm', formula: '=FLOOR(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 }, { name: '休憩時間', format: '[h]:mm', width: 50 }, { name: '勤務時間', format: '[h]:mm', formula: '=MAX(RC[-2]-RC[-3]-RC[-1],0)', width: 100 }, { name: 'メモ', width: 300 }, { name: '承認者', width: 100 }],
       properties: [{ name: 'DayOff', value: '土,日', comment: '← 月,火,水みたいに入力してください。アカウント停止のためには「全部」と入れてください。' }]
     };
   };
@@ -823,7 +825,7 @@ loadTimesheets = function loadTimesheets(exports) {
     if (this.datetime) {
       var signInTime = DateUtils.ceil30(this.datetime);
       var signInTimeStr = DateUtils.format("Y/m/d H:M", signInTime);
-      var data = this.storage.get(username, signInTime);
+      var data = this.storage.get(username, this.datetime);
       if (!data.signIn || data.signIn === '-') {
         this.storage.set(username, this.datetime, { signIn: this.datetime });
         this.responder.template("出勤", username, signInTimeStr);

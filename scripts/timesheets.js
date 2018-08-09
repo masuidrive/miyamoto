@@ -52,7 +52,7 @@ loadTimesheets = function (exports) {
     if(this.datetime) {
       const signInTime = DateUtils.ceil30(this.datetime);
       const signInTimeStr = DateUtils.format("Y/m/d H:M", signInTime);
-      var data = this.storage.get(username, signInTime);
+      var data = this.storage.get(username, this.datetime);
       if(!data.signIn || data.signIn === '-') {
         this.storage.set(username, this.datetime, { signIn: this.datetime });
         this.responder.template("出勤", username, signInTimeStr);
