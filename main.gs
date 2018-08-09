@@ -424,7 +424,7 @@ loadGSTimesheets = function loadGSTimesheets() {
     this.employees_folder = DriveApp.searchFolders('"' + this.master_folder.getId() + '" in parents and title = "Employees"').next();
 
     this.scheme = {
-      columns: [{ name: '日付', format: 'yyyy"年"m"月"d"日（"ddd"）"', width: 150 }, { name: '出勤（打刻）', format: 'H:mm', width: 50 }, { name: '退勤（打刻）', format: 'H:mm', width: 50 }, { name: '出勤', format: 'H:mm', formula: '=CEILING(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 }, { name: '退勤', format: 'H:mm', formula: '=FLOOR(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 }, { name: '休憩時間', format: '[h]:mm', width: 50 }, { name: '勤務時間', format: '[h]:mm', formula: '=MAX(RC[-2]-RC[-3]-RC[-1],0)', width: 100 }, { name: 'メモ', width: 300 }, { name: '承認者', width: 100 }],
+      columns: [{ name: '日付', format: 'yyyy"年"m"月"d"日（"ddd"）"', width: 150 }, { name: '出勤（打刻）', format: 'H:mm', width: 100 }, { name: '退勤（打刻）', format: 'H:mm', width: 100 }, { name: '出勤', format: 'H:mm', formula: '=CEILING(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 }, { name: '退勤', format: 'H:mm', formula: '=FLOOR(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 }, { name: '休憩時間', format: '[h]:mm', width: 75 }, { name: '勤務時間', format: '[h]:mm', formula: '=MAX(RC[-2]-RC[-3]-RC[-1],0)', width: 75 }, { name: 'メモ', width: 300 }, { name: '承認者', width: 100 }],
       properties: [{ name: 'DayOff', value: '土,日', comment: '← 月,火,水みたいに入力してください。アカウント停止のためには「全部」と入れてください。' }]
     };
   };
@@ -540,7 +540,7 @@ loadGSTimesheets = function loadGSTimesheets() {
       }
 
       // 合計勤務時間
-      sheet.getRange('E1').setFormulaR1C1('=SUM(R[2]C:R[' + (2 + rows.length - 1) + ']C)').setNumberFormat('[h]:mm');
+      sheet.getRange('G1').setFormulaR1C1('=SUM(R[2]C:R[' + (2 + rows.length - 1) + ']C)').setNumberFormat('[h]:mm');
     }
   };
 
