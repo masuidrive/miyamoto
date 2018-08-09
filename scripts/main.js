@@ -76,6 +76,8 @@ function setUp() {
     settings.setNote('無視するユーザ', '反応をしないユーザを,区切りで設定する。botは必ず指定してください。');
     settings.set('休憩時間', '1:30:00');
     settings.setNote('休憩時間', '勤務時間からデフォルトで差し引かれる休憩時間を入力してください');
+    settings.set('管理者メールアドレス', 'taimei@arsaga.jp');
+    settings.setNote('管理者メールアドレス', 'ファイルのオーナーになるユーザーのメールアドレスを入力してください');
 
     // 休日を設定 (iCal)
     var calendarId = 'ja.japanese#holiday@group.v.calendar.google.com';

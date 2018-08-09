@@ -13,8 +13,8 @@ loadGSTimesheets = function () {
     this.scheme = {
       columns: [
         { name: '日付', format: 'yyyy"年"m"月"d"日（"ddd"）"', width: 150 },
-        { name: '出勤', format: 'H:m', width: 100 },
-        { name: '退勤', format: 'H:m', width: 100 },
+        { name: '出勤', format: 'H:mm', width: 100 },
+        { name: '退勤', format: 'H:mm', width: 100 },
         { name: '休憩時間', format: '[h]:mm', width: 100 },
         { name: '勤務時間', format: '[h]:mm', formula: '=RC[-2]-RC[-3]-RC[-1]', width: 100 },
         { name: 'メモ', width: 300 },
@@ -46,7 +46,11 @@ loadGSTimesheets = function () {
     const prop_sheet = this._createOrOpenSheet(new_ss, '_設定');
     this._fillPropertiesSheet(prop_sheet);
     const new_ss_file = DriveApp.getFileById(new_ss.getId())
-      .setSharing(DriveApp.Access.DOMAIN, DriveApp.Permission.VIEW);
+      .setOwner(this.settings.get('管理者メールアドレス'))
+      .setSharing(DriveApp.Access.ANYONE, DriveApp.Permission.NONE)
+      .setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.NONE)
+      .setSharing(DriveApp.Access.DOMAIN, DriveApp.Permission.VIEW)
+      .setSharing(DriveApp.Access.DOMAIN_WITH_LINK, DriveApp.Permission.VIEW);
     folder.addFile(new_ss_file);
     DriveApp.getRootFolder().removeFile(new_ss_file);
 

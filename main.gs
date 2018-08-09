@@ -422,7 +422,7 @@ loadGSTimesheets = function loadGSTimesheets() {
     this.employees_folder = DriveApp.searchFolders('"' + this.master_folder.getId() + '" in parents and title = "Employees"').next();
 
     this.scheme = {
-      columns: [{ name: '日付', format: 'yyyy"年"m"月"d"日（"ddd"）"', width: 150 }, { name: '出勤', format: 'H:m', width: 100 }, { name: '退勤', format: 'H:m', width: 100 }, { name: '休憩時間', format: '[h]:mm', width: 100 }, { name: '勤務時間', format: '[h]:mm', formula: '=RC[-2]-RC[-3]-RC[-1]', width: 100 }, { name: 'メモ', width: 300 }, { name: '承認者', width: 100 }],
+      columns: [{ name: '日付', format: 'yyyy"年"m"月"d"日（"ddd"）"', width: 150 }, { name: '出勤', format: 'H:mm', width: 100 }, { name: '退勤', format: 'H:mm', width: 100 }, { name: '休憩時間', format: '[h]:mm', width: 100 }, { name: '勤務時間', format: '[h]:mm', formula: '=RC[-2]-RC[-3]-RC[-1]', width: 100 }, { name: 'メモ', width: 300 }, { name: '承認者', width: 100 }],
       properties: [{ name: 'DayOff', value: '土,日', comment: '← 月,火,水みたいに入力してください。アカウント停止のためには「全部」と入れてください。' }]
     };
   };
@@ -446,7 +446,7 @@ loadGSTimesheets = function loadGSTimesheets() {
     var new_ss = SpreadsheetApp.create(username);
     var prop_sheet = this._createOrOpenSheet(new_ss, '_設定');
     this._fillPropertiesSheet(prop_sheet);
-    var new_ss_file = DriveApp.getFileById(new_ss.getId()).setSharing(DriveApp.Access.DOMAIN, DriveApp.Permission.VIEW);
+    var new_ss_file = DriveApp.getFileById(new_ss.getId()).setOwner(this.settings.get('管理者メールアドレス')).setSharing(DriveApp.Access.ANYONE, DriveApp.Permission.NONE).setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.NONE).setSharing(DriveApp.Access.DOMAIN, DriveApp.Permission.VIEW).setSharing(DriveApp.Access.DOMAIN_WITH_LINK, DriveApp.Permission.VIEW);
     folder.addFile(new_ss_file);
     DriveApp.getRootFolder().removeFile(new_ss_file);
 
@@ -677,6 +677,8 @@ function setUp() {
     settings.setNote('無視するユーザ', '反応をしないユーザを,区切りで設定する。botは必ず指定してください。');
     settings.set('休憩時間', '1:30:00');
     settings.setNote('休憩時間', '勤務時間からデフォルトで差し引かれる休憩時間を入力してください');
+    settings.set('管理者メールアドレス', 'taimei@arsaga.jp');
+    settings.setNote('管理者メールアドレス', 'ファイルのオーナーになるユーザーのメールアドレスを入力してください');
 
     // 休日を設定 (iCal)
     var calendarId = 'ja.japanese#holiday@group.v.calendar.google.com';
