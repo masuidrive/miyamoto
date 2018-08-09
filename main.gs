@@ -422,7 +422,7 @@ loadGSTimesheets = function loadGSTimesheets() {
     this.employees_folder = DriveApp.searchFolders('"' + this.master_folder.getId() + '" in parents and title = "Employees"').next();
 
     this.scheme = {
-      columns: [{ name: '日付', format: 'yyyy"年"m"月"d"日（"ddd"）"', width: 150 }, { name: '出勤', format: 'H:mm', width: 100 }, { name: '退勤', format: 'H:mm', width: 100 }, { name: '休憩時間', format: '[h]:mm', width: 100 }, { name: '勤務時間', format: '[h]:mm', formula: '=RC[-2]-RC[-3]-RC[-1]', width: 100 }, { name: 'メモ', width: 300 }, { name: '承認者', width: 100 }],
+      columns: [{ name: '日付', format: 'yyyy"年"m"月"d"日（"ddd"）"', width: 150 }, { name: '出勤（打刻）', format: 'H:mm', width: 50 }, { name: '退勤（打刻）', format: 'H:mm', width: 50 }, { name: '出勤', format: 'H:mm', formula: '=CEILING(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0)', width: 50 }, { name: '退勤', format: 'H:mm', formula: '=FLOOR(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0)', width: 50 }, { name: '休憩時間', format: '[h]:mm', width: 50 }, { name: '勤務時間', format: '[h]:mm', formula: '=MAX(RC[-2]-RC[-3]-RC[-1],0)', width: 100 }, { name: 'メモ', width: 300 }, { name: '承認者', width: 100 }],
       properties: [{ name: 'DayOff', value: '土,日', comment: '← 月,火,水みたいに入力してください。アカウント停止のためには「全部」と入れてください。' }]
     };
   };
@@ -537,6 +537,7 @@ loadGSTimesheets = function loadGSTimesheets() {
         }
       }
 
+      // 合計勤務時間
       sheet.getRange('E1').setFormulaR1C1('=SUM(R[2]C:R[' + (2 + rows.length - 1) + ']C)').setNumberFormat('[h]:mm');
     }
   };
@@ -552,7 +553,7 @@ loadGSTimesheets = function loadGSTimesheets() {
       return v === '' ? undefined : v;
     });
 
-    return { user: username, date: row[0], signIn: row[1], signOut: row[2], rest: row[3], note: row[5], supervisor: row[6] };
+    return { user: username, date: row[0], signIn: row[1], signOut: row[2], rest: row[5], note: row[7], supervisor: row[8] };
   };
 
   GSTimesheets.prototype.set = function (username, date, params) {
@@ -562,16 +563,17 @@ loadGSTimesheets = function loadGSTimesheets() {
     var sheet = this._getMonthlySheet(username, date);
     var rowNo = this._getRowNo(date);
 
-    var data = [row.signIn, row.signOut, row.rest].map(function (v) {
-      return v == null ? '' : v;
-    });
-    sheet.getRange(rowNo, 2, 1, 3).setValues([data]);
-    data = [row.note, row.supervisor].map(function (v) {
-      return v == null ? '' : v;
-    });
-    sheet.getRange(rowNo, 6, 1, 2).setValues([data]);
+    this._setValues(sheet.getRange(rowNo, 2, 1, 2), [row.signIn, row.signOut]);
+    this._setValues(sheet.getRange(rowNo, 6, 1, 1), [row.rest]);
+    this._setValues(sheet.getRange(rowNo, 8, 1, 2), [row.note, row.supervisor]);
 
     return row;
+  };
+
+  GSTimesheets.prototype._setValues = function (range, data) {
+    range.setValues([data.map(function (v) {
+      return v == null ? '' : v;
+    })]);
   };
 
   GSTimesheets.prototype.getUsers = function () {
@@ -677,6 +679,8 @@ function setUp() {
     settings.setNote('無視するユーザ', '反応をしないユーザを,区切りで設定する。botは必ず指定してください。');
     settings.set('休憩時間', '1:30:00');
     settings.setNote('休憩時間', '勤務時間からデフォルトで差し引かれる休憩時間を入力してください');
+    settings.set('丸め時間（分）', '30');
+    settings.setNote('丸め時間（分）', '出退勤時刻の丸め単位を分単位で入力してください');
     settings.set('管理者メールアドレス', 'taimei@arsaga.jp');
     settings.setNote('管理者メールアドレス', 'ファイルのオーナーになるユーザーのメールアドレスを入力してください');
 
@@ -821,12 +825,12 @@ loadTimesheets = function loadTimesheets(exports) {
       var signInTimeStr = DateUtils.format("Y/m/d H:M", signInTime);
       var data = this.storage.get(username, signInTime);
       if (!data.signIn || data.signIn === '-') {
-        this.storage.set(username, signInTime, { signIn: signInTime });
+        this.storage.set(username, this.datetime, { signIn: this.datetime });
         this.responder.template("出勤", username, signInTimeStr);
       } else {
         // 更新の場合は時間を明示する必要がある
         if (!!this.time) {
-          this.storage.set(username, signInTime, { signIn: signInTime });
+          this.storage.set(username, this.datetime, { signIn: this.datetime });
           this.responder.template("出勤更新", username, signInTimeStr);
         }
       }
@@ -838,16 +842,16 @@ loadTimesheets = function loadTimesheets(exports) {
     if (this.datetime) {
       var signOutTime = DateUtils.floor30(this.datetime);
       var signOutTimeStr = DateUtils.format("Y/m/d H:M", signOutTime);
-      var data = this.storage.get(username, signOutTime);
+      var data = this.storage.get(username, this.datetime);
       var rest = DateUtils.parseTime(this.settings.get('休憩時間'));
       var rest_string = rest[0] + ":" + rest[1] + ":00";
       if (!data.signOut || data.signOut === '-') {
-        this.storage.set(username, signOutTime, { signOut: signOutTime, rest: rest_string });
+        this.storage.set(username, this.datetime, { signOut: this.datetime, rest: rest_string });
         this.responder.template("退勤", username, signOutTimeStr);
       } else {
         // 更新の場合は時間を明示する必要がある
         if (!!this.time) {
-          this.storage.set(username, signOutTime, { signOut: signOutTime, rest: rest_string });
+          this.storage.set(username, this.datetime, { signOut: this.datetime, rest: rest_string });
           this.responder.template("退勤更新", username, signOutTimeStr);
         }
       }
