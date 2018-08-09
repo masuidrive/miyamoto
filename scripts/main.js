@@ -76,8 +76,8 @@ function setUp() {
     settings.setNote('無視するユーザ', '反応をしないユーザを,区切りで設定する。botは必ず指定してください。');
     settings.set('休憩時間', '1:30:00');
     settings.setNote('休憩時間', '勤務時間からデフォルトで差し引かれる休憩時間を入力してください');
-    settings.set('丸め時間（分）', '30');
-    settings.setNote('丸め時間（分）', '出退勤時刻の丸め単位を分単位で入力してください');
+    settings.set('丸め単位（分）', '30');
+    settings.setNote('丸め単位（分）', '出退勤時刻の丸め単位を分単位で入力してください');
     settings.set('管理者メールアドレス', 'taimei@arsaga.jp');
     settings.setNote('管理者メールアドレス', 'ファイルのオーナーになるユーザーのメールアドレスを入力してください');
 
