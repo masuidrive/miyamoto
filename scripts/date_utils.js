@@ -183,6 +183,18 @@ loadDateUtils = function () {
     return result;
   };
 
+  DateUtils.ceil30 = function (original_date) {
+    const date = new Date(original_date.getTime());
+    date.setMinutes(Math.ceil(date.getMinutes() / 30) * 30);
+    return date;
+  };
+
+  DateUtils.floor30 = function (original_date) {
+    const date = new Date(original_date.getTime());
+    date.setMinutes(Math.floor(date.getMinutes() / 30) * 30);
+    return date;
+  };
+
   return DateUtils;
 };
 
