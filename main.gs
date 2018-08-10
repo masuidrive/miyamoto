@@ -421,7 +421,8 @@ loadGSTimesheets = function loadGSTimesheets() {
     this._spreadsheets = {};
     this._sheets = {};
     this.master_folder = DriveApp.getFileById(spreadsheet.getId()).getParents().next();
-    this.employees_folder = DriveApp.searchFolders('"' + this.master_folder.getId() + '" in parents and title = "Employees"').next();
+    var employees_fi = DriveApp.searchFolders('"' + this.master_folder.getId() + '" in parents and title = "Employees"');
+    this.employees_folder = employees_fi.hasNext() ? employees_fi.next() : this.master_folder.createFolder('Employees').setOwner(this.settings.get('管理者メールアドレス')).setSharing(DriveApp.Access.ANYONE, DriveApp.Permission.NONE).setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.NONE).setSharing(DriveApp.Access.DOMAIN, DriveApp.Permission.VIEW).setSharing(DriveApp.Access.DOMAIN_WITH_LINK, DriveApp.Permission.VIEW);
 
     this.scheme = {
       columns: [{ name: '日付', format: 'yyyy"年"m"月"d"日（"ddd"）"', width: 150 }, { name: '出勤（打刻）', format: 'H:mm', width: 100 }, { name: '退勤（打刻）', format: 'H:mm', width: 100 }, { name: '出勤', format: 'H:mm', formula: '=CEILING(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 }, { name: '退勤', format: 'H:mm', formula: '=FLOOR(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 }, { name: '休憩時間', format: '[h]:mm', width: 75 }, { name: '勤務時間', format: '[h]:mm', formula: '=MAX(RC[-2]-RC[-3]-RC[-1],0)', width: 75 }, { name: 'メモ', width: 300 }, { name: '承認者', width: 100 }],

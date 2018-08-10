@@ -8,7 +8,15 @@ loadGSTimesheets = function () {
     this._spreadsheets = {};
     this._sheets = {};
     this.master_folder = DriveApp.getFileById(spreadsheet.getId()).getParents().next();
-    this.employees_folder = DriveApp.searchFolders(`"${this.master_folder.getId()}" in parents and title = "Employees"`).next();
+    const employees_fi = DriveApp.searchFolders(`"${this.master_folder.getId()}" in parents and title = "Employees"`);
+    this.employees_folder = employees_fi.hasNext()
+      ? employees_fi.next()
+      : this.master_folder.createFolder('Employees')
+        .setOwner(this.settings.get('管理者メールアドレス'))
+        .setSharing(DriveApp.Access.ANYONE, DriveApp.Permission.NONE)
+        .setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.NONE)
+        .setSharing(DriveApp.Access.DOMAIN, DriveApp.Permission.VIEW)
+        .setSharing(DriveApp.Access.DOMAIN_WITH_LINK, DriveApp.Permission.VIEW);
 
     this.scheme = {
       columns: [
