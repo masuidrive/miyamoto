@@ -499,7 +499,7 @@ loadGSTimesheets = function loadGSTimesheets() {
   };
 
   GSTimesheets.prototype._getMonthlySheet = function (username, date) {
-    var sheetName = date.getFullYear() + '\u5E74' + date.getMonth() + '\u6708';
+    var sheetName = date.getFullYear() + '\u5E74' + (date.getMonth() + 1) + '\u6708';
     var monthly_sheet = this._getSheet(username, sheetName);
     this._fillMonthlySheet(monthly_sheet, date);
     return monthly_sheet;

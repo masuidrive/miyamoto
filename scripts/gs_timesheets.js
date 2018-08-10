@@ -103,7 +103,7 @@ loadGSTimesheets = function () {
   };
 
   GSTimesheets.prototype._getMonthlySheet =  function (username, date) {
-    const sheetName = `${date.getFullYear()}年${date.getMonth()}月`;
+    const sheetName = `${date.getFullYear()}年${date.getMonth() + 1}月`;
     const monthly_sheet = this._getSheet(username, sheetName);
     this._fillMonthlySheet(monthly_sheet, date);
     return monthly_sheet;
