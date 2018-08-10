@@ -60,7 +60,7 @@ function setUp() {
   if(!global_settings.get('spreadsheet')) {
 
     // タイムシートを作る
-    var spreadsheet = SpreadsheetApp.create("Slack Timesheets");
+    const spreadsheet = createSpreadsheetInMasterFolder("Slack Timesheets");
     var sheets = spreadsheet.getSheets();
     if(sheets.length == 1 && sheets[0].getLastRow() == 0) {
       sheets[0].setName('_設定');
@@ -110,7 +110,24 @@ function setUp() {
       .nearMinute(45)
       .create();
   }
-};
+}
+
+function createSpreadsheetInMasterFolder(name) {
+  const spreadsheet = SpreadsheetApp.create(name);
+  moveSpreadsheetToFolder(spreadsheet, getMasterFolder());
+  return spreadsheet;
+}
+
+function getMasterFolder() {
+  const script_id = ScriptApp.getScriptId();
+  return DriveApp.getFileById(script_id).getParents().next();
+}
+
+function moveSpreadsheetToFolder(spreadsheet, folder) {
+  const ss_file = DriveApp.getFileById(spreadsheet.getId());
+  folder.addFile(ss_file);
+  DriveApp.getRootFolder().removeFile(ss_file);
+}
 
 /* バージョンアップ処理を行う */
 function migrate() {

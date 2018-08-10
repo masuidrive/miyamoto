@@ -665,7 +665,7 @@ function setUp() {
   if (!global_settings.get('spreadsheet')) {
 
     // タイムシートを作る
-    var spreadsheet = SpreadsheetApp.create("Slack Timesheets");
+    var spreadsheet = createSpreadsheetInMasterFolder("Slack Timesheets");
     var sheets = spreadsheet.getSheets();
     if (sheets.length == 1 && sheets[0].getLastRow() == 0) {
       sheets[0].setName('_設定');
@@ -706,7 +706,24 @@ function setUp() {
     // 毎日23時45分頃に退勤してるかチェックする
     ScriptApp.newTrigger('confirmSignOut').timeBased().everyDays(1).atHour(23).nearMinute(45).create();
   }
-};
+}
+
+function createSpreadsheetInMasterFolder(name) {
+  var spreadsheet = SpreadsheetApp.create(name);
+  moveSpreadsheetToFolder(spreadsheet, getMasterFolder());
+  return spreadsheet;
+}
+
+function getMasterFolder() {
+  var script_id = ScriptApp.getScriptId();
+  return DriveApp.getFileById(script_id).getParents().next();
+}
+
+function moveSpreadsheetToFolder(spreadsheet, folder) {
+  var ss_file = DriveApp.getFileById(spreadsheet.getId());
+  folder.addFile(ss_file);
+  DriveApp.getRootFolder().removeFile(ss_file);
+}
 
 /* バージョンアップ処理を行う */
 function migrate() {
