@@ -823,8 +823,7 @@ loadTimesheets = function loadTimesheets(exports) {
   // 出勤
   Timesheets.prototype.actionSignIn = function (username, message) {
     if (this.datetime) {
-      var signInTime = DateUtils.ceil30(this.datetime);
-      var signInTimeStr = DateUtils.format("Y/m/d H:M", signInTime);
+      var signInTimeStr = DateUtils.format("Y/m/d H:M", this.datetime);
       var data = this.storage.get(username, this.datetime);
       if (!data.signIn || data.signIn === '-') {
         this.storage.set(username, this.datetime, { signIn: this.datetime });
@@ -842,8 +841,7 @@ loadTimesheets = function loadTimesheets(exports) {
   // 退勤
   Timesheets.prototype.actionSignOut = function (username, message) {
     if (this.datetime) {
-      var signOutTime = DateUtils.floor30(this.datetime);
-      var signOutTimeStr = DateUtils.format("Y/m/d H:M", signOutTime);
+      var signOutTimeStr = DateUtils.format("Y/m/d H:M", this.datetime);
       var data = this.storage.get(username, this.datetime);
       var rest = DateUtils.parseTime(this.settings.get('休憩時間'));
       var rest_string = rest[0] + ":" + rest[1] + ":00";
