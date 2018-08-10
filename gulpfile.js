@@ -8,3 +8,7 @@ gulp.task('compile', () => {
     .pipe(concat('main.gs'))
     .pipe(gulp.dest('.'));
 });
+
+gulp.task('watch', () => {
+  gulp.watch('./scripts/*.js', ['compile']);
+});
