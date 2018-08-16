@@ -154,13 +154,13 @@ loadTimesheets = function (exports) {
   };
 
   Timesheets.prototype.getStatus = function (username, message) {
-    const datetime = DateUtils.toDate(DateUtils.now());
+    const datetime = DateUtils.now();
     const user_row = this.storage.get(username, datetime);
 
     let status = '';
-    if (user_row.signIn === '') {
+    if (user_row.signIn == null) {
       status = 'notSignedIn';
-    } else if (user_row.signOut === '') {
+    } else if (user_row.signOut == null) {
       status = 'signedIn';
     } else {
       status = 'signedOut';

@@ -26,8 +26,8 @@ loadDateUtils = function () {
 
       // 1時20, 2:30, 3:00pm
       if(matches[2] != null) {
-        hour = parseInt(matches[2]);
-        min = parseInt(matches[3] ? matches[3] : '0');
+        hour = parseInt(matches[2], 10);
+        min = parseInt(matches[3] ? matches[3] : '0', 10);
         if(_.contains(['pm'], matches[4])) {
           hour += 12;
         }
@@ -35,8 +35,8 @@ loadDateUtils = function () {
 
       // 午後1 午後2時30 pm3
       if(matches[5] != null) {
-        hour = parseInt(matches[6]);
-        min = parseInt(matches[8] ? matches[8] : '0');
+        hour = parseInt(matches[6], 10);
+        min = parseInt(matches[8] ? matches[8] : '0', 10);
         if(_.contains(['pm', '午後'], matches[5])) {
           hour += 12;
         }
@@ -44,8 +44,8 @@ loadDateUtils = function () {
 
       // 1am 2:30pm
       if(matches[9] != null) {
-        hour = parseInt(matches[9]);
-        min = parseInt(matches[11] ? matches[11] : '0');
+        hour = parseInt(matches[9], 10);
+        min = parseInt(matches[11] ? matches[11] : '0', 10);
         if(_.contains(['pm'], matches[12])) {
           hour += 12;
         }
@@ -53,7 +53,7 @@ loadDateUtils = function () {
 
       // 14時
       if(matches[13] != null) {
-        hour = parseInt(matches[13]);
+        hour = parseInt(matches[13], 10);
         min = 0;
       }
 
@@ -85,9 +85,9 @@ loadDateUtils = function () {
     var reg = /((\d{4})[-\/年]{1}|)(\d{1,2})[-\/月]{1}(\d{1,2})/;
     var matches = str.match(reg);
     if(matches) {
-      var year = parseInt(matches[2]);
-      var month = parseInt(matches[3]);
-      var day = parseInt(matches[4]);
+      var year = parseInt(matches[2], 10);
+      var month = parseInt(matches[3], 10);
+      var day = parseInt(matches[4], 10);
       if(_.isNaN(year) || year < 1970) {
         //
         if((now().getMonth() + 1) >= 11 && month <= 2) {
