@@ -21,9 +21,9 @@ const init = function (mode = 'slack') {
     const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
     const settings = new GSProperties(spreadsheet);
     const template = new GSTemplate(spreadsheet);
-    const slack = new Slack(settings.get('Slack Incoming URL'), template, settings);
-    const api = new Api(slack, template, settings);
     const storage = new GSTimesheets(spreadsheet, settings);
+    const slack = new Slack(settings.get('Slack Incoming URL'), template, settings);
+    const api = new Api(slack, storage, template, settings);
     const receiver = (mode === 'slack') ? slack : api;
     const timesheets = new Timesheets(storage, settings, receiver);
     return { receiver, timesheets, storage };

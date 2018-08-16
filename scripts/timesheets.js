@@ -46,6 +46,12 @@ loadTimesheets = function (exports) {
     if(command && this[command[0]]) {
       return this[command[0]](username, message);
     }
+    this.responder.result = {
+      code: 400,
+      message: 'Command not found.',
+      username,
+      datetime: this.datetime
+    };
   };
 
   // 出勤
@@ -62,6 +68,13 @@ loadTimesheets = function (exports) {
         if(!!this.time) {
           this.storage.set(username, this.datetime, { signIn: this.datetime });
           this.responder.template("出勤更新", username, signInTimeStr);
+        } else {
+          this.responder.result = {
+            code: 400,
+            message: 'Already signed in.',
+            username,
+            datetime: this.datetime
+          };
         }
       }
     }
@@ -83,6 +96,13 @@ loadTimesheets = function (exports) {
         if(!!this.time) {
           this.storage.set(username, this.datetime, { signOut: this.datetime, rest: rest_string });
           this.responder.template("退勤更新", username, signOutTimeStr);
+        } else {
+          this.responder.result = {
+            code: 400,
+            message: 'Already signed out.',
+            username,
+            datetime: this.datetime
+          };
         }
       }
     }
@@ -166,7 +186,7 @@ loadTimesheets = function (exports) {
       status = 'signedOut';
     }
 
-    this.responder.result = { status, username, datetime };
+    this.responder.result = { code: 200, status, username, datetime };
     return status;
   };
 

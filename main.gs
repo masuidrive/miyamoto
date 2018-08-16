@@ -2,9 +2,10 @@
 // Api = loadApi();
 
 loadApi = function loadApi() {
-  var Api = function Api(slack, template, settings) {
+  var Api = function Api(slack, storage, template, settings) {
     EventListener.apply(this);
     this.slack = slack;
+    this.storage = storage;
     this._template = template;
     this.settings = settings;
     this.result = {};
@@ -26,8 +27,17 @@ loadApi = function loadApi() {
     // -で始まるメッセージも無視
     if (command.match(/^-/)) return;
 
-    this.command = command;
-    this.fireEvent('receiveMessage', username, this._convertCommandToText(command));
+    if (this.storage.getUsers().includes(username)) {
+      this.command = command;
+      this.fireEvent('receiveMessage', username, this._convertCommandToText(command));
+    } else {
+      this.result = {
+        code: 404,
+        message: 'User not found.',
+        username: username,
+        datetime: new Date()
+      };
+    }
 
     return ContentService.createTextOutput(JSON.stringify(this.result)).setMimeType(ContentService.MimeType.JSON);
   };
@@ -53,6 +63,7 @@ loadApi = function loadApi() {
       case 'signIn':
       case 'signOut':
         this.result = {
+          code: 200,
           username: arguments[1],
           datetime: DateUtils.parseDateTime(arguments[2])
         };
@@ -650,10 +661,12 @@ loadGSTimesheets = function loadGSTimesheets() {
   };
 
   GSTimesheets.prototype.getUsers = function () {
-    return _.compact(_.map(this.spreadsheet.getSheets(), function (s) {
-      var name = s.getName();
-      return String(name).substr(0, 1) == '_' ? undefined : name;
-    }));
+    var employeesSpreadsheets = DriveApp.searchFiles('"' + this.employees_folder.getId() + '" in parents and mimeType = "' + MimeType.GOOGLE_SHEETS + '"');
+    var users = [];
+    while (employeesSpreadsheets.hasNext()) {
+      users.push(employeesSpreadsheets.next().getName());
+    }
+    return users;
   };
 
   GSTimesheets.prototype.getByDate = function (date) {
@@ -700,9 +713,9 @@ var init = function init() {
     var spreadsheet = SpreadsheetApp.openById(spreadsheetId);
     var settings = new GSProperties(spreadsheet);
     var template = new GSTemplate(spreadsheet);
-    var slack = new Slack(settings.get('Slack Incoming URL'), template, settings);
-    var api = new Api(slack, template, settings);
     var storage = new GSTimesheets(spreadsheet, settings);
+    var slack = new Slack(settings.get('Slack Incoming URL'), template, settings);
+    var api = new Api(slack, storage, template, settings);
     var receiver = mode === 'slack' ? slack : api;
     var timesheets = new Timesheets(storage, settings, receiver);
     return { receiver: receiver, timesheets: timesheets, storage: storage };
@@ -908,6 +921,12 @@ loadTimesheets = function loadTimesheets(exports) {
     if (command && this[command[0]]) {
       return this[command[0]](username, message);
     }
+    this.responder.result = {
+      code: 400,
+      message: 'Command not found.',
+      username: username,
+      datetime: this.datetime
+    };
   };
 
   // 出勤
@@ -923,6 +942,13 @@ loadTimesheets = function loadTimesheets(exports) {
         if (!!this.time) {
           this.storage.set(username, this.datetime, { signIn: this.datetime });
           this.responder.template("出勤更新", username, signInTimeStr);
+        } else {
+          this.responder.result = {
+            code: 400,
+            message: 'Already signed in.',
+            username: username,
+            datetime: this.datetime
+          };
         }
       }
     }
@@ -943,6 +969,13 @@ loadTimesheets = function loadTimesheets(exports) {
         if (!!this.time) {
           this.storage.set(username, this.datetime, { signOut: this.datetime, rest: rest_string });
           this.responder.template("退勤更新", username, signOutTimeStr);
+        } else {
+          this.responder.result = {
+            code: 400,
+            message: 'Already signed out.',
+            username: username,
+            datetime: this.datetime
+          };
         }
       }
     }
@@ -1024,7 +1057,7 @@ loadTimesheets = function loadTimesheets(exports) {
       status = 'signedOut';
     }
 
-    this.responder.result = { status: status, username: username, datetime: datetime };
+    this.responder.result = { code: 200, status: status, username: username, datetime: datetime };
     return status;
   };
 

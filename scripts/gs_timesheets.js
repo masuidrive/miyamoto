@@ -195,10 +195,14 @@ loadGSTimesheets = function () {
   };
 
   GSTimesheets.prototype.getUsers = function() {
-    return _.compact(_.map(this.spreadsheet.getSheets(), function(s) {
-      var name = s.getName();
-      return String(name).substr(0, 1) == '_' ? undefined : name;
-    }));
+    const employeesSpreadsheets = DriveApp.searchFiles(
+      `"${this.employees_folder.getId()}" in parents and mimeType = "${MimeType.GOOGLE_SHEETS}"`
+    );
+    const users = [];
+    while (employeesSpreadsheets.hasNext()) {
+      users.push(employeesSpreadsheets.next().getName());
+    }
+    return users;
   };
 
   GSTimesheets.prototype.getByDate = function(date) {

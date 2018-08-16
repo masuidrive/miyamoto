@@ -2,9 +2,10 @@
 // Api = loadApi();
 
 loadApi = function () {
-  var Api = function(slack, template, settings) {
+  var Api = function(slack, storage, template, settings) {
     EventListener.apply(this);
     this.slack = slack;
+    this.storage = storage;
     this._template = template;
     this.settings = settings;
     this.result = {};
@@ -26,8 +27,17 @@ loadApi = function () {
     // -で始まるメッセージも無視
     if(command.match(/^-/)) return;
 
-    this.command = command;
-    this.fireEvent('receiveMessage', username, this._convertCommandToText(command));
+    if (this.storage.getUsers().includes(username)) {
+      this.command = command;
+      this.fireEvent('receiveMessage', username, this._convertCommandToText(command));
+    } else {
+      this.result = {
+        code: 404,
+        message: 'User not found.',
+        username,
+        datetime: new Date()
+      }
+    }
 
     return ContentService.createTextOutput(JSON.stringify(this.result))
       .setMimeType(ContentService.MimeType.JSON);
@@ -54,6 +64,7 @@ loadApi = function () {
       case 'signIn':
       case 'signOut':
         this.result = {
+          code: 200,
           username: arguments[1],
           datetime: DateUtils.parseDateTime(arguments[2])
         };
