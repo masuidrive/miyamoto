@@ -45,7 +45,7 @@ loadTimesheets = function (exports) {
     if(command && this[command[0]]) {
       return this[command[0]](username, message);
     }
-  }
+  };
 
   // 出勤
   Timesheets.prototype.actionSignIn = function(username, message) {

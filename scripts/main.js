@@ -8,34 +8,34 @@ var initLibraries = function() {
   if(typeof GSTimesheets === 'undefined') GSTimesheets = loadGSTimesheets();
   if(typeof Timesheets === 'undefined') Timesheets = loadTimesheets();
   if(typeof Slack === 'undefined') Slack = loadSlack();
-}
+  if(typeof Api === 'undefined') Api = loadApi();
+};
 
-var init = function() {
+const init = function (mode = 'slack') {
   initLibraries();
 
-  var global_settings = new GASProperties();
+  const global_settings = new GASProperties();
 
-  var spreadsheetId = global_settings.get('spreadsheet');
-  if(spreadsheetId) {
-    var spreadsheet = SpreadsheetApp.openById(spreadsheetId);
-    var settings = new GSProperties(spreadsheet);
-    var template = new GSTemplate(spreadsheet);
-    var slack = new Slack(settings.get('Slack Incoming URL'), template, settings);
-    var storage = new GSTimesheets(spreadsheet, settings);
-    var timesheets = new Timesheets(storage, settings, slack);
-    return({
-      receiver: slack,
-      timesheets: timesheets,
-      storage: storage
-    });
+  const spreadsheetId = global_settings.get('spreadsheet');
+  if (spreadsheetId) {
+    const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+    const settings = new GSProperties(spreadsheet);
+    const template = new GSTemplate(spreadsheet);
+    const slack = new Slack(settings.get('Slack Incoming URL'), template, settings);
+    const api = new Api(slack, template, settings);
+    const storage = new GSTimesheets(spreadsheet, settings);
+    const receiver = (mode === 'slack') ? slack : api;
+    const timesheets = new Timesheets(storage, settings, receiver);
+    return { receiver, timesheets, storage };
   }
   return null;
-}
+};
 
 // SlackのOutgoingから来るメッセージ
 function doPost(e) {
-  var miyamoto = init();
-  miyamoto.receiver.receiveMessage(e.parameters);
+  const mode = (e.parameter.command == null) ? 'slack' : 'api';
+  const miyamoto = init(mode);
+  return miyamoto.receiver.receiveMessage(e.parameters);
 }
 
 // Time-based triggerで実行
