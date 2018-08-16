@@ -32,6 +32,7 @@ loadTimesheets = function (exports) {
       ['actionCancelOff', /(休|やす(ま|み|む)|休暇).*(キャンセル|消|止|やめ|ません)/i],
       ['actionOff', /(休|やす(ま|み|む)|休暇)/i],
       ['actionSignIn', /(モ[ー〜]+ニン|も[ー〜]+にん|おっは|おは|お早|へろ|はろ|ヘロ|ハロ|hi|hello|morning|出勤)/i],
+      ['getStatus', /__getStatus__/],
       ['confirmSignIn', /__confirmSignIn__/],
       ['confirmSignOut', /__confirmSignOut__/],
     ];
@@ -150,6 +151,23 @@ loadTimesheets = function (exports) {
     else {
       this.responder.template("休暇中", dateStr, result.sort().join(', '));
     }
+  };
+
+  Timesheets.prototype.getStatus = function (username, message) {
+    const datetime = DateUtils.toDate(DateUtils.now());
+    const user_row = this.storage.get(username, datetime);
+
+    let status = '';
+    if (user_row.signIn === '') {
+      status = 'notSignedIn';
+    } else if (user_row.signOut === '') {
+      status = 'signedIn';
+    } else {
+      status = 'signedOut';
+    }
+
+    this.responder.result = { status, username, datetime };
+    return status;
   };
 
   // 出勤していない人にメッセージを送る

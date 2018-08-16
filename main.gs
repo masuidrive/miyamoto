@@ -8,6 +8,7 @@ loadApi = function loadApi() {
     this._template = template;
     this.settings = settings;
     this.result = {};
+    this.command = '';
   };
 
   if (typeof EventListener === 'undefined') EventListener = loadEventListener();
@@ -25,6 +26,7 @@ loadApi = function loadApi() {
     // -で始まるメッセージも無視
     if (command.match(/^-/)) return;
 
+    this.command = command;
     this.fireEvent('receiveMessage', username, this._convertCommandToText(command));
 
     return ContentService.createTextOutput(JSON.stringify(this.result)).setMimeType(ContentService.MimeType.JSON);
@@ -36,35 +38,28 @@ loadApi = function loadApi() {
         return 'おはようございます';
       case 'signOut':
         return 'お疲れさまでした';
+      case 'getStatus':
+        return '__getStatus__';
       default:
         return '';
     }
   };
 
-  // メッセージ送信
-  Api.prototype.send = function (message, options) {
-    options = _.clone(options || {});
-    options["text"] = message;
-
-    var send_options = {
-      method: "post",
-      payload: { "payload": JSON.stringify(options) }
-    };
-
-    if (this.slack) {
-      UrlFetchApp.fetch(this.slack, send_options);
-    }
-
-    return message;
-  };
-
   // テンプレート付きでメッセージ送信
   Api.prototype.template = function () {
     this.slack.send(this._template.template.apply(this._template, arguments));
-    this.result = {
-      username: arguments[1],
-      datetime: arguments[2]
-    };
+
+    switch (this.command) {
+      case 'signIn':
+      case 'signOut':
+        this.result = {
+          username: arguments[1],
+          datetime: DateUtils.parseDateTime(arguments[2])
+        };
+        break;
+      default:
+        break;
+    }
   };
 
   return Api;
@@ -902,7 +897,7 @@ loadTimesheets = function loadTimesheets(exports) {
     }
 
     // コマンド集
-    var commands = [['actionSignOut', /(バ[ー〜ァ]*イ|ば[ー〜ぁ]*い|おやすみ|お[つっ]ー|おつ|さらば|お先|お疲|帰|乙|bye|night|(c|see)\s*(u|you)|退勤|ごきげんよ|グ[ッ]?バイ)/i], ['actionWhoIsOff', /(だれ|誰|who\s*is).*(休|やす(ま|み|む))/i], ['actionWhoIsIn', /(だれ|誰|who\s*is)/i], ['actionCancelOff', /(休|やす(ま|み|む)|休暇).*(キャンセル|消|止|やめ|ません)/i], ['actionOff', /(休|やす(ま|み|む)|休暇)/i], ['actionSignIn', /(モ[ー〜]+ニン|も[ー〜]+にん|おっは|おは|お早|へろ|はろ|ヘロ|ハロ|hi|hello|morning|出勤)/i], ['confirmSignIn', /__confirmSignIn__/], ['confirmSignOut', /__confirmSignOut__/]];
+    var commands = [['actionSignOut', /(バ[ー〜ァ]*イ|ば[ー〜ぁ]*い|おやすみ|お[つっ]ー|おつ|さらば|お先|お疲|帰|乙|bye|night|(c|see)\s*(u|you)|退勤|ごきげんよ|グ[ッ]?バイ)/i], ['actionWhoIsOff', /(だれ|誰|who\s*is).*(休|やす(ま|み|む))/i], ['actionWhoIsIn', /(だれ|誰|who\s*is)/i], ['actionCancelOff', /(休|やす(ま|み|む)|休暇).*(キャンセル|消|止|やめ|ません)/i], ['actionOff', /(休|やす(ま|み|む)|休暇)/i], ['actionSignIn', /(モ[ー〜]+ニン|も[ー〜]+にん|おっは|おは|お早|へろ|はろ|ヘロ|ハロ|hi|hello|morning|出勤)/i], ['getStatus', /__getStatus__/], ['confirmSignIn', /__confirmSignIn__/], ['confirmSignOut', /__confirmSignOut__/]];
 
     // メッセージを元にメソッドを探す
     var command = _.find(commands, function (ary) {
@@ -1014,6 +1009,23 @@ loadTimesheets = function loadTimesheets(exports) {
     } else {
       this.responder.template("休暇中", dateStr, result.sort().join(', '));
     }
+  };
+
+  Timesheets.prototype.getStatus = function (username, message) {
+    var datetime = DateUtils.toDate(DateUtils.now());
+    var user_row = this.storage.get(username, datetime);
+
+    var status = '';
+    if (user_row.signIn === '') {
+      status = 'notSignedIn';
+    } else if (user_row.signOut === '') {
+      status = 'signedIn';
+    } else {
+      status = 'signedOut';
+    }
+
+    this.responder.result = { status: status, username: username, datetime: datetime };
+    return status;
   };
 
   // 出勤していない人にメッセージを送る

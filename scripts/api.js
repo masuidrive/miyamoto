@@ -8,6 +8,7 @@ loadApi = function () {
     this._template = template;
     this.settings = settings;
     this.result = {};
+    this.command = '';
   };
 
   if(typeof EventListener === 'undefined') EventListener = loadEventListener();
@@ -25,6 +26,7 @@ loadApi = function () {
     // -で始まるメッセージも無視
     if(command.match(/^-/)) return;
 
+    this.command = command;
     this.fireEvent('receiveMessage', username, this._convertCommandToText(command));
 
     return ContentService.createTextOutput(JSON.stringify(this.result))
@@ -37,35 +39,28 @@ loadApi = function () {
         return 'おはようございます';
       case 'signOut':
         return 'お疲れさまでした';
+      case 'getStatus':
+        return '__getStatus__';
       default:
         return '';
     }
   };
 
-  // メッセージ送信
-  Api.prototype.send = function(message, options) {
-    options = _.clone(options || {});
-    options["text"] = message;
-
-    var send_options = {
-      method: "post",
-      payload: {"payload": JSON.stringify(options)}
-    };
-
-    if(this.slack) {
-      UrlFetchApp.fetch(this.slack, send_options);
-    }
-
-    return message;
-  };
-
   // テンプレート付きでメッセージ送信
   Api.prototype.template = function() {
     this.slack.send(this._template.template.apply(this._template, arguments));
-    this.result = {
-      username: arguments[1],
-      datetime: arguments[2]
-    };
+
+    switch (this.command) {
+      case 'signIn':
+      case 'signOut':
+        this.result = {
+          username: arguments[1],
+          datetime: DateUtils.parseDateTime(arguments[2])
+        };
+        break;
+      default:
+        break;
+    }
   };
 
   return Api;
