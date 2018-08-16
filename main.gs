@@ -27,7 +27,7 @@ loadApi = function loadApi() {
     // -で始まるメッセージも無視
     if (command.match(/^-/)) return;
 
-    if (this.storage.getUsers().includes(username)) {
+    if (this.storage.getUsers().indexOf(username) >= 0) {
       this.command = command;
       this.fireEvent('receiveMessage', username, this._convertCommandToText(command));
     } else {
