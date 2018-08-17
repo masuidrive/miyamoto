@@ -593,7 +593,7 @@ loadGSTimesheets = function loadGSTimesheets() {
     var props = sheet.getRange(1, 1, last_row, 1).getValues();
     props.forEach(function (row, index) {
       if (row[0] !== '勤務形態') return;
-      var cell = sheet.getRange(index, 2, 1, 1);
+      var cell = sheet.getRange(index + 1, 2, 1, 1);
       if (cell.getDataValidation() === null) {
         cell.setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(['正社員', '業務委託', 'アルバイト'], true).build());
       }
