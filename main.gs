@@ -10,6 +10,7 @@ loadApi = function loadApi() {
     this.settings = settings;
     this.result = {};
     this.command = '';
+    this.via = 'API';
   };
 
   if (typeof EventListener === 'undefined') EventListener = loadEventListener();
@@ -506,7 +507,7 @@ loadGSTimesheets = function loadGSTimesheets() {
     this.employees_folder = employees_fi.hasNext() ? employees_fi.next() : this.master_folder.createFolder('Employees').setOwner(this.settings.get('管理者メールアドレス')).setSharing(DriveApp.Access.ANYONE, DriveApp.Permission.NONE).setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.NONE).setSharing(DriveApp.Access.DOMAIN, DriveApp.Permission.VIEW).setSharing(DriveApp.Access.DOMAIN_WITH_LINK, DriveApp.Permission.VIEW);
 
     this.scheme = {
-      columns: [{ name: '日付', format: 'yyyy"年"m"月"d"日（"ddd"）"', width: 150 }, { name: '出勤（打刻）', format: 'H:mm', width: 100 }, { name: '退勤（打刻）', format: 'H:mm', width: 100 }, { name: '出勤', format: 'H:mm', formula: '=CEILING(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 }, { name: '退勤', format: 'H:mm', formula: '=FLOOR(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 }, { name: '休憩時間', format: '[h]:mm', width: 75 }, { name: '勤務時間', format: '[h]:mm', formula: '=IF(OR(ISBLANK(RC[-5]),ISBLANK(RC[-4]),ISBLANK(RC[-1])),0,MAX(RC[-2]-RC[-3]-RC[-1],0))', width: 75 }, { name: 'メモ', width: 300 }, { name: '承認者', width: 100 }],
+      columns: [{ name: '日付', format: 'yyyy"年"m"月"d"日（"ddd"）"', width: 150 }, { name: '出勤（打刻）', format: 'H:mm', width: 100 }, { name: '退勤（打刻）', format: 'H:mm', width: 100 }, { name: '出勤', format: 'H:mm', formula: '=CEILING(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 }, { name: '退勤', format: 'H:mm', formula: '=FLOOR(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 }, { name: '休憩時間', format: '[h]:mm', width: 75 }, { name: '勤務時間', format: '[h]:mm', formula: '=IF(OR(ISBLANK(RC[-5]),ISBLANK(RC[-4]),ISBLANK(RC[-1])),0,MAX(RC[-2]-RC[-3]-RC[-1],0))', width: 75 }, { name: 'メモ', width: 300 }, { name: '承認者', width: 100 }, { name: '経由', width: 50 }],
       properties: [{ name: 'DayOff', value: '土,日', comment: '← 月,火,水みたいに入力してください。アカウント停止のためには「全部」と入れてください。' }]
     };
   };
@@ -637,19 +638,19 @@ loadGSTimesheets = function loadGSTimesheets() {
       return v === '' ? undefined : v;
     });
 
-    return { user: username, date: row[0], signIn: row[1], signOut: row[2], rest: row[5], note: row[7], supervisor: row[8] };
+    return { user: username, date: row[0], signIn: row[1], signOut: row[2], rest: row[5], note: row[7], supervisor: row[8], via: row[9] };
   };
 
   GSTimesheets.prototype.set = function (username, date, params) {
     var row = this.get(username, date);
-    _.extend(row, _.pick(params, 'signIn', 'signOut', 'rest', 'note', 'supervisor'));
+    _.extend(row, _.pick(params, 'signIn', 'signOut', 'rest', 'note', 'supervisor', 'via'));
 
     var sheet = this._getMonthlySheet(username, date);
     var rowNo = this._getRowNo(date);
 
     this._setValues(sheet.getRange(rowNo, 2, 1, 2), [row.signIn, row.signOut]);
     this._setValues(sheet.getRange(rowNo, 6, 1, 1), [row.rest]);
-    this._setValues(sheet.getRange(rowNo, 8, 1, 2), [row.note, row.supervisor]);
+    this._setValues(sheet.getRange(rowNo, 8, 1, 3), [row.note, row.supervisor, row.via]);
 
     return row;
   };
@@ -835,6 +836,7 @@ loadSlack = function loadSlack() {
     this.incomingURL = incomingURL;
     this._template = template;
     this.settings = settings;
+    this.via = 'Slack';
   };
 
   if (typeof EventListener === 'undefined') EventListener = loadEventListener();
@@ -935,12 +937,12 @@ loadTimesheets = function loadTimesheets(exports) {
       var signInTimeStr = DateUtils.format("Y/m/d H:M", this.datetime);
       var data = this.storage.get(username, this.datetime);
       if (!data.signIn || data.signIn === '-') {
-        this.storage.set(username, this.datetime, { signIn: this.datetime });
+        this.storage.set(username, this.datetime, { signIn: this.datetime, via: this.responder.via });
         this.responder.template("出勤", username, signInTimeStr);
       } else {
         // 更新の場合は時間を明示する必要がある
         if (!!this.time) {
-          this.storage.set(username, this.datetime, { signIn: this.datetime });
+          this.storage.set(username, this.datetime, { signIn: this.datetime, via: this.responder.via });
           this.responder.template("出勤更新", username, signInTimeStr);
         } else {
           this.responder.result = {
@@ -962,12 +964,12 @@ loadTimesheets = function loadTimesheets(exports) {
       var rest = DateUtils.parseTime(this.settings.get('休憩時間'));
       var rest_string = rest[0] + ":" + rest[1] + ":00";
       if (!data.signOut || data.signOut === '-') {
-        this.storage.set(username, this.datetime, { signOut: this.datetime, rest: rest_string });
+        this.storage.set(username, this.datetime, { signOut: this.datetime, rest: rest_string, via: this.responder.via });
         this.responder.template("退勤", username, signOutTimeStr);
       } else {
         // 更新の場合は時間を明示する必要がある
         if (!!this.time) {
-          this.storage.set(username, this.datetime, { signOut: this.datetime, rest: rest_string });
+          this.storage.set(username, this.datetime, { signOut: this.datetime, rest: rest_string, via: this.responder.via });
           this.responder.template("退勤更新", username, signOutTimeStr);
         } else {
           this.responder.result = {
@@ -987,7 +989,7 @@ loadTimesheets = function loadTimesheets(exports) {
       var dateObj = new Date(this.date[0], this.date[1] - 1, this.date[2]);
       var data = this.storage.get(username, dateObj);
       if (!data.signOut || data.signOut === '-') {
-        this.storage.set(username, dateObj, { signIn: '-', signOut: '-', note: message });
+        this.storage.set(username, dateObj, { signIn: '-', signOut: '-', note: message, via: this.responder.via });
         this.responder.template("休暇", username, DateUtils.format("Y/m/d", dateObj));
       }
     }
@@ -999,7 +1001,7 @@ loadTimesheets = function loadTimesheets(exports) {
       var dateObj = new Date(this.date[0], this.date[1] - 1, this.date[2]);
       var data = this.storage.get(username, dateObj);
       if (!data.signOut || data.signOut === '-') {
-        this.storage.set(username, dateObj, { signIn: null, signOut: null, note: message });
+        this.storage.set(username, dateObj, { signIn: null, signOut: null, note: message, via: this.responder.via });
         this.responder.template("休暇取消", username, DateUtils.format("Y/m/d", dateObj));
       }
     }

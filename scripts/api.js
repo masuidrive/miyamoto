@@ -10,6 +10,7 @@ loadApi = function () {
     this.settings = settings;
     this.result = {};
     this.command = '';
+    this.via = 'API';
   };
 
   if(typeof EventListener === 'undefined') EventListener = loadEventListener();

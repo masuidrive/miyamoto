@@ -28,7 +28,8 @@ loadGSTimesheets = function () {
         { name: '休憩時間', format: '[h]:mm', width: 75 },
         { name: '勤務時間', format: '[h]:mm', formula: '=IF(OR(ISBLANK(RC[-5]),ISBLANK(RC[-4]),ISBLANK(RC[-1])),0,MAX(RC[-2]-RC[-3]-RC[-1],0))', width: 75 },
         { name: 'メモ', width: 300 },
-        { name: '承認者', width: 100 }
+        { name: '承認者', width: 100 },
+        { name: '経由', width: 50 }
       ],
       properties: [
         { name: 'DayOff', value: '土,日', comment: '← 月,火,水みたいに入力してください。アカウント停止のためには「全部」と入れてください。'},
@@ -169,19 +170,19 @@ loadGSTimesheets = function () {
       return v === '' ? undefined : v;
     });
 
-    return({ user: username, date: row[0], signIn: row[1], signOut: row[2], rest: row[5], note: row[7], supervisor: row[8] });
+    return { user: username, date: row[0], signIn: row[1], signOut: row[2], rest: row[5], note: row[7], supervisor: row[8], via: row[9] };
   };
 
   GSTimesheets.prototype.set = function(username, date, params) {
     var row = this.get(username, date);
-    _.extend(row, _.pick(params, 'signIn', 'signOut', 'rest', 'note', 'supervisor'));
+    _.extend(row, _.pick(params, 'signIn', 'signOut', 'rest', 'note', 'supervisor', 'via'));
 
     var sheet = this._getMonthlySheet(username, date);
     var rowNo = this._getRowNo(date);
 
     this._setValues(sheet.getRange(rowNo, 2, 1, 2), [row.signIn, row.signOut]);
     this._setValues(sheet.getRange(rowNo, 6, 1, 1), [row.rest]);
-    this._setValues(sheet.getRange(rowNo, 8, 1, 2), [row.note, row.supervisor]);
+    this._setValues(sheet.getRange(rowNo, 8, 1, 3), [row.note, row.supervisor, row.via]);
 
     return row;
   };

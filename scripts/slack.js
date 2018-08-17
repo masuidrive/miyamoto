@@ -7,6 +7,7 @@ loadSlack = function () {
     this.incomingURL = incomingURL;
     this._template = template;
     this.settings = settings;
+    this.via = 'Slack';
   };
 
   if(typeof EventListener === 'undefined') EventListener = loadEventListener();
