@@ -546,7 +546,7 @@ loadGSTimesheets = function loadGSTimesheets() {
   };
 
   GSTimesheets.prototype._getRowNo = function (date) {
-    return date.getDate() + 2;
+    return date.getDate() + (date.getHours() < 6 ? 1 : 2);
   };
 
   GSTimesheets.prototype.get = function (username, date) {
