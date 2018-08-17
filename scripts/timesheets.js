@@ -32,6 +32,7 @@ loadTimesheets = function (exports) {
       ['actionCancelOff', /(休|やす(ま|み|む)|休暇).*(キャンセル|消|止|やめ|ません)/i],
       ['actionOff', /(休|やす(ま|み|む)|休暇)/i],
       ['actionSignIn', /(モ[ー〜]+ニン|も[ー〜]+にん|おっは|おは|お早|へろ|はろ|ヘロ|ハロ|hi|hello|morning|出勤)/i],
+      ['getStatus', /__getStatus__/],
       ['confirmSignIn', /__confirmSignIn__/],
       ['confirmSignOut', /__confirmSignOut__/],
     ];
@@ -45,7 +46,13 @@ loadTimesheets = function (exports) {
     if(command && this[command[0]]) {
       return this[command[0]](username, message);
     }
-  }
+    this.responder.result = {
+      code: 400,
+      message: 'Command not found.',
+      username,
+      datetime: this.datetime
+    };
+  };
 
   // 出勤
   Timesheets.prototype.actionSignIn = function(username, message) {
@@ -61,6 +68,13 @@ loadTimesheets = function (exports) {
         if(!!this.time) {
           this.storage.set(username, this.datetime, { signIn: this.datetime });
           this.responder.template("出勤更新", username, signInTimeStr);
+        } else {
+          this.responder.result = {
+            code: 400,
+            message: 'Already signed in.',
+            username,
+            datetime: this.datetime
+          };
         }
       }
     }
@@ -82,6 +96,13 @@ loadTimesheets = function (exports) {
         if(!!this.time) {
           this.storage.set(username, this.datetime, { signOut: this.datetime, rest: rest_string });
           this.responder.template("退勤更新", username, signOutTimeStr);
+        } else {
+          this.responder.result = {
+            code: 400,
+            message: 'Already signed out.',
+            username,
+            datetime: this.datetime
+          };
         }
       }
     }
@@ -150,6 +171,23 @@ loadTimesheets = function (exports) {
     else {
       this.responder.template("休暇中", dateStr, result.sort().join(', '));
     }
+  };
+
+  Timesheets.prototype.getStatus = function (username, message) {
+    const datetime = DateUtils.now();
+    const user_row = this.storage.get(username, datetime);
+
+    let status = '';
+    if (user_row.signIn == null) {
+      status = 'notSignedIn';
+    } else if (user_row.signOut == null) {
+      status = 'signedIn';
+    } else {
+      status = 'signedOut';
+    }
+
+    this.responder.result = { code: 200, status, username, datetime };
+    return status;
   };
 
   // 出勤していない人にメッセージを送る

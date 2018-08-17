@@ -1,3 +1,84 @@
+// Apiのインタフェース
+// Api = loadApi();
+
+loadApi = function loadApi() {
+  var Api = function Api(slack, storage, template, settings) {
+    EventListener.apply(this);
+    this.slack = slack;
+    this.storage = storage;
+    this._template = template;
+    this.settings = settings;
+    this.result = {};
+    this.command = '';
+  };
+
+  if (typeof EventListener === 'undefined') EventListener = loadEventListener();
+  _.extend(Api.prototype, EventListener.prototype);
+
+  // 受信したメッセージをtimesheetsに投げる
+  Api.prototype.receiveMessage = function (message) {
+    var username = String(message.username);
+    var command = String(message.command);
+
+    // 特定のアカウントには反応しない
+    var ignore_users = (this.settings.get("無視するユーザ") || '').toLowerCase().replace(/^\s*(.*?)\s*$/, "$1").split(/\s*,\s*/);
+    if (_.contains(ignore_users, username.toLowerCase())) return;
+
+    // -で始まるメッセージも無視
+    if (command.match(/^-/)) return;
+
+    if (this.storage.getUsers().indexOf(username) >= 0) {
+      this.command = command;
+      this.fireEvent('receiveMessage', username, this._convertCommandToText(command));
+    } else {
+      this.result = {
+        code: 404,
+        message: 'User not found.',
+        username: username,
+        datetime: new Date()
+      };
+    }
+
+    return ContentService.createTextOutput(JSON.stringify(this.result)).setMimeType(ContentService.MimeType.JSON);
+  };
+
+  Api.prototype._convertCommandToText = function (command) {
+    switch (command) {
+      case 'signIn':
+        return 'おはようございます';
+      case 'signOut':
+        return 'お疲れさまでした';
+      case 'getStatus':
+        return '__getStatus__';
+      default:
+        return '';
+    }
+  };
+
+  // テンプレート付きでメッセージ送信
+  Api.prototype.template = function () {
+    this.slack.send(this._template.template.apply(this._template, arguments));
+
+    switch (this.command) {
+      case 'signIn':
+      case 'signOut':
+        this.result = {
+          code: 200,
+          username: arguments[1],
+          datetime: DateUtils.parseDateTime(arguments[2])
+        };
+        break;
+      default:
+        break;
+    }
+  };
+
+  return Api;
+};
+
+if (typeof exports !== 'undefined') {
+  exports.Api = loadApi();
+}
 // 日付関係の関数
 // DateUtils = loadDateUtils();
 
@@ -26,8 +107,8 @@ loadDateUtils = function loadDateUtils() {
 
       // 1時20, 2:30, 3:00pm
       if (matches[2] != null) {
-        hour = parseInt(matches[2]);
-        min = parseInt(matches[3] ? matches[3] : '0');
+        hour = parseInt(matches[2], 10);
+        min = parseInt(matches[3] ? matches[3] : '0', 10);
         if (_.contains(['pm'], matches[4])) {
           hour += 12;
         }
@@ -35,8 +116,8 @@ loadDateUtils = function loadDateUtils() {
 
       // 午後1 午後2時30 pm3
       if (matches[5] != null) {
-        hour = parseInt(matches[6]);
-        min = parseInt(matches[8] ? matches[8] : '0');
+        hour = parseInt(matches[6], 10);
+        min = parseInt(matches[8] ? matches[8] : '0', 10);
         if (_.contains(['pm', '午後'], matches[5])) {
           hour += 12;
         }
@@ -44,8 +125,8 @@ loadDateUtils = function loadDateUtils() {
 
       // 1am 2:30pm
       if (matches[9] != null) {
-        hour = parseInt(matches[9]);
-        min = parseInt(matches[11] ? matches[11] : '0');
+        hour = parseInt(matches[9], 10);
+        min = parseInt(matches[11] ? matches[11] : '0', 10);
         if (_.contains(['pm'], matches[12])) {
           hour += 12;
         }
@@ -53,7 +134,7 @@ loadDateUtils = function loadDateUtils() {
 
       // 14時
       if (matches[13] != null) {
-        hour = parseInt(matches[13]);
+        hour = parseInt(matches[13], 10);
         min = 0;
       }
 
@@ -85,9 +166,9 @@ loadDateUtils = function loadDateUtils() {
     var reg = /((\d{4})[-\/年]{1}|)(\d{1,2})[-\/月]{1}(\d{1,2})/;
     var matches = str.match(reg);
     if (matches) {
-      var year = parseInt(matches[2]);
-      var month = parseInt(matches[3]);
-      var day = parseInt(matches[4]);
+      var year = parseInt(matches[2], 10);
+      var month = parseInt(matches[3], 10);
+      var day = parseInt(matches[4], 10);
       if (_.isNaN(year) || year < 1970) {
         //
         if (now().getMonth() + 1 >= 11 && month <= 2) {
@@ -580,10 +661,12 @@ loadGSTimesheets = function loadGSTimesheets() {
   };
 
   GSTimesheets.prototype.getUsers = function () {
-    return _.compact(_.map(this.spreadsheet.getSheets(), function (s) {
-      var name = s.getName();
-      return String(name).substr(0, 1) == '_' ? undefined : name;
-    }));
+    var employeesSpreadsheets = DriveApp.searchFiles('"' + this.employees_folder.getId() + '" in parents and mimeType = "' + MimeType.GOOGLE_SHEETS + '"');
+    var users = [];
+    while (employeesSpreadsheets.hasNext()) {
+      users.push(employeesSpreadsheets.next().getName());
+    }
+    return users;
   };
 
   GSTimesheets.prototype.getByDate = function (date) {
@@ -615,9 +698,12 @@ var initLibraries = function initLibraries() {
   if (typeof GSTimesheets === 'undefined') GSTimesheets = loadGSTimesheets();
   if (typeof Timesheets === 'undefined') Timesheets = loadTimesheets();
   if (typeof Slack === 'undefined') Slack = loadSlack();
+  if (typeof Api === 'undefined') Api = loadApi();
 };
 
 var init = function init() {
+  var mode = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'slack';
+
   initLibraries();
 
   var global_settings = new GASProperties();
@@ -627,22 +713,21 @@ var init = function init() {
     var spreadsheet = SpreadsheetApp.openById(spreadsheetId);
     var settings = new GSProperties(spreadsheet);
     var template = new GSTemplate(spreadsheet);
-    var slack = new Slack(settings.get('Slack Incoming URL'), template, settings);
     var storage = new GSTimesheets(spreadsheet, settings);
-    var timesheets = new Timesheets(storage, settings, slack);
-    return {
-      receiver: slack,
-      timesheets: timesheets,
-      storage: storage
-    };
+    var slack = new Slack(settings.get('Slack Incoming URL'), template, settings);
+    var api = new Api(slack, storage, template, settings);
+    var receiver = mode === 'slack' ? slack : api;
+    var timesheets = new Timesheets(storage, settings, receiver);
+    return { receiver: receiver, timesheets: timesheets, storage: storage };
   }
   return null;
 };
 
 // SlackのOutgoingから来るメッセージ
 function doPost(e) {
-  var miyamoto = init();
-  miyamoto.receiver.receiveMessage(e.parameters);
+  var mode = e.parameter.command == null ? 'slack' : 'api';
+  var miyamoto = init(mode);
+  return miyamoto.receiver.receiveMessage(e.parameters);
 }
 
 // Time-based triggerで実行
@@ -825,7 +910,7 @@ loadTimesheets = function loadTimesheets(exports) {
     }
 
     // コマンド集
-    var commands = [['actionSignOut', /(バ[ー〜ァ]*イ|ば[ー〜ぁ]*い|おやすみ|お[つっ]ー|おつ|さらば|お先|お疲|帰|乙|bye|night|(c|see)\s*(u|you)|退勤|ごきげんよ|グ[ッ]?バイ)/i], ['actionWhoIsOff', /(だれ|誰|who\s*is).*(休|やす(ま|み|む))/i], ['actionWhoIsIn', /(だれ|誰|who\s*is)/i], ['actionCancelOff', /(休|やす(ま|み|む)|休暇).*(キャンセル|消|止|やめ|ません)/i], ['actionOff', /(休|やす(ま|み|む)|休暇)/i], ['actionSignIn', /(モ[ー〜]+ニン|も[ー〜]+にん|おっは|おは|お早|へろ|はろ|ヘロ|ハロ|hi|hello|morning|出勤)/i], ['confirmSignIn', /__confirmSignIn__/], ['confirmSignOut', /__confirmSignOut__/]];
+    var commands = [['actionSignOut', /(バ[ー〜ァ]*イ|ば[ー〜ぁ]*い|おやすみ|お[つっ]ー|おつ|さらば|お先|お疲|帰|乙|bye|night|(c|see)\s*(u|you)|退勤|ごきげんよ|グ[ッ]?バイ)/i], ['actionWhoIsOff', /(だれ|誰|who\s*is).*(休|やす(ま|み|む))/i], ['actionWhoIsIn', /(だれ|誰|who\s*is)/i], ['actionCancelOff', /(休|やす(ま|み|む)|休暇).*(キャンセル|消|止|やめ|ません)/i], ['actionOff', /(休|やす(ま|み|む)|休暇)/i], ['actionSignIn', /(モ[ー〜]+ニン|も[ー〜]+にん|おっは|おは|お早|へろ|はろ|ヘロ|ハロ|hi|hello|morning|出勤)/i], ['getStatus', /__getStatus__/], ['confirmSignIn', /__confirmSignIn__/], ['confirmSignOut', /__confirmSignOut__/]];
 
     // メッセージを元にメソッドを探す
     var command = _.find(commands, function (ary) {
@@ -836,6 +921,12 @@ loadTimesheets = function loadTimesheets(exports) {
     if (command && this[command[0]]) {
       return this[command[0]](username, message);
     }
+    this.responder.result = {
+      code: 400,
+      message: 'Command not found.',
+      username: username,
+      datetime: this.datetime
+    };
   };
 
   // 出勤
@@ -851,6 +942,13 @@ loadTimesheets = function loadTimesheets(exports) {
         if (!!this.time) {
           this.storage.set(username, this.datetime, { signIn: this.datetime });
           this.responder.template("出勤更新", username, signInTimeStr);
+        } else {
+          this.responder.result = {
+            code: 400,
+            message: 'Already signed in.',
+            username: username,
+            datetime: this.datetime
+          };
         }
       }
     }
@@ -871,6 +969,13 @@ loadTimesheets = function loadTimesheets(exports) {
         if (!!this.time) {
           this.storage.set(username, this.datetime, { signOut: this.datetime, rest: rest_string });
           this.responder.template("退勤更新", username, signOutTimeStr);
+        } else {
+          this.responder.result = {
+            code: 400,
+            message: 'Already signed out.',
+            username: username,
+            datetime: this.datetime
+          };
         }
       }
     }
@@ -937,6 +1042,23 @@ loadTimesheets = function loadTimesheets(exports) {
     } else {
       this.responder.template("休暇中", dateStr, result.sort().join(', '));
     }
+  };
+
+  Timesheets.prototype.getStatus = function (username, message) {
+    var datetime = DateUtils.now();
+    var user_row = this.storage.get(username, datetime);
+
+    var status = '';
+    if (user_row.signIn == null) {
+      status = 'notSignedIn';
+    } else if (user_row.signOut == null) {
+      status = 'signedIn';
+    } else {
+      status = 'signedOut';
+    }
+
+    this.responder.result = { code: 200, status: status, username: username, datetime: datetime };
+    return status;
   };
 
   // 出勤していない人にメッセージを送る
