@@ -26,7 +26,7 @@ loadGSTimesheets = function () {
         { name: '出勤', format: 'H:mm', formula: `=CEILING(RC[-2],TIME(0,${this.settings.get('丸め単位（分）')},0))`, width: 50 },
         { name: '退勤', format: 'H:mm', formula: `=FLOOR(RC[-2],TIME(0,${this.settings.get('丸め単位（分）')},0))`, width: 50 },
         { name: '休憩時間', format: '[h]:mm', width: 75 },
-        { name: '勤務時間', format: '[h]:mm', formula: '=MAX(RC[-2]-RC[-3]-RC[-1],0)', width: 75 },
+        { name: '勤務時間', format: '[h]:mm', formula: '=IF(OR(ISBLANK(RC[-5]),ISBLANK(RC[-4]),ISBLANK(RC[-1])),0,MAX(RC[-2]-RC[-3]-RC[-1],0))', width: 75 },
         { name: 'メモ', width: 300 },
         { name: '承認者', width: 100 }
       ],
@@ -159,7 +159,7 @@ loadGSTimesheets = function () {
   };
 
   GSTimesheets.prototype._getRowNo = function(date) {
-    return date.getDate() + 2;
+    return date.getDate() + (date.getHours() < 6 ? 1 : 2);
   };
 
   GSTimesheets.prototype.get = function(username, date) {
