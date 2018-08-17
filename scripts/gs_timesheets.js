@@ -33,6 +33,8 @@ loadGSTimesheets = function () {
       ],
       properties: [
         { name: 'DayOff', value: '土,日', comment: '← 月,火,水みたいに入力してください。アカウント停止のためには「全部」と入れてください。'},
+        { name: '入社日', value: (new Date).toLocaleDateString(), comment: 'デフォルトでシート作成日が入っているので，入社日に修正してください。' },
+        { name: '勤務形態', value: '正社員', comment: 'デフォルトで「正社員」が入っているので，正しいものを選択してください。編集権限がない場合はコーポレート部門に連絡してください。' }
       ]
     };
   };
@@ -56,6 +58,7 @@ loadGSTimesheets = function () {
     const new_ss = SpreadsheetApp.create(username);
     const prop_sheet = this._createOrOpenSheet(new_ss, '_設定');
     this._fillPropertiesSheet(prop_sheet);
+
     const new_ss_file = DriveApp.getFileById(new_ss.getId())
       .setOwner(this.settings.get('管理者メールアドレス'))
       .setSharing(DriveApp.Access.ANYONE, DriveApp.Permission.NONE)
@@ -99,16 +102,35 @@ loadGSTimesheets = function () {
   };
 
   GSTimesheets.prototype._fillPropertiesSheet = function (sheet) {
-    // 中身が無い場合は新規作成
-    if (sheet.getLastRow() == 0) {
-      // 設定部の書き出し
-      var properties = [["Properties count", this.scheme.properties.length, null]];
-      this.scheme.properties.forEach(function(s) {
-        properties.push([s.name, s.value, s.comment]);
-      });
-      sheet.getRange("A1:C"+(properties.length)).setValues(properties);
+    const last_row = sheet.getLastRow();
+    const current_props = (last_row === 0) ? [['']] : sheet.getRange(1, 1, last_row, 1).getValues();
+    const new_props = (last_row === 0) ? [["Properties count", this.scheme.properties.length, null]] : [];
+    this.scheme.properties.forEach(s => {
+      if (!_.find(current_props, v => v[0] === s.name)) {
+        new_props.push([s.name, s.value, s.comment]);
+      }
+    });
+    if (new_props.length > 0) {
+      sheet.getRange(last_row + 1, 1, new_props.length, 3).setValues(new_props);
     }
-    //this.on("newUser", username);
+
+    this._setDataValidationInPropertiesSheet(sheet);
+  };
+
+  GSTimesheets.prototype._setDataValidationInPropertiesSheet = function (sheet) {
+    const last_row = sheet.getLastRow();
+    if (last_row < 1) return;
+    const props = sheet.getRange(1, 1, last_row, 1).getValues();
+    props.forEach((row, index) => {
+      if (row[0] !== '勤務形態') return;
+      const cell = sheet.getRange(index, 2, 1, 1);
+      if (cell.getDataValidation() === null) {
+        cell.setDataValidation(SpreadsheetApp.newDataValidation()
+          .requireValueInList(['正社員', '業務委託', 'アルバイト'], true)
+          .build()
+        );
+      }
+    })
   };
 
   GSTimesheets.prototype._getMonthlySheet =  function (username, date) {

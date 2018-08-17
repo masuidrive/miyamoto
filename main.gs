@@ -508,7 +508,7 @@ loadGSTimesheets = function loadGSTimesheets() {
 
     this.scheme = {
       columns: [{ name: '日付', format: 'yyyy"年"m"月"d"日（"ddd"）"', width: 150 }, { name: '出勤（打刻）', format: 'H:mm', width: 100 }, { name: '退勤（打刻）', format: 'H:mm', width: 100 }, { name: '出勤', format: 'H:mm', formula: '=CEILING(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 }, { name: '退勤', format: 'H:mm', formula: '=FLOOR(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 }, { name: '休憩時間', format: '[h]:mm', width: 75 }, { name: '勤務時間', format: '[h]:mm', formula: '=IF(OR(ISBLANK(RC[-5]),ISBLANK(RC[-4]),ISBLANK(RC[-1])),0,MAX(RC[-2]-RC[-3]-RC[-1],0))', width: 75 }, { name: 'メモ', width: 300 }, { name: '承認者', width: 100 }, { name: '経由', width: 50 }],
-      properties: [{ name: 'DayOff', value: '土,日', comment: '← 月,火,水みたいに入力してください。アカウント停止のためには「全部」と入れてください。' }]
+      properties: [{ name: 'DayOff', value: '土,日', comment: '← 月,火,水みたいに入力してください。アカウント停止のためには「全部」と入れてください。' }, { name: '入社日', value: new Date().toLocaleDateString(), comment: 'デフォルトでシート作成日が入っているので，入社日に修正してください。' }, { name: '勤務形態', value: '正社員', comment: 'デフォルトで「正社員」が入っているので，正しいものを選択してください。編集権限がない場合はコーポレート部門に連絡してください。' }]
     };
   };
 
@@ -531,6 +531,7 @@ loadGSTimesheets = function loadGSTimesheets() {
     var new_ss = SpreadsheetApp.create(username);
     var prop_sheet = this._createOrOpenSheet(new_ss, '_設定');
     this._fillPropertiesSheet(prop_sheet);
+
     var new_ss_file = DriveApp.getFileById(new_ss.getId()).setOwner(this.settings.get('管理者メールアドレス')).setSharing(DriveApp.Access.ANYONE, DriveApp.Permission.NONE).setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.NONE).setSharing(DriveApp.Access.DOMAIN, DriveApp.Permission.VIEW).setSharing(DriveApp.Access.DOMAIN_WITH_LINK, DriveApp.Permission.VIEW);
     folder.addFile(new_ss_file);
     DriveApp.getRootFolder().removeFile(new_ss_file);
@@ -569,16 +570,34 @@ loadGSTimesheets = function loadGSTimesheets() {
   };
 
   GSTimesheets.prototype._fillPropertiesSheet = function (sheet) {
-    // 中身が無い場合は新規作成
-    if (sheet.getLastRow() == 0) {
-      // 設定部の書き出し
-      var properties = [["Properties count", this.scheme.properties.length, null]];
-      this.scheme.properties.forEach(function (s) {
-        properties.push([s.name, s.value, s.comment]);
-      });
-      sheet.getRange("A1:C" + properties.length).setValues(properties);
+    var last_row = sheet.getLastRow();
+    var current_props = last_row === 0 ? [['']] : sheet.getRange(1, 1, last_row, 1).getValues();
+    var new_props = last_row === 0 ? [["Properties count", this.scheme.properties.length, null]] : [];
+    this.scheme.properties.forEach(function (s) {
+      if (!_.find(current_props, function (v) {
+        return v[0] === s.name;
+      })) {
+        new_props.push([s.name, s.value, s.comment]);
+      }
+    });
+    if (new_props.length > 0) {
+      sheet.getRange(last_row + 1, 1, new_props.length, 3).setValues(new_props);
     }
-    //this.on("newUser", username);
+
+    this._setDataValidationInPropertiesSheet(sheet);
+  };
+
+  GSTimesheets.prototype._setDataValidationInPropertiesSheet = function (sheet) {
+    var last_row = sheet.getLastRow();
+    if (last_row < 1) return;
+    var props = sheet.getRange(1, 1, last_row, 1).getValues();
+    props.forEach(function (row, index) {
+      if (row[0] !== '勤務形態') return;
+      var cell = sheet.getRange(index, 2, 1, 1);
+      if (cell.getDataValidation() === null) {
+        cell.setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(['正社員', '業務委託', 'アルバイト'], true).build());
+      }
+    });
   };
 
   GSTimesheets.prototype._getMonthlySheet = function (username, date) {
