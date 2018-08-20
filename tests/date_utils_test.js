@@ -44,3 +44,11 @@ QUnit.test('DateUtils.round30', (assert) => {
   assert.ok(_.isEqual(new Date(2018, 7, 8, 19, 30, 0), DateUtils.ceil30(new Date(2018, 7, 8, 19, 20, 0))), 'ceil30');
   assert.ok(_.isEqual(new Date(2018, 7, 8, 19, 0, 0), DateUtils.floor30(new Date(2018, 7, 8, 19, 20, 0))), 'floor30');
 });
+
+QUnit.test('DateUtils.getLengthOfService', (assert) => {
+  assert.ok(_.isEqual(0, DateUtils.getLengthOfService(new Date(2018, 7, 20), new Date(2018, 7, 20))), 'Same date');
+  assert.ok(_.isEqual(0, DateUtils.getLengthOfService(new Date(2018, 7, 20), new Date(2019, 7, 19))), 'Last date of 1st year');
+  assert.ok(_.isEqual(1, DateUtils.getLengthOfService(new Date(2018, 7, 20), new Date(2019, 7, 20))), 'First date of 2nd year');
+  assert.ok(_.isEqual(1, DateUtils.getLengthOfService(new Date(2018, 7, 20), new Date(2020, 7, 19))), 'Last date of 2nd year');
+  assert.ok(_.isEqual(2, DateUtils.getLengthOfService(new Date(2018, 7, 20), new Date(2020, 7, 20))), 'First date of 3rd year');
+});

@@ -195,6 +195,14 @@ loadDateUtils = function () {
     return date;
   };
 
+  DateUtils.getLengthOfService = function (entrance, today) {
+    let year = 0;
+    while (entrance.setFullYear(entrance.getFullYear() + 1) <= today) {
+      year++;
+    }
+    return year;
+  };
+
   return DateUtils;
 };
 
