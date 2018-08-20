@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "gas-manager": "^0.6.0",
-    "qunit": "^2.6.1"
+    "qunit": "^0.7.5"
   },
   "devDependencies": {
     "babel": "^6.23.0",
