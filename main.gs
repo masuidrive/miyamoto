@@ -522,6 +522,12 @@ loadGSTimesheets = function loadGSTimesheets() {
       columns: [{ name: '日付', format: 'yyyy"年"m"月"d"日（"ddd"）"', width: 150 }, { name: '出勤（打刻）', format: 'H:mm', width: 100 }, { name: '退勤（打刻）', format: 'H:mm', width: 100 }, { name: '出勤', format: 'H:mm', formula: '=CEILING(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 }, { name: '退勤', format: 'H:mm', formula: '=FLOOR(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 }, { name: '休憩時間', format: '[h]:mm', width: 75 }, { name: '勤務時間', format: '[h]:mm', formula: '=IF(OR(ISBLANK(RC[-5]),ISBLANK(RC[-4]),ISBLANK(RC[-1])),0,MAX(RC[-2]-RC[-3]-RC[-1],0))', width: 75 }, { name: 'メモ', width: 300 }, { name: '承認者', width: 100 }, { name: '経由', width: 50 }],
       properties: [{ name: 'DayOff', value: '土,日', comment: '← 月,火,水みたいに入力してください。アカウント停止のためには「全部」と入れてください。' }, { name: '入社日', value: new Date().toLocaleDateString(), comment: 'デフォルトでシート作成日が入っているので，入社日に修正してください。' }, { name: '勤務形態', value: '正社員', comment: 'デフォルトで「正社員」が入っているので，正しいものを選択してください。編集権限がない場合はコーポレート部門に連絡してください。' }]
     };
+
+    this.seasons = [{ name: '夏季', duration: 3, judge: function judge(date) {
+        return [6, 7, 8].includes(date.getMonth());
+      } }, { name: '年末年始', duration: 3, judge: function judge(date) {
+        return [11, 0].includes(date.getMonth());
+      } }];
   };
 
   GSTimesheets.prototype._getSpreadsheet = function (username) {
@@ -544,6 +550,7 @@ loadGSTimesheets = function loadGSTimesheets() {
     var prop_sheet = this._createOrOpenSheet(new_ss, '_設定');
     this._fillPropertiesSheet(prop_sheet);
     this._createPaidHolidaysSheets(new_ss);
+    this._createSeasonalHolidaysSheets(new_ss, DateUtils.getFiscalYear(new Date()));
 
     var new_ss_file = DriveApp.getFileById(new_ss.getId()).setOwner(this.settings.get('管理者メールアドレス')).setSharing(DriveApp.Access.ANYONE, DriveApp.Permission.NONE).setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.NONE).setSharing(DriveApp.Access.DOMAIN, DriveApp.Permission.VIEW).setSharing(DriveApp.Access.DOMAIN_WITH_LINK, DriveApp.Permission.VIEW);
     folder.addFile(new_ss_file);
@@ -636,6 +643,25 @@ loadGSTimesheets = function loadGSTimesheets() {
     sheet.getRange('B6').setFormula('=B3+B4-B5');
     sheet.getRange('C3:C6').setFormulaR1C1('=INT(RC[-1]/8)');
     sheet.getRange('D3:D6').setFormulaR1C1('=MOD(RC[-2],8)');
+  };
+
+  GSTimesheets.prototype._createSeasonalHolidaysSheets = function (spreadsheet, year) {
+    var _this = this;
+
+    this.seasons.forEach(function (season) {
+      var sheet = _this._createOrOpenSheet(spreadsheet, year + '\u5E74\u5EA6' + season.name + '\u4F11\u6687');
+      _this._fillSeasonalHolidaysSheet(sheet, season);
+    });
+  };
+
+  GSTimesheets.prototype._fillSeasonalHolidaysSheet = function (sheet, season) {
+    if (sheet.getLastRow() > 0) return;
+
+    var rows = [['付与日数', season.duration], ['取得済み日数', ''], ['残り日数', ''], ['', ''], ['取得日', '']];
+    sheet.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
+
+    sheet.getRange('B2').setFormula('=COUNT(A6:A8)');
+    sheet.getRange('B3').setFormula('=B1-B2');
   };
 
   GSTimesheets.prototype._getMonthlySheet = function (username, date) {

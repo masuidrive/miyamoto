@@ -37,6 +37,11 @@ loadGSTimesheets = function () {
         { name: '勤務形態', value: '正社員', comment: 'デフォルトで「正社員」が入っているので，正しいものを選択してください。編集権限がない場合はコーポレート部門に連絡してください。' }
       ]
     };
+
+    this.seasons = [
+      { name: '夏季', duration: 3, judge: (date) => [6, 7, 8].includes(date.getMonth()) },
+      { name: '年末年始', duration: 3, judge: (date) => [11, 0].includes(date.getMonth()) }
+    ];
   };
 
   GSTimesheets.prototype._getSpreadsheet = function (username) {
@@ -59,6 +64,7 @@ loadGSTimesheets = function () {
     const prop_sheet = this._createOrOpenSheet(new_ss, '_設定');
     this._fillPropertiesSheet(prop_sheet);
     this._createPaidHolidaysSheets(new_ss);
+    this._createSeasonalHolidaysSheets(new_ss, DateUtils.getFiscalYear(new Date()));
 
     const new_ss_file = DriveApp.getFileById(new_ss.getId())
       .setOwner(this.settings.get('管理者メールアドレス'))
@@ -166,6 +172,29 @@ loadGSTimesheets = function () {
     sheet.getRange('B6').setFormula('=B3+B4-B5');
     sheet.getRange('C3:C6').setFormulaR1C1('=INT(RC[-1]/8)');
     sheet.getRange('D3:D6').setFormulaR1C1('=MOD(RC[-2],8)');
+  };
+
+  GSTimesheets.prototype._createSeasonalHolidaysSheets = function (spreadsheet, year) {
+    this.seasons.forEach((season) => {
+      const sheet = this._createOrOpenSheet(spreadsheet, `${year}年度${season.name}休暇`);
+      this._fillSeasonalHolidaysSheet(sheet, season);
+    });
+  };
+
+  GSTimesheets.prototype._fillSeasonalHolidaysSheet = function (sheet, season) {
+    if (sheet.getLastRow() > 0) return;
+
+    const rows = [
+      ['付与日数', season.duration],
+      ['取得済み日数', ''],
+      ['残り日数', ''],
+      ['', ''],
+      ['取得日', '']
+    ];
+    sheet.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
+
+    sheet.getRange('B2').setFormula('=COUNT(A6:A8)');
+    sheet.getRange('B3').setFormula('=B1-B2');
   };
 
   GSTimesheets.prototype._getMonthlySheet =  function (username, date) {
