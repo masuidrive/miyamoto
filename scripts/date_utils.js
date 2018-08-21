@@ -82,7 +82,7 @@ loadDateUtils = function () {
       return [yesterday.getFullYear(), yesterday.getMonth()+1, yesterday.getDate()]
     }
 
-    var reg = /((\d{4})[-\/年]{1}|)(\d{1,2})[-\/月]{1}(\d{1,2})/;
+    var reg = /((\d{4})[-\/年]{1}|)(1[0-2]|0?[1-9])[-\/月]{1}([12][0-9]|3[01]|0?[1-9])/;
     var matches = str.match(reg);
     if(matches) {
       var year = parseInt(matches[2], 10);
