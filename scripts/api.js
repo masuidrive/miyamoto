@@ -63,9 +63,17 @@ loadApi = function () {
 
     switch (this.command) {
       case 'signIn':
+        this.result = {
+          code: 200,
+          status: 'signedIn',
+          username: arguments[1],
+          datetime: DateUtils.parseDateTime(arguments[2])
+        };
+        break;
       case 'signOut':
         this.result = {
           code: 200,
+          status: 'signedOut',
           username: arguments[1],
           datetime: DateUtils.parseDateTime(arguments[2])
         };

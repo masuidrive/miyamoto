@@ -62,9 +62,17 @@ loadApi = function loadApi() {
 
     switch (this.command) {
       case 'signIn':
+        this.result = {
+          code: 200,
+          status: 'signedIn',
+          username: arguments[1],
+          datetime: DateUtils.parseDateTime(arguments[2])
+        };
+        break;
       case 'signOut':
         this.result = {
           code: 200,
+          status: 'signedOut',
           username: arguments[1],
           datetime: DateUtils.parseDateTime(arguments[2])
         };
@@ -1031,6 +1039,7 @@ loadTimesheets = function loadTimesheets(exports) {
           this.responder.result = {
             code: 400,
             message: 'Already signed in.',
+            status: 'signedIn',
             username: username,
             datetime: this.datetime
           };
@@ -1058,6 +1067,7 @@ loadTimesheets = function loadTimesheets(exports) {
           this.responder.result = {
             code: 400,
             message: 'Already signed out.',
+            status: 'signedOut',
             username: username,
             datetime: this.datetime
           };

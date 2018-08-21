@@ -72,6 +72,7 @@ Make user sign in.
 |---|---|---|
 |code|integer|Status code. <br> `200`: OK, `4xx`: failure.|
 |message|string|Optional. Error message.|
+|status|string|User's status.<br>`notSignedIn` (未出勤), `signedIn` (出勤済み), `signedOut` (退勤済み).|
 |username|string|Same as the query.|
 |datetime|DateTime|Datetime of signing in. <br> ISO 8601 (`YYYY-MM-DDThh:mm:ss.sZ`) format.|
 
@@ -84,6 +85,7 @@ Sample response:
 ```json
 {
   "code": 200,
+  "status": "signedIn",
   "username": "toshikish",
   "datetime": "2018-08-16T05:44:00.000Z"
 }
@@ -92,6 +94,7 @@ Sample response:
 {
   "code": 400,
   "message": "Already signed in.",
+  "status": "signedIn",
   "username": "toshikish",
   "datetime": "2018-08-16T05:44:00.000Z"
 }
@@ -114,6 +117,7 @@ Make user sign out.
 |---|---|---|
 |code|integer|Status code. <br> `200`: OK, `4xx`: failure.|
 |message|string|Optional. Error message.|
+|status|string|User's status.<br>`notSignedIn` (未出勤), `signedIn` (出勤済み), `signedOut` (退勤済み).|
 |username|string|Same as the query.|
 |datetime|DateTime|Datetime of signing in. <br> ISO 8601 (`YYYY-MM-DDThh:mm:ss.sZ`) format.|
 
@@ -126,6 +130,7 @@ Sample response:
 ```json
 {
   "code": 200,
+  "status": "signedOut",
   "username": "toshikish",
   "datetime": "2018-08-16T05:44:00.000Z"
 }
@@ -134,6 +139,7 @@ Sample response:
 {
   "code": 400,
   "message": "Already signed out.",
+  "status": "signedOut",
   "username": "toshikish",
   "datetime": "2018-08-16T05:44:00.000Z"
 }

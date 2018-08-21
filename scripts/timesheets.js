@@ -72,6 +72,7 @@ loadTimesheets = function (exports) {
           this.responder.result = {
             code: 400,
             message: 'Already signed in.',
+            status: 'signedIn',
             username,
             datetime: this.datetime
           };
@@ -100,6 +101,7 @@ loadTimesheets = function (exports) {
           this.responder.result = {
             code: 400,
             message: 'Already signed out.',
+            status: 'signedOut',
             username,
             datetime: this.datetime
           };
