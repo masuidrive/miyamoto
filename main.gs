@@ -293,6 +293,10 @@ loadDateUtils = function loadDateUtils() {
     return year;
   };
 
+  DateUtils.getFiscalYear = function (date) {
+    return date.getMonth() <= 2 ? date.getFullYear() - 1 : date.getFullYear();
+  };
+
   return DateUtils;
 };
 

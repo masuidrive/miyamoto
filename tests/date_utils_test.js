@@ -52,3 +52,8 @@ QUnit.test('DateUtils.getLengthOfService', (assert) => {
   assert.ok(_.isEqual(1, DateUtils.getLengthOfService(new Date(2018, 7, 20), new Date(2020, 7, 19))), 'Last date of 2nd year');
   assert.ok(_.isEqual(2, DateUtils.getLengthOfService(new Date(2018, 7, 20), new Date(2020, 7, 20))), 'First date of 3rd year');
 });
+
+QUnit.test('DateUtils.getFiscalYear', (assert) => {
+  assert.ok(_.isEqual(2018, DateUtils.getFiscalYear(new Date(2018, 3, 1))), 'First day of fiscal year');
+  assert.ok(_.isEqual(2017, DateUtils.getFiscalYear(new Date(2018, 2, 31))), 'Last day of fiscal year');
+});
