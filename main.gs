@@ -621,12 +621,12 @@ loadGSTimesheets = function loadGSTimesheets() {
 
   GSTimesheets.prototype._fillPaidHolidaysSheet = function (sheet) {
     if (sheet.getLastRow() > 0) return;
-    var nth_of_year = sheet.getName().match(/\d+/)[0];
+    var nth_of_year = sheet.getName().match(/\d+/)[0] * 1;
 
     var rows = [['期間', '', '', ''], ['', '合計時間', '日', '時間'], ['繰越', 0, '', ''], ['付与', 8 * (10 + nth_of_year - 1), '', ''], ['取得済み', '', '', ''], ['残り', '', '', ''], ['', '', '', ''], ['取得日', '取得時間', '', '']];
     sheet.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
 
-    sheet.getRange('B1:C1').setFormulas(['=EDATE(\'_\u8A2D\u5B9A\'!B3,' + 12 * (nth_of_year - 1) + ')', '=EDATE(B1,12)-1']);
+    sheet.getRange('B1:C1').setFormulas([['=EDATE(\'_\u8A2D\u5B9A\'!B3,' + 12 * (nth_of_year - 1) + ')', '=EDATE(B1,12)-1']]);
     if (nth_of_year > 1) sheet.getRange('B3').setFormula('=\'' + (nth_of_year - 1) + '\u5E74\u76EE\u6709\u7D66\u4F11\u6687\'!B6');
     sheet.getRange('B5').setFormula('=SUM(B9:B88)');
     sheet.getRange('B6').setFormula('=B3+B4-B5');

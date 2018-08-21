@@ -146,7 +146,7 @@ loadGSTimesheets = function () {
 
   GSTimesheets.prototype._fillPaidHolidaysSheet = function (sheet) {
     if (sheet.getLastRow() > 0) return;
-    const nth_of_year = sheet.getName().match(/\d+/)[0];
+    const nth_of_year = sheet.getName().match(/\d+/)[0] * 1;
 
     const rows = [
       ['期間', '', '', ''],
@@ -160,7 +160,7 @@ loadGSTimesheets = function () {
     ];
     sheet.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
 
-    sheet.getRange('B1:C1').setFormulas([`=EDATE('_設定'!B3,${12 * (nth_of_year - 1)})`, '=EDATE(B1,12)-1']);
+    sheet.getRange('B1:C1').setFormulas([[`=EDATE('_設定'!B3,${12 * (nth_of_year - 1)})`, '=EDATE(B1,12)-1']]);
     if (nth_of_year > 1) sheet.getRange('B3').setFormula(`='${nth_of_year - 1}年目有給休暇'!B6`);
     sheet.getRange('B5').setFormula('=SUM(B9:B88)');
     sheet.getRange('B6').setFormula('=B3+B4-B5');
