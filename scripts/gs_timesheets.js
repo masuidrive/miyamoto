@@ -58,6 +58,7 @@ loadGSTimesheets = function () {
     const new_ss = SpreadsheetApp.create(username);
     const prop_sheet = this._createOrOpenSheet(new_ss, '_設定');
     this._fillPropertiesSheet(prop_sheet);
+    this._createPaidHolidaysSheets(new_ss);
 
     const new_ss_file = DriveApp.getFileById(new_ss.getId())
       .setOwner(this.settings.get('管理者メールアドレス'))
@@ -131,6 +132,40 @@ loadGSTimesheets = function () {
         );
       }
     })
+  };
+
+  GSTimesheets.prototype._createPaidHolidaysSheets = function (spreadsheet) {
+    const entrance = this._createOrOpenSheet(spreadsheet, '_設定').getRange('B3').getValue();
+    const length_of_service = DateUtils.getLengthOfService(entrance, new Date());
+
+    for (let i = 1; i <= length_of_service + 1; i++) {
+      const sheet = this._createOrOpenSheet(spreadsheet, `${i}年目有給休暇`);
+      this._fillPaidHolidaysSheet(sheet);
+    }
+  };
+
+  GSTimesheets.prototype._fillPaidHolidaysSheet = function (sheet) {
+    if (sheet.getLastRow() > 0) return;
+    const nth_of_year = sheet.getName().match(/\d+/)[0];
+
+    const rows = [
+      ['期間', '', '', ''],
+      ['', '合計時間', '日', '時間'],
+      ['繰越', 0, '', ''],
+      ['付与', 8 * (10 + nth_of_year - 1), '', ''],
+      ['取得済み', '', '', ''],
+      ['残り', '', '', ''],
+      ['', '', '', ''],
+      ['取得日', '取得時間', '', '']
+    ];
+    sheet.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
+
+    sheet.getRange('B1:C1').setFormulas([`=EDATE('_設定'!B3,${12 * (nth_of_year - 1)})`, '=EDATE(B1,12)-1']);
+    if (nth_of_year > 1) sheet.getRange('B3').setFormula(`='${nth_of_year - 1}年目有給休暇'!B6`);
+    sheet.getRange('B5').setFormula('=SUM(B9:B88)');
+    sheet.getRange('B6').setFormula('=B3+B4-B5');
+    sheet.getRange('C3:C6').setFormulaR1C1('=INT(RC[-1]/8)');
+    sheet.getRange('D3:D6').setFormulaR1C1('=MOD(RC[-2],8)');
   };
 
   GSTimesheets.prototype._getMonthlySheet =  function (username, date) {

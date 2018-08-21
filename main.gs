@@ -164,7 +164,7 @@ loadDateUtils = function loadDateUtils() {
       return [yesterday.getFullYear(), yesterday.getMonth() + 1, yesterday.getDate()];
     }
 
-    var reg = /((\d{4})[-\/年]{1}|)(\d{1,2})[-\/月]{1}(\d{1,2})/;
+    var reg = /((\d{4})[-\/年]{1}|)(1[0-2]|0?[1-9])[-\/月]{1}([12][0-9]|3[01]|0?[1-9])/;
     var matches = str.match(reg);
     if (matches) {
       var year = parseInt(matches[2], 10);
@@ -283,6 +283,14 @@ loadDateUtils = function loadDateUtils() {
     var date = new Date(original_date.getTime());
     date.setMinutes(Math.floor(date.getMinutes() / 30) * 30);
     return date;
+  };
+
+  DateUtils.getLengthOfService = function (entrance, today) {
+    var year = 0;
+    while (entrance.setFullYear(entrance.getFullYear() + 1) <= today) {
+      year++;
+    }
+    return year;
   };
 
   return DateUtils;
@@ -531,6 +539,7 @@ loadGSTimesheets = function loadGSTimesheets() {
     var new_ss = SpreadsheetApp.create(username);
     var prop_sheet = this._createOrOpenSheet(new_ss, '_設定');
     this._fillPropertiesSheet(prop_sheet);
+    this._createPaidHolidaysSheets(new_ss);
 
     var new_ss_file = DriveApp.getFileById(new_ss.getId()).setOwner(this.settings.get('管理者メールアドレス')).setSharing(DriveApp.Access.ANYONE, DriveApp.Permission.NONE).setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.NONE).setSharing(DriveApp.Access.DOMAIN, DriveApp.Permission.VIEW).setSharing(DriveApp.Access.DOMAIN_WITH_LINK, DriveApp.Permission.VIEW);
     folder.addFile(new_ss_file);
@@ -598,6 +607,31 @@ loadGSTimesheets = function loadGSTimesheets() {
         cell.setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(['正社員', '業務委託', 'アルバイト'], true).build());
       }
     });
+  };
+
+  GSTimesheets.prototype._createPaidHolidaysSheets = function (spreadsheet) {
+    var entrance = this._createOrOpenSheet(spreadsheet, '_設定').getRange('B3').getValue();
+    var length_of_service = DateUtils.getLengthOfService(entrance, new Date());
+
+    for (var i = 1; i <= length_of_service + 1; i++) {
+      var sheet = this._createOrOpenSheet(spreadsheet, i + '\u5E74\u76EE\u6709\u7D66\u4F11\u6687');
+      this._fillPaidHolidaysSheet(sheet);
+    }
+  };
+
+  GSTimesheets.prototype._fillPaidHolidaysSheet = function (sheet) {
+    if (sheet.getLastRow() > 0) return;
+    var nth_of_year = sheet.getName().match(/\d+/)[0];
+
+    var rows = [['期間', '', '', ''], ['', '合計時間', '日', '時間'], ['繰越', 0, '', ''], ['付与', 8 * (10 + nth_of_year - 1), '', ''], ['取得済み', '', '', ''], ['残り', '', '', ''], ['', '', '', ''], ['取得日', '取得時間', '', '']];
+    sheet.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
+
+    sheet.getRange('B1:C1').setFormulas(['=EDATE(\'_\u8A2D\u5B9A\'!B3,' + 12 * (nth_of_year - 1) + ')', '=EDATE(B1,12)-1']);
+    if (nth_of_year > 1) sheet.getRange('B3').setFormula('=\'' + (nth_of_year - 1) + '\u5E74\u76EE\u6709\u7D66\u4F11\u6687\'!B6');
+    sheet.getRange('B5').setFormula('=SUM(B9:B88)');
+    sheet.getRange('B6').setFormula('=B3+B4-B5');
+    sheet.getRange('C3:C6').setFormulaR1C1('=INT(RC[-1]/8)');
+    sheet.getRange('D3:D6').setFormulaR1C1('=MOD(RC[-2],8)');
   };
 
   GSTimesheets.prototype._getMonthlySheet = function (username, date) {
@@ -698,7 +732,7 @@ loadGSTimesheets = function loadGSTimesheets() {
 
   // 休みの曜日を数字で返す
   GSTimesheets.prototype.getDayOff = function (username) {
-    var sheet = this._getSheet(username);
+    var sheet = this._getSheet(username, '_設定');
     return DateUtils.parseWday(sheet.getRange("B2").getValue());
   };
 
