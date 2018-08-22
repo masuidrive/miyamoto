@@ -2,12 +2,13 @@
 // Timesheets = loadTimesheets();
 
 loadGSTimesheets = function () {
-  var GSTimesheets = function(spreadsheet, settings) {
+  var GSTimesheets = function(spreadsheet, settings, properties) {
     this.spreadsheet = spreadsheet;
     this.settings = settings;
+    this.properties = properties;
     this._spreadsheets = {};
     this._sheets = {};
-    this.users = JSON.parse(GASProperties.get('users'));
+    this.users = JSON.parse(this.properties.get('users'));
 
     this.scheme = {
       columns: [
@@ -38,7 +39,7 @@ loadGSTimesheets = function () {
   GSTimesheets.prototype._getSpreadsheet = function (username) {
     if (this._spreadsheets[username]) return this._spreadsheets[username];
 
-    const user_ss = this._createOrOpenUserSpreadsheet(GASProperties.get('employees_folder_id'), username);
+    const user_ss = this._createOrOpenUserSpreadsheet(this.properties.get('employees_folder_id'), username);
     this._spreadsheets[username] = user_ss;
     this._sheets[username] = {};
 
@@ -288,7 +289,7 @@ loadGSTimesheets = function () {
   };
 
   GSTimesheets.prototype.updateUsers = function () {
-    GASProperties.set('users', JSON.stringify(this.users));
+    this.properties.set('users', JSON.stringify(this.users));
   };
 
   GSTimesheets.prototype.getByDate = function(date) {

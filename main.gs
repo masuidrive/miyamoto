@@ -374,9 +374,8 @@ loadGASProperties = function loadGASProperties(exports) {
   };
 
   GASProperties.prototype.get = function (key) {
-    if (!key in values) return null;
     var val = this.properties.getProperty(key);
-    if (val !== null) return val;
+    if (!(key in values) || val !== null) return val;
 
     val = values[key]();
     this.set(key, val);
@@ -544,12 +543,13 @@ if (typeof exports !== 'undefined') {
 // Timesheets = loadTimesheets();
 
 loadGSTimesheets = function loadGSTimesheets() {
-  var GSTimesheets = function GSTimesheets(spreadsheet, settings) {
+  var GSTimesheets = function GSTimesheets(spreadsheet, settings, properties) {
     this.spreadsheet = spreadsheet;
     this.settings = settings;
+    this.properties = properties;
     this._spreadsheets = {};
     this._sheets = {};
-    this.users = JSON.parse(GASProperties.get('users'));
+    this.users = JSON.parse(this.properties.get('users'));
 
     this.scheme = {
       columns: [{ name: '日付', format: 'yyyy"年"m"月"d"日（"ddd"）"', width: 150 }, { name: '出勤（打刻）', format: 'H:mm', width: 100 }, { name: '退勤（打刻）', format: 'H:mm', width: 100 }, { name: '出勤', format: 'H:mm', formula: '=CEILING(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 }, { name: '退勤', format: 'H:mm', formula: '=FLOOR(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 }, { name: '休憩時間', format: '[h]:mm', width: 75 }, { name: '勤務時間', format: '[h]:mm', formula: '=IF(OR(ISBLANK(RC[-5]),ISBLANK(RC[-4]),ISBLANK(RC[-1])),0,MAX(RC[-2]-RC[-3]-RC[-1],0))', width: 75 }, { name: 'メモ', width: 300 }, { name: '承認者', width: 100 }, { name: '経由', width: 50 }],
@@ -566,7 +566,7 @@ loadGSTimesheets = function loadGSTimesheets() {
   GSTimesheets.prototype._getSpreadsheet = function (username) {
     if (this._spreadsheets[username]) return this._spreadsheets[username];
 
-    var user_ss = this._createOrOpenUserSpreadsheet(GASProperties.get('employees_folder_id'), username);
+    var user_ss = this._createOrOpenUserSpreadsheet(this.properties.get('employees_folder_id'), username);
     this._spreadsheets[username] = user_ss;
     this._sheets[username] = {};
 
@@ -793,7 +793,7 @@ loadGSTimesheets = function loadGSTimesheets() {
   };
 
   GSTimesheets.prototype.updateUsers = function () {
-    GASProperties.set('users', JSON.stringify(this.users));
+    this.properties.set('users', JSON.stringify(this.users));
   };
 
   GSTimesheets.prototype.getByDate = function (date) {
@@ -840,7 +840,7 @@ var init = function init() {
     var spreadsheet = SpreadsheetApp.openById(spreadsheetId);
     var settings = new GSProperties(spreadsheet);
     var template = new GSTemplate(spreadsheet);
-    var storage = new GSTimesheets(spreadsheet, settings);
+    var storage = new GSTimesheets(spreadsheet, settings, global_settings);
     var slack = new Slack(settings.get('Slack Incoming URL'), template, settings);
     var api = new Api(slack, storage, template, settings);
     var receiver = mode === 'slack' ? slack : api;
