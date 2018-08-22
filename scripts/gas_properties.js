@@ -33,9 +33,8 @@ loadGASProperties = function (exports) {
   };
 
   GASProperties.prototype.get = function(key) {
-    if (!key in values) return null;
     let val = this.properties.getProperty(key);
-    if (val !== null) return val;
+    if (!(key in values) || val !== null) return val;
 
     val = values[key]();
     this.set(key, val);
