@@ -60,7 +60,7 @@ function setUp() {
   if(!global_settings.get('spreadsheet')) {
 
     // タイムシートを作る
-    const spreadsheet = createSpreadsheetInMasterFolder("Slack Timesheets");
+    const spreadsheet = createSpreadsheetInMasterFolder(DriveApp.getFileById(ScriptApp.getScriptId()).getName());
     var sheets = spreadsheet.getSheets();
     if(sheets.length == 1 && sheets[0].getLastRow() == 0) {
       sheets[0].setName('_設定');

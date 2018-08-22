@@ -7,16 +7,7 @@ loadGSTimesheets = function () {
     this.settings = settings;
     this._spreadsheets = {};
     this._sheets = {};
-    this.master_folder = DriveApp.getFileById(spreadsheet.getId()).getParents().next();
-    const employees_fi = DriveApp.searchFolders(`"${this.master_folder.getId()}" in parents and title = "Employees"`);
-    this.employees_folder = employees_fi.hasNext()
-      ? employees_fi.next()
-      : this.master_folder.createFolder('Employees')
-        .setOwner(this.settings.get('管理者メールアドレス'))
-        .setSharing(DriveApp.Access.ANYONE, DriveApp.Permission.NONE)
-        .setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.NONE)
-        .setSharing(DriveApp.Access.DOMAIN, DriveApp.Permission.VIEW)
-        .setSharing(DriveApp.Access.DOMAIN_WITH_LINK, DriveApp.Permission.VIEW);
+    this.users = JSON.parse(GASProperties.get('users'));
 
     this.scheme = {
       columns: [
@@ -47,17 +38,21 @@ loadGSTimesheets = function () {
   GSTimesheets.prototype._getSpreadsheet = function (username) {
     if (this._spreadsheets[username]) return this._spreadsheets[username];
 
-    const user_ss = this._createOrOpenUserSpreadsheet(this.employees_folder, username);
+    const user_ss = this._createOrOpenUserSpreadsheet(GASProperties.get('employees_folder_id'), username);
     this._spreadsheets[username] = user_ss;
     this._sheets[username] = {};
 
     return user_ss;
   };
 
-  GSTimesheets.prototype._createOrOpenUserSpreadsheet = function (folder, username) {
-    const user_ss = DriveApp.searchFiles(`"${folder.getId()}" in parents and mimeType = "${MimeType.GOOGLE_SHEETS}" and title = "${username}"`);
-    if (user_ss.hasNext()) {
-      return SpreadsheetApp.openById(user_ss.next().getId());
+  GSTimesheets.prototype._createOrOpenUserSpreadsheet = function (folder_id, username) {
+    if (username in this.users.keys()) return SpreadsheetApp.openById(this.users[username]);
+
+    const user_ss_fi = DriveApp.searchFiles(`"${folder_id}" in parents and mimeType = "${MimeType.GOOGLE_SHEETS}" and title = "${username}"`);
+    if (user_ss_fi.hasNext()) {
+      const user_ss = SpreadsheetApp.openById(user_ss_fi.next().getId());
+      this.addUserSpreadsheet(user_ss);
+      return user_ss;
     }
 
     const new_ss = SpreadsheetApp.create(username);
@@ -74,6 +69,8 @@ loadGSTimesheets = function () {
       .setSharing(DriveApp.Access.DOMAIN_WITH_LINK, DriveApp.Permission.VIEW);
     folder.addFile(new_ss_file);
     DriveApp.getRootFolder().removeFile(new_ss_file);
+
+    this.addUserSpreadsheet(new_ss);
 
     return new_ss;
   };
@@ -282,14 +279,16 @@ loadGSTimesheets = function () {
   };
 
   GSTimesheets.prototype.getUsers = function() {
-    const employeesSpreadsheets = DriveApp.searchFiles(
-      `"${this.employees_folder.getId()}" in parents and mimeType = "${MimeType.GOOGLE_SHEETS}"`
-    );
-    const users = [];
-    while (employeesSpreadsheets.hasNext()) {
-      users.push(employeesSpreadsheets.next().getName());
-    }
-    return users;
+    return this.users.keys();
+  };
+
+  GSTimesheets.prototype.addUserSpreadsheet = function (spreadsheet) {
+    this.users[spreadsheet.getName()] = spreadsheet.getId();
+    this.updateUsers();
+  };
+
+  GSTimesheets.prototype.updateUsers = function () {
+    GASProperties.set('users', JSON.stringify(this.users));
   };
 
   GSTimesheets.prototype.getByDate = function(date) {
