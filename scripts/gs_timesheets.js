@@ -47,7 +47,7 @@ loadGSTimesheets = function () {
   };
 
   GSTimesheets.prototype._createOrOpenUserSpreadsheet = function (folder_id, username) {
-    if (username in this.users.keys()) return SpreadsheetApp.openById(this.users[username]);
+    if (username in Object.keys(this.users)) return SpreadsheetApp.openById(this.users[username]);
 
     const user_ss_fi = DriveApp.searchFiles(`"${folder_id}" in parents and mimeType = "${MimeType.GOOGLE_SHEETS}" and title = "${username}"`);
     if (user_ss_fi.hasNext()) {
@@ -280,7 +280,7 @@ loadGSTimesheets = function () {
   };
 
   GSTimesheets.prototype.getUsers = function() {
-    return this.users.keys();
+    return Object.keys(this.users);
   };
 
   GSTimesheets.prototype.addUserSpreadsheet = function (spreadsheet) {
