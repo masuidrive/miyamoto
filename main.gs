@@ -359,11 +359,15 @@ loadGASProperties = function loadGASProperties(exports) {
       return DriveApp.getFileById(ScriptApp.getScriptId()).getParents().next().getId();
     },
     employees_folder_id: function employees_folder_id() {
-      var employees_fi = DriveApp.searchFolders('"' + GASProperties.get('master_folder_id') + '" in parents and title = "Employees"');
+      var master_folder_id = DriveApp.getFileById(ScriptApp.getScriptId()).getParents().next().getId();
+      var employees_fi = DriveApp.searchFolders('"' + master_folder_id + '" in parents and title = "Employees"');
       return employees_fi.hasNext() ? employees_fi.next().getId() : _this.master_folder.createFolder('Employees').setSharing(DriveApp.Access.ANYONE, DriveApp.Permission.NONE).setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.NONE).setSharing(DriveApp.Access.DOMAIN, DriveApp.Permission.VIEW).setSharing(DriveApp.Access.DOMAIN_WITH_LINK, DriveApp.Permission.VIEW).getId();
     },
     users: function users() {
-      var employeesSpreadsheets = DriveApp.searchFiles('"' + GASProperties.get('employees_folder_id') + '" in parents and mimeType = "' + MimeType.GOOGLE_SHEETS + '"');
+      var master_folder_id = DriveApp.getFileById(ScriptApp.getScriptId()).getParents().next().getId();
+      var employees_fi = DriveApp.searchFolders('"' + master_folder_id + '" in parents and title = "Employees"');
+      var employees_folder_id = employees_fi.next().getId();
+      var employeesSpreadsheets = DriveApp.searchFiles('"' + employees_folder_id + '" in parents and mimeType = "' + MimeType.GOOGLE_SHEETS + '"');
       var users = {};
       while (employeesSpreadsheets.hasNext()) {
         var ss = employeesSpreadsheets.next();

@@ -9,7 +9,8 @@ loadGASProperties = function (exports) {
   const values = {
     master_folder_id: () => DriveApp.getFileById(ScriptApp.getScriptId()).getParents().next().getId(),
     employees_folder_id: () => {
-      const employees_fi = DriveApp.searchFolders(`"${GASProperties.get('master_folder_id')}" in parents and title = "Employees"`);
+      const master_folder_id = DriveApp.getFileById(ScriptApp.getScriptId()).getParents().next().getId();
+      const employees_fi = DriveApp.searchFolders(`"${master_folder_id}" in parents and title = "Employees"`);
       return employees_fi.hasNext()
         ? employees_fi.next().getId()
         : this.master_folder.createFolder('Employees')
@@ -20,8 +21,11 @@ loadGASProperties = function (exports) {
           .getId();
     },
     users: () => {
+      const master_folder_id = DriveApp.getFileById(ScriptApp.getScriptId()).getParents().next().getId();
+      const employees_fi = DriveApp.searchFolders(`"${master_folder_id}" in parents and title = "Employees"`);
+      const employees_folder_id = employees_fi.next().getId();
       const employeesSpreadsheets = DriveApp.searchFiles(
-        `"${GASProperties.get('employees_folder_id')}" in parents and mimeType = "${MimeType.GOOGLE_SHEETS}"`
+        `"${employees_folder_id}" in parents and mimeType = "${MimeType.GOOGLE_SHEETS}"`
       );
       const users = {};
       while (employeesSpreadsheets.hasNext()) {
