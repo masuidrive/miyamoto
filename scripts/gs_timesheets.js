@@ -58,7 +58,7 @@ loadGSTimesheets = function () {
     var rowNo = this.scheme.properties.length + 4;
     var startAt = DateUtils.parseDate(this.settings.get("開始日"));
     var s = new Date(startAt[0], startAt[1]-1, startAt[2], 0, 0, 0);
-    rowNo += parseInt((date.getTime()-date.getTimezoneOffset()*60*1000)/(1000*24*60*60)) - parseInt((s.getTime()-s.getTimezoneOffset()*60*1000)/(1000*24*60*60));
+    rowNo += parseInt((date.getTime()-date.getTimezoneOffset()*60*1000)/(1000*24*60*60), 10) - parseInt((s.getTime()-s.getTimezoneOffset()*60*1000)/(1000*24*60*60), 10);
     return rowNo;
   };
 
