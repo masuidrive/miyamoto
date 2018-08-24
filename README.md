@@ -181,35 +181,35 @@ make test
 ## ソースコード
 
 - main.js
- - HTTPを受け取る
+  - HTTPを受け取る
 
 - 入力内容を解析して、メソッドを呼び出す
- - Slackへの入出力
+  - Slackへの入出力
 
 - gs_template.js
- - Google Spreadsheetを使ったメッセージテンプレート
+  - Google Spreadsheetを使ったメッセージテンプレート
 
 - gs_properties.js
- - Google Spreadsheetを使った設定key-value store
+  - Google Spreadsheetを使った設定key-value store
 
 - gs_timesheets.js
- - timesheetsをGoogle Spreadsheetに保存する処理
+  - timesheetsをGoogle Spreadsheetに保存する処理
 
 - gas_properties.js
- - Google Apps Scriptを使った設定key-value store
+  - Google Apps Scriptを使った設定key-value store
 
 - gas_utils.js
- - Google Apps Script用のユーティリティ
+  - Google Apps Script用のユーティリティ
 
 - utils.js
- - globalで使うユーティリティ
+  - globalで使うユーティリティ
 
 - date_utils.js
- - 日付関係のユーティリティ
+  - 日付関係のユーティリティ
 
 - underscore.js
- - _.で始まるユーティリティ集
- - http://underscorejs.org
+  - _.で始まるユーティリティ集
+  - http://underscorejs.org
 
 
 # License
