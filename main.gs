@@ -103,9 +103,25 @@ var Auth = function () {
   _createClass(Auth, [{
     key: 'receiveMessage',
     value: function receiveMessage(parameters) {
-      var result = typeof this[parameters.command] === 'function' ? this[parameters.command]() : this.commandNotFound();
+      var _this = this;
 
-      return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+      if (parameters.command != null) {
+        var result = typeof this[parameters.command] === 'function' ? this[parameters.command]() : this.commandNotFound();
+
+        return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+      } else {
+        var message = function () {
+          if (!_this.validateAccessToken(parameters.state)) {
+            return HtmlService.createHtmlOutput('<b>不正なパラメータです</b>');
+          } else if (parameters.error === 'access_denied') {
+            return _this.handleAccessDenied(parameters.state);
+          } else {
+            return _this.handleAccessAllowed();
+          }
+        }();
+
+        return HtmlService.createHtmlOutput('<b>' + message + '</b>');
+      }
     }
   }, {
     key: 'commandNotFound',
@@ -132,6 +148,50 @@ var Auth = function () {
         access_token: access_token,
         datetime: this.datetime
       };
+    }
+  }, {
+    key: 'validateAccessToken',
+    value: function validateAccessToken(access_token) {
+      return access_token in this.properties.get('access_tokens');
+    }
+  }, {
+    key: 'handleAccessDenied',
+    value: function handleAccessDenied(access_token) {
+      var access_tokens = this.properties.get('access_tokens');
+      access_tokens[access_token].denied_at = this.datetime;
+      this.properties.set('access_tokens', JSON.stringify(access_tokens));
+
+      return '認証に失敗しました';
+    }
+  }, {
+    key: 'handleAccessAllowed',
+    value: function handleAccessAllowed(access_token, code) {
+      var slack_access_token_response = this.obtainSlackAccessToken(code);
+      if (!slack_access_token_response.ok) return 'Slack ログインに失敗しました';
+      var slack_access_token = slack_access_token_response.access_token;
+
+      var user_response = this.retrieveUserInformation(slack_access_token);
+      if (!user_response.ok) return 'ユーザ情報の取得に失敗しました';
+
+      var access_tokens = this.properties.get('access_tokens');
+      access_tokens[access_token].username = user_response.user.name;
+      access_tokens[access_token].user_id = user_response.user.id;
+      access_tokens[access_token].allowed_at = this.datetime;
+      this.properties.set('access_tokens', JSON.stringify(access_tokens));
+
+      return 'Slack ログインが完了しました';
+    }
+  }, {
+    key: 'obtainSlackAccessToken',
+    value: function obtainSlackAccessToken(code) {
+      var response = UrlFetchApp.fetch('https://slack.com/api/oauth.access?client_id=' + this.properties.get('slack_client_id') + '&client_secret=' + this.properties.get('slack_client_secret') + '&code=' + code);
+      return JSON.parse(response.getContentText());
+    }
+  }, {
+    key: 'retrieveUserInformation',
+    value: function retrieveUserInformation(slack_access_token) {
+      var response = UrlFetchApp.fetch('https://slack.com/api/users.identity?token=' + slack_access_token);
+      return JSON.parse(response.getContentText());
     }
   }]);
 
@@ -929,6 +989,11 @@ function doPost(e) {
     }
   }();
   var miyamoto = init(mode);
+  return miyamoto.receiver.receiveMessage(e.parameters);
+}
+
+function doGet(e) {
+  var miyamoto = init('auth');
   return miyamoto.receiver.receiveMessage(e.parameters);
 }
 

@@ -57,6 +57,11 @@ function doPost(e) {
   return miyamoto.receiver.receiveMessage(e.parameters);
 }
 
+function doGet(e) {
+  const miyamoto = init('auth');
+  return miyamoto.receiver.receiveMessage(e.parameters);
+}
+
 // Time-based triggerで実行
 function confirmSignIn() {
   var miyamoto = init();
