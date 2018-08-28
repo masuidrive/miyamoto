@@ -2,12 +2,13 @@
 // Api = loadApi();
 
 loadApi = function loadApi() {
-  var Api = function Api(slack, storage, template, settings) {
+  var Api = function Api(slack, storage, template, settings, properties) {
     EventListener.apply(this);
     this.slack = slack;
     this.storage = storage;
     this._template = template;
     this.settings = settings;
+    this.properties = properties;
     this.result = {};
     this.command = '';
     this.via = 'API';
@@ -16,10 +17,19 @@ loadApi = function loadApi() {
   if (typeof EventListener === 'undefined') EventListener = loadEventListener();
   _.extend(Api.prototype, EventListener.prototype);
 
+  Api.prototype.extractUsername = function (parameter) {
+    if (parameter.access_token != null) {
+      var access_token = JSON.parse(this.properties.get('access_tokens'));
+      return access_token[parameter.access_token] ? access_token[parameter.access_token].display_name : '';
+    } else {
+      return parameter.username | '';
+    }
+  };
+
   // 受信したメッセージをtimesheetsに投げる
   Api.prototype.receiveMessage = function (message) {
-    var username = String(message.username);
-    var command = String(message.command);
+    var username = this.extractUsername(message);
+    var command = message.command;
 
     // 特定のアカウントには反応しない
     var ignore_users = (this.settings.get("無視するユーザ") || '').toLowerCase().replace(/^\s*(.*?)\s*$/, "$1").split(/\s*,\s*/);
@@ -964,7 +974,7 @@ var init = function init() {
     var template = new GSTemplate(spreadsheet);
     var storage = new GSTimesheets(spreadsheet, settings, global_settings);
     var slack = new Slack(settings.get('Slack Incoming URL'), template, settings);
-    var api = new Api(slack, storage, template, settings);
+    var api = new Api(slack, storage, template, settings, global_settings);
     var auth = new Auth(global_settings);
     var receiver = function () {
       switch (mode) {
@@ -995,12 +1005,12 @@ function doPost(e) {
     }
   }();
   var miyamoto = init(mode);
-  return miyamoto.receiver.receiveMessage(e.parameters);
+  return miyamoto.receiver.receiveMessage(e.parameter);
 }
 
 function doGet(e) {
   var miyamoto = init('auth');
-  return miyamoto.receiver.receiveMessage(e.parameters);
+  return miyamoto.receiver.receiveMessage(e.parameter);
 }
 
 // Time-based triggerで実行

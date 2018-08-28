@@ -23,7 +23,7 @@ const init = function (mode = 'slack') {
     const template = new GSTemplate(spreadsheet);
     const storage = new GSTimesheets(spreadsheet, settings, global_settings);
     const slack = new Slack(settings.get('Slack Incoming URL'), template, settings);
-    const api = new Api(slack, storage, template, settings);
+    const api = new Api(slack, storage, template, settings, global_settings);
     const auth = new Auth(global_settings);
     const receiver = (() => {
       switch (mode) {
@@ -54,12 +54,12 @@ function doPost(e) {
     }
   })();
   const miyamoto = init(mode);
-  return miyamoto.receiver.receiveMessage(e.parameters);
+  return miyamoto.receiver.receiveMessage(e.parameter);
 }
 
 function doGet(e) {
   const miyamoto = init('auth');
-  return miyamoto.receiver.receiveMessage(e.parameters);
+  return miyamoto.receiver.receiveMessage(e.parameter);
 }
 
 // Time-based triggerで実行
