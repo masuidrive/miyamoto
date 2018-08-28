@@ -41,6 +41,7 @@ Sample response:
 {
   "code": 202,
   "access_token": "58d12bc1-08d0-4e94-9440-75562f22027a",
+  "auth_url": "https://slack.com/oauth/authorize?scope=users.profile:read&client_id=1048553852.9553671552&state=58d12bc1-08d0-4e94-9440-75562f22027a",
   "datetime": "2018-08-16T05:44:00.000Z"
 }
 ```
