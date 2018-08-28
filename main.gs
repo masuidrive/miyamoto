@@ -116,7 +116,7 @@ var Auth = function () {
           } else if (parameters.error === 'access_denied') {
             return _this.handleAccessDenied(parameters.state);
           } else {
-            return _this.handleAccessAllowed();
+            return _this.handleAccessAllowed(parameters.state, parameters.code);
           }
         }();
 

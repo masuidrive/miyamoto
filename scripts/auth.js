@@ -19,7 +19,7 @@ class Auth {
         } else if (parameters.error === 'access_denied') {
           return this.handleAccessDenied(parameters.state);
         } else {
-          return this.handleAccessAllowed();
+          return this.handleAccessAllowed(parameters.state, parameters.code);
         }
       })();
 
