@@ -136,7 +136,7 @@ var Auth = function () {
     key: 'generateAccessToken',
     value: function generateAccessToken() {
       var access_token = Utilities.getUuid();
-      var access_tokens = this.properties.get('access_tokens');
+      var access_tokens = JSON.parse(this.properties.get('access_tokens'));
       access_tokens[access_token] = {
         username: '',
         created_at: this.datetime
@@ -152,12 +152,12 @@ var Auth = function () {
   }, {
     key: 'validateAccessToken',
     value: function validateAccessToken(access_token) {
-      return access_token in this.properties.get('access_tokens');
+      return access_token in JSON.parse(this.properties.get('access_tokens'));
     }
   }, {
     key: 'handleAccessDenied',
     value: function handleAccessDenied(access_token) {
-      var access_tokens = this.properties.get('access_tokens');
+      var access_tokens = JSON.parse(this.properties.get('access_tokens'));
       access_tokens[access_token].denied_at = this.datetime;
       this.properties.set('access_tokens', JSON.stringify(access_tokens));
 
@@ -173,7 +173,7 @@ var Auth = function () {
       var user_response = this.retrieveUserInformation(slack_access_token);
       if (!user_response.ok) return 'ユーザ情報の取得に失敗しました';
 
-      var access_tokens = this.properties.get('access_tokens');
+      var access_tokens = JSON.parse(this.properties.get('access_tokens'));
       access_tokens[access_token].username = user_response.user.name;
       access_tokens[access_token].user_id = user_response.user.id;
       access_tokens[access_token].allowed_at = this.datetime;

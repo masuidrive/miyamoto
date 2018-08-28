@@ -37,7 +37,7 @@ class Auth {
 
   generateAccessToken() {
     const access_token = Utilities.getUuid();
-    const access_tokens = this.properties.get('access_tokens');
+    const access_tokens = JSON.parse(this.properties.get('access_tokens'));
     access_tokens[access_token] = {
       username: '',
       created_at: this.datetime
@@ -52,11 +52,11 @@ class Auth {
   }
 
   validateAccessToken(access_token) {
-    return access_token in this.properties.get('access_tokens');
+    return access_token in JSON.parse(this.properties.get('access_tokens'));
   }
 
   handleAccessDenied(access_token) {
-    const access_tokens = this.properties.get('access_tokens');
+    const access_tokens = JSON.parse(this.properties.get('access_tokens'));
     access_tokens[access_token].denied_at = this.datetime;
     this.properties.set('access_tokens', JSON.stringify(access_tokens));
 
@@ -71,7 +71,7 @@ class Auth {
     const user_response = this.retrieveUserInformation(slack_access_token);
     if (!user_response.ok) return 'ユーザ情報の取得に失敗しました';
 
-    const access_tokens = this.properties.get('access_tokens');
+    const access_tokens = JSON.parse(this.properties.get('access_tokens'));
     access_tokens[access_token].username = user_response.user.name;
     access_tokens[access_token].user_id = user_response.user.id;
     access_tokens[access_token].allowed_at = this.datetime;
@@ -90,4 +90,3 @@ class Auth {
     return JSON.parse(response.getContentText());
   }
 }
-
