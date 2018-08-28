@@ -33,6 +33,9 @@ loadGASProperties = function (exports) {
         users[ss.getName()] = ss.getId();
       }
       return JSON.stringify(users);
+    },
+    access_tokens: () => {
+      return {}
     }
   };
 

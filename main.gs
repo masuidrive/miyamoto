@@ -423,6 +423,9 @@ loadGASProperties = function loadGASProperties(exports) {
         users[ss.getName()] = ss.getId();
       }
       return JSON.stringify(users);
+    },
+    access_tokens: function access_tokens() {
+      return {};
     }
   };
 
