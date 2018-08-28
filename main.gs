@@ -22,7 +22,7 @@ loadApi = function loadApi() {
       var access_token = JSON.parse(this.properties.get('access_tokens'));
       return access_token[parameter.access_token] ? access_token[parameter.access_token].display_name : '';
     } else {
-      return parameter.username | '';
+      return parameter.username || '';
     }
   };
 
