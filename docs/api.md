@@ -45,6 +45,51 @@ Sample response:
 }
 ```
 
+### getUserInformation
+
+Obtain user's information.
+
+#### Query
+
+|Name|Type|Description|
+|---|---|---|
+|command|string|`getUserInformation`|
+|access_token|string|User's access token|
+
+#### Response
+
+|Name|Type|Description|
+|---|---|---|
+|code|integer|Status code. <br> `200`: OK, `4xx`: failure.|
+|message|string|Optional. Error message.|
+|display_name|string|User's display name of Slack.|
+|real_name|string|User's real name of Slack.|
+|slack_access_token|string|User's access token of Slack.|
+|datetime|DateTime|Datetime of query. <br> ISO 8601 (`YYYY-MM-DDThh:mm:ss.sZ`) format.|
+
+Sample query:
+```
+command=getUserInformation&access_token=58d12bc1-08d0-4e94-9440-75562f22027a
+```
+
+Sample response:
+```json
+{
+  "code": 200,
+  "display_name": "toshikish",
+  "real_name": "Toshiki Shimomura",
+  "slack_access_token": "xoxp-1111827399-16111519414-20367011469-5f89a31i07",
+  "datetime": "2018-08-16T05:44:00.000Z"
+}
+```
+```json
+{
+  "code": 404,
+  "message": "User not found.",
+  "datetime": "2018-08-16T05:44:00.000Z"
+}
+```
+
 ### getStatus
 
 Check whether user has not signed in, already signed in, or signed out.

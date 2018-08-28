@@ -12,7 +12,7 @@ class Auth {
   receiveMessage(parameters) {
     if (parameters.command != null) {
       const result = (typeof this[parameters.command] === 'function')
-        ? this[parameters.command]()
+        ? this[parameters.command](parameters)
         : this.commandNotFound();
 
       return ContentService.createTextOutput(JSON.stringify(result))
@@ -40,7 +40,7 @@ class Auth {
     };
   }
 
-  generateAccessToken() {
+  generateAccessToken(parameters) {
     const access_token = Utilities.getUuid();
     this.access_tokens[access_token] = {
       display_name: '',
@@ -56,6 +56,25 @@ class Auth {
       auth_url: `https://slack.com/oauth/authorize?scope=users.profile:read&client_id=${this.properties.get('slack_client_id')}&state=${access_token}`,
       datetime: this.datetime
     };
+  }
+
+  getUserInformation(parameters) {
+    if (!this.validateAccessToken(parameters.access_token)) {
+      return {
+        code: 404,
+        message: 'Invalid access token.',
+        datetime: this.datetime
+      }
+    }
+
+    const access_token = this.access_tokens[paramters.access_token];
+    return {
+      code: 200,
+      display_name: access_token.display_name,
+      real_name: access_token.real_name,
+      slack_access_token: access_token.slack_access_token,
+      datetime: this.datetime
+    }
   }
 
   validateAccessToken(access_token) {

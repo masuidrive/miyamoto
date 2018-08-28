@@ -47,7 +47,7 @@ function doPost(e) {
   const mode = (() => {
     if (e.parameter.command == null) {
       return 'slack';
-    } else if (e.parameter.command === 'generateAccessToken') {
+    } else if (['generateAccessToken', 'getUserInformation'].includes(e.parameter.command)) {
       return 'auth';
     } else {
       return 'api';

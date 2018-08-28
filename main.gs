@@ -122,7 +122,7 @@ var Auth = function () {
       var _this = this;
 
       if (parameters.command != null) {
-        var result = typeof this[parameters.command] === 'function' ? this[parameters.command]() : this.commandNotFound();
+        var result = typeof this[parameters.command] === 'function' ? this[parameters.command](parameters) : this.commandNotFound();
 
         return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
       } else {
@@ -150,7 +150,7 @@ var Auth = function () {
     }
   }, {
     key: 'generateAccessToken',
-    value: function generateAccessToken() {
+    value: function generateAccessToken(parameters) {
       var access_token = Utilities.getUuid();
       this.access_tokens[access_token] = {
         display_name: '',
@@ -164,6 +164,26 @@ var Auth = function () {
         code: 201,
         access_token: access_token,
         auth_url: 'https://slack.com/oauth/authorize?scope=users.profile:read&client_id=' + this.properties.get('slack_client_id') + '&state=' + access_token,
+        datetime: this.datetime
+      };
+    }
+  }, {
+    key: 'getUserInformation',
+    value: function getUserInformation(parameters) {
+      if (!this.validateAccessToken(parameters.access_token)) {
+        return {
+          code: 404,
+          message: 'Invalid access token.',
+          datetime: this.datetime
+        };
+      }
+
+      var access_token = this.access_tokens[paramters.access_token];
+      return {
+        code: 200,
+        display_name: access_token.display_name,
+        real_name: access_token.real_name,
+        slack_access_token: access_token.slack_access_token,
         datetime: this.datetime
       };
     }
@@ -998,7 +1018,7 @@ function doPost(e) {
   var mode = function () {
     if (e.parameter.command == null) {
       return 'slack';
-    } else if (e.parameter.command === 'generateAccessToken') {
+    } else if (['generateAccessToken', 'getUserInformation'].includes(e.parameter.command)) {
       return 'auth';
     } else {
       return 'api';
