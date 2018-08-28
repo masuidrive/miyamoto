@@ -1018,7 +1018,7 @@ function doPost(e) {
   var mode = function () {
     if (e.parameter.command == null) {
       return 'slack';
-    } else if (['generateAccessToken', 'getUserInformation'].includes(e.parameter.command)) {
+    } else if (['generateAccessToken', 'getUserInformation'].indexOf(e.parameter.command) >= 0) {
       return 'auth';
     } else {
       return 'api';
