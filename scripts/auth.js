@@ -97,6 +97,7 @@ class Auth {
     if (!user_response.ok) return 'ユーザ情報の取得に失敗しました';
 
     this.access_tokens[access_token].display_name = user_response.profile.display_name;
+    this.access_tokens[access_token].real_name = user_response.profile.real_name;
     this.access_tokens[access_token].slack_access_token = slack_access_token;
     this.access_tokens[access_token].allowed_at = this.datetime;
     this.updateAccessTokens();
