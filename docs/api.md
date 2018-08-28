@@ -28,6 +28,7 @@ Generate an access token for API authentication.
 |code|integer|Status code. <br> `202`: created, `4xx`: failure.|
 |message|string|Optional. Error message.|
 |access_token|string|Generated access token. <br> Version 4 UUID (`RRRRRRRR-RRRR-4RRR-rRRR-RRRRRRRRRRRR`) format.|
+|auth_url|string|Authentication URL to redirect user for.|
 |datetime|DateTime|Datetime of query. <br> ISO 8601 (`YYYY-MM-DDThh:mm:ss.sZ`) format.|
 
 Sample query:

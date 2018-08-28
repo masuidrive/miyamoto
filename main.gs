@@ -146,6 +146,7 @@ var Auth = function () {
       return {
         code: 201,
         access_token: access_token,
+        auth_url: 'https://slack.com/oauth/authorize?scope=users.profile:read&client_id=' + this.properties.get('slack_client_id') + '&state=' + access_token,
         datetime: this.datetime
       };
     }
