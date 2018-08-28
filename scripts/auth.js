@@ -69,12 +69,11 @@ class Auth {
     if (!slack_access_token_response.ok) return 'Slack ログインに失敗しました';
     const slack_access_token = slack_access_token_response.access_token;
 
-    const user_response = this.retrieveUserInformation(slack_access_token);
+    const user_response = this.retrieveUserProfile(slack_access_token);
     if (!user_response.ok) return 'ユーザ情報の取得に失敗しました';
 
     const access_tokens = JSON.parse(this.properties.get('access_tokens'));
-    access_tokens[access_token].username = user_response.user.name;
-    access_tokens[access_token].user_id = user_response.user.id;
+    access_tokens[access_token].username = user_response.profile.display_name;
     access_tokens[access_token].allowed_at = this.datetime;
     this.properties.set('access_tokens', JSON.stringify(access_tokens));
 
@@ -86,8 +85,8 @@ class Auth {
     return JSON.parse(response.getContentText());
   }
 
-  retrieveUserInformation(slack_access_token) {
-    const response = UrlFetchApp.fetch(`https://slack.com/api/users.identity?token=${slack_access_token}`);
+  retrieveUserProfile(slack_access_token) {
+    const response = UrlFetchApp.fetch(`https://slack.com/api/users.profile.get?token=${slack_access_token}`);
     return JSON.parse(response.getContentText());
   }
 }
