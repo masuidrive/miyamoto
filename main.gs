@@ -98,9 +98,15 @@ var Auth = function () {
 
     this.properties = properties;
     this.datetime = new Date();
+    this.access_tokens = JSON.parse(this.properties.get('access_tokens'));
   }
 
   _createClass(Auth, [{
+    key: 'updateAccessTokens',
+    value: function updateAccessTokens() {
+      this.properties.set('access_tokens', JSON.stringify(this.access_tokens));
+    }
+  }, {
     key: 'receiveMessage',
     value: function receiveMessage(parameters) {
       var _this = this;
@@ -136,14 +142,13 @@ var Auth = function () {
     key: 'generateAccessToken',
     value: function generateAccessToken() {
       var access_token = Utilities.getUuid();
-      var access_tokens = JSON.parse(this.properties.get('access_tokens'));
-      access_tokens[access_token] = {
+      this.access_tokens[access_token] = {
         display_name: '',
         real_name: '',
         slack_access_token: '',
         created_at: this.datetime
       };
-      this.properties.set('access_tokens', JSON.stringify(access_tokens));
+      this.updateAccessTokens();
 
       return {
         code: 201,
@@ -155,14 +160,13 @@ var Auth = function () {
   }, {
     key: 'validateAccessToken',
     value: function validateAccessToken(access_token) {
-      return access_token in JSON.parse(this.properties.get('access_tokens'));
+      return access_token in this.access_tokens;
     }
   }, {
     key: 'handleAccessDenied',
     value: function handleAccessDenied(access_token) {
-      var access_tokens = JSON.parse(this.properties.get('access_tokens'));
-      access_tokens[access_token].denied_at = this.datetime;
-      this.properties.set('access_tokens', JSON.stringify(access_tokens));
+      this.access_tokens[access_token].denied_at = this.datetime;
+      this.updateAccessTokens();
 
       return '認証に失敗しました';
     }
@@ -176,12 +180,10 @@ var Auth = function () {
       var user_response = this.retrieveUserProfile(slack_access_token);
       if (!user_response.ok) return 'ユーザ情報の取得に失敗しました';
 
-      var access_tokens = JSON.parse(this.properties.get('access_tokens'));
-      access_tokens[access_token].display_name = user_response.profile.display_name;
-      access_tokens[access_token].real_name = user_response.profile.real_name;
-      access_tokens[access_token].slack_access_token = slack_access_token;
-      access_tokens[access_token].allowed_at = this.datetime;
-      this.properties.set('access_tokens', JSON.stringify(access_tokens));
+      this.access_tokens[access_token].display_name = user_response.profile.display_name;
+      this.access_tokens[access_token].slack_access_token = slack_access_token;
+      this.access_tokens[access_token].allowed_at = this.datetime;
+      this.updateAccessTokens();
 
       return 'Slack ログインが完了しました';
     }
