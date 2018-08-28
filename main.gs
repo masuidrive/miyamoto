@@ -88,6 +88,57 @@ loadApi = function loadApi() {
 if (typeof exports !== 'undefined') {
   exports.Api = loadApi();
 }
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Auth = function () {
+  function Auth(properties) {
+    _classCallCheck(this, Auth);
+
+    this.properties = properties;
+    this.datetime = new Date();
+  }
+
+  _createClass(Auth, [{
+    key: 'receiveMessage',
+    value: function receiveMessage(parameters) {
+      var result = typeof this[parameters.command] === 'function' ? this[parameters.command]() : this.commandNotFound();
+
+      return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+    }
+  }, {
+    key: 'commandNotFound',
+    value: function commandNotFound() {
+      return {
+        code: 400,
+        message: 'Command not found.',
+        datetime: this.datetime
+      };
+    }
+  }, {
+    key: 'generateAccessToken',
+    value: function generateAccessToken() {
+      var access_token = Utilities.getUuid();
+      var access_tokens = this.properties.get('access_tokens');
+      access_tokens[access_token] = {
+        username: '',
+        created_at: this.datetime
+      };
+      this.properties.set('access_tokens', JSON.stringify(access_tokens));
+
+      return {
+        code: 201,
+        access_token: access_token,
+        datetime: this.datetime
+      };
+    }
+  }]);
+
+  return Auth;
+}();
+
+export default Auth;
 // 日付関係の関数
 // DateUtils = loadDateUtils();
 
@@ -819,6 +870,7 @@ loadGSTimesheets = function loadGSTimesheets() {
 if (typeof exports !== 'undefined') {
   exports.GSTimesheets = loadGSTimesheets();
 }
+import Auth from 'auth';
 // 各モジュールの読み込み
 var initLibraries = function initLibraries() {
   if (typeof EventListener === 'undefined') EventListener = loadEventListener();
@@ -847,7 +899,17 @@ var init = function init() {
     var storage = new GSTimesheets(spreadsheet, settings, global_settings);
     var slack = new Slack(settings.get('Slack Incoming URL'), template, settings);
     var api = new Api(slack, storage, template, settings);
-    var receiver = mode === 'slack' ? slack : api;
+    var auth = new Auth(global_settings);
+    var receiver = function () {
+      switch (mode) {
+        case 'slack':
+          return slack;
+        case 'api':
+          return api;
+        case 'auth':
+          return auth;
+      }
+    }();
     var timesheets = new Timesheets(storage, settings, receiver);
     return { receiver: receiver, timesheets: timesheets, storage: storage };
   }
@@ -856,7 +918,15 @@ var init = function init() {
 
 // SlackのOutgoingから来るメッセージ
 function doPost(e) {
-  var mode = e.parameter.command == null ? 'slack' : 'api';
+  var mode = function () {
+    if (e.parameter.command == null) {
+      return 'slack';
+    } else if (e.parameter.command === 'generateAccessToken') {
+      return 'auth';
+    } else {
+      return 'api';
+    }
+  }();
   var miyamoto = init(mode);
   return miyamoto.receiver.receiveMessage(e.parameters);
 }

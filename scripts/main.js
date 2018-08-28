@@ -1,3 +1,4 @@
+import Auth from 'auth';
 // 各モジュールの読み込み
 var initLibraries = function() {
   if(typeof EventListener === 'undefined') EventListener = loadEventListener();
@@ -24,7 +25,17 @@ const init = function (mode = 'slack') {
     const storage = new GSTimesheets(spreadsheet, settings, global_settings);
     const slack = new Slack(settings.get('Slack Incoming URL'), template, settings);
     const api = new Api(slack, storage, template, settings);
-    const receiver = (mode === 'slack') ? slack : api;
+    const auth = new Auth(global_settings);
+    const receiver = (() => {
+      switch (mode) {
+        case 'slack':
+          return slack;
+        case 'api':
+          return api;
+        case 'auth':
+          return auth;
+      }
+    })();
     const timesheets = new Timesheets(storage, settings, receiver);
     return { receiver, timesheets, storage };
   }
@@ -33,7 +44,15 @@ const init = function (mode = 'slack') {
 
 // SlackのOutgoingから来るメッセージ
 function doPost(e) {
-  const mode = (e.parameter.command == null) ? 'slack' : 'api';
+  const mode = (() => {
+    if (e.parameter.command == null) {
+      return 'slack';
+    } else if (e.parameter.command === 'generateAccessToken') {
+      return 'auth';
+    } else {
+      return 'api';
+    }
+  })();
   const miyamoto = init(mode);
   return miyamoto.receiver.receiveMessage(e.parameters);
 }

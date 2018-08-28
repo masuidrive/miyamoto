@@ -11,6 +11,39 @@
 
 ## Commands
 
+### generateAccessToken
+
+Generate an access token for API authentication.
+
+#### Query
+
+|Name|Type|Description|
+|---|---|---|
+|command|string|`generateAccessToken`|
+
+#### Response
+
+|Name|Type|Description|
+|---|---|---|
+|code|integer|Status code. <br> `202`: created, `4xx`: failure.|
+|message|string|Optional. Error message.|
+|access_token|string|Generated access token. <br> Version 4 UUID (`RRRRRRRR-RRRR-4RRR-rRRR-RRRRRRRRRRRR`) format.|
+|datetime|DateTime|Datetime of query. <br> ISO 8601 (`YYYY-MM-DDThh:mm:ss.sZ`) format.|
+
+Sample query:
+```
+command=generateAccessToken
+```
+
+Sample response:
+```json
+{
+  "code": 202,
+  "access_token": "58d12bc1-08d0-4e94-9440-75562f22027a",
+  "datetime": "2018-08-16T05:44:00.000Z"
+}
+```
+
 ### getStatus
 
 Check whether user has not signed in, already signed in, or signed out.
