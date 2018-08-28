@@ -3,5 +3,5 @@ function setProperties() {
     slack_client_id: '',
     slack_client_secret: ''
   };
-  PropertiesService.getScriptService().setProperties(properties);
+  PropertiesService.getScriptProperties().setProperties(properties);
 }
