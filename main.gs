@@ -138,7 +138,9 @@ var Auth = function () {
       var access_token = Utilities.getUuid();
       var access_tokens = JSON.parse(this.properties.get('access_tokens'));
       access_tokens[access_token] = {
-        username: '',
+        display_name: '',
+        real_name: '',
+        slack_access_token: '',
         created_at: this.datetime
       };
       this.properties.set('access_tokens', JSON.stringify(access_tokens));
@@ -175,7 +177,9 @@ var Auth = function () {
       if (!user_response.ok) return 'ユーザ情報の取得に失敗しました';
 
       var access_tokens = JSON.parse(this.properties.get('access_tokens'));
-      access_tokens[access_token].username = user_response.profile.display_name;
+      access_tokens[access_token].display_name = user_response.profile.display_name;
+      access_tokens[access_token].real_name = user_response.profile.real_name;
+      access_tokens[access_token].slack_access_token = slack_access_token;
       access_tokens[access_token].allowed_at = this.datetime;
       this.properties.set('access_tokens', JSON.stringify(access_tokens));
 
