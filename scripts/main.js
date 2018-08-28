@@ -1,4 +1,3 @@
-import Auth from 'auth';
 // 各モジュールの読み込み
 var initLibraries = function() {
   if(typeof EventListener === 'undefined') EventListener = loadEventListener();

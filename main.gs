@@ -137,8 +137,6 @@ var Auth = function () {
 
   return Auth;
 }();
-
-export default Auth;
 // 日付関係の関数
 // DateUtils = loadDateUtils();
 
@@ -870,7 +868,6 @@ loadGSTimesheets = function loadGSTimesheets() {
 if (typeof exports !== 'undefined') {
   exports.GSTimesheets = loadGSTimesheets();
 }
-import Auth from 'auth';
 // 各モジュールの読み込み
 var initLibraries = function initLibraries() {
   if (typeof EventListener === 'undefined') EventListener = loadEventListener();

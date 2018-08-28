@@ -1,4 +1,4 @@
-export default class Auth {
+class Auth {
   constructor(properties) {
     this.properties = properties;
     this.datetime = new Date();
