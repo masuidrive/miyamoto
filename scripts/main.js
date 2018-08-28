@@ -35,6 +35,7 @@ const init = function (mode = 'slack') {
           return auth;
       }
     })();
+    if (mode === 'auth') return { receiver, storage };
     const timesheets = new Timesheets(storage, settings, receiver);
     return { receiver, timesheets, storage };
   }

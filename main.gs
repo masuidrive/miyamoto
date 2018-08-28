@@ -907,6 +907,7 @@ var init = function init() {
           return auth;
       }
     }();
+    if (mode === 'auth') return { receiver: receiver, storage: storage };
     var timesheets = new Timesheets(storage, settings, receiver);
     return { receiver: receiver, timesheets: timesheets, storage: storage };
   }
