@@ -178,7 +178,7 @@ var Auth = function () {
         };
       }
 
-      var access_token = this.access_tokens[paramters.access_token];
+      var access_token = this.access_tokens[parameters.access_token];
       return {
         code: 200,
         display_name: access_token.display_name,
