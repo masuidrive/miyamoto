@@ -100,7 +100,11 @@ Check whether user has not signed in, already signed in, or signed out.
 |Name|Type|Description|
 |---|---|---|
 |command|string|`getStatus`|
-|username|string|User's name of Slack|
+|access_token|string|User's access token.|
+|username|string|[WILL BE DEPRECATED] User's name of Slack.|
+
+- Either `access_token` or `username` is required.
+- **It is recommended to use `access_token`.**
 
 #### Response
 
@@ -109,12 +113,12 @@ Check whether user has not signed in, already signed in, or signed out.
 |code|integer|Status code. <br> `200`: OK, `4xx`: failure.|
 |message|string|Optional. Error message.|
 |status|string|User's status.<br>`notSignedIn` (未出勤), `signedIn` (出勤済み), `signedOut` (退勤済み).|
-|username|string|Same as the query.|
+|username|string|User's display name of Slack.|
 |datetime|DateTime|Datetime of query. <br> ISO 8601 (`YYYY-MM-DDThh:mm:ss.sZ`) format.|
 
 Sample query:
 ```
-command=getStatus&username=toshikish
+command=getStatus&access_token=58d12bc1-08d0-4e94-9440-75562f22027a
 ```
 
 Sample response:
@@ -144,7 +148,11 @@ Make user sign in.
 |Name|Type|Description|
 |---|---|---|
 |command|string|`signIn`|
-|username|string|User's name of Slack|
+|access_token|string|User's access token.|
+|username|string|[WILL BE DEPRECATED] User's name of Slack.|
+
+- Either `access_token` or `username` is required.
+- **It is recommended to use `access_token`.**
 
 #### Response
 
@@ -153,12 +161,12 @@ Make user sign in.
 |code|integer|Status code. <br> `200`: OK, `4xx`: failure.|
 |message|string|Optional. Error message.|
 |status|string|User's status.<br>`notSignedIn` (未出勤), `signedIn` (出勤済み), `signedOut` (退勤済み).|
-|username|string|Same as the query.|
+|username|string|User's display name of Slack.|
 |datetime|DateTime|Datetime of signing in. <br> ISO 8601 (`YYYY-MM-DDThh:mm:ss.sZ`) format.|
 
 Sample query:
 ```
-command=signIn&username=toshikish
+command=signIn&access_token=58d12bc1-08d0-4e94-9440-75562f22027a
 ```
 
 Sample response:
@@ -189,7 +197,11 @@ Make user sign out.
 |Name|Type|Description|
 |---|---|---|
 |command|string|`signOut`|
-|username|string|User's name of Slack|
+|access_token|string|User's access token.|
+|username|string|[WILL BE DEPRECATED] User's name of Slack.|
+
+- Either `access_token` or `username` is required.
+- **It is recommended to use `access_token`.**
 
 #### Response
 
@@ -198,12 +210,12 @@ Make user sign out.
 |code|integer|Status code. <br> `200`: OK, `4xx`: failure.|
 |message|string|Optional. Error message.|
 |status|string|User's status.<br>`notSignedIn` (未出勤), `signedIn` (出勤済み), `signedOut` (退勤済み).|
-|username|string|Same as the query.|
+|username|string|User's display name of Slack.|
 |datetime|DateTime|Datetime of signing in. <br> ISO 8601 (`YYYY-MM-DDThh:mm:ss.sZ`) format.|
 
 Sample query:
 ```
-command=signOut&username=toshikish
+command=signOut&access_token=58d12bc1-08d0-4e94-9440-75562f22027a
 ```
 
 Sample response:
