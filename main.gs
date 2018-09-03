@@ -948,7 +948,7 @@ loadGSTimesheets = function loadGSTimesheets() {
   };
 
   GSTimesheets.prototype.getUsers = function () {
-    return JSON.parse(this.properties.get('users'));
+    return this.users;
   };
 
   GSTimesheets.prototype.addUserSpreadsheet = function (spreadsheet) {
