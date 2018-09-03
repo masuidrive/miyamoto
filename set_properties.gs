@@ -10,6 +10,10 @@ function viewProperties() {
   Logger.log(PropertiesService.getScriptProperties().getProperties());
 }
 
+function viewPropertyKeys() {
+  Logger.log(PropertiesService.getScriptProperties().getKeys());
+}
+
 function migrateUsersSpreadsheet() {
   var Prop = PropertiesService.getScriptProperties();
   var users = JSON.parse(Prop.getProperty('users'));
