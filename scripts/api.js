@@ -19,8 +19,8 @@ loadApi = function () {
 
   Api.prototype.extractUsername = function (parameter) {
     if (parameter.access_token != null) {
-      const access_token = JSON.parse(this.properties.get('access_tokens'));
-      return access_token[parameter.access_token] ? access_token[parameter.access_token].display_name : '';
+      const access_token = this.properties.get(`access_tokens::${parameter.access_token}`);
+      return access_token !== null ? JSON.parse(access_token).display_name : '';
     } else {
       return parameter.username || '';
     }
