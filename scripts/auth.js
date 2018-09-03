@@ -80,7 +80,7 @@ class Auth {
   }
 
   setAccessToken(access_token, accessToken) {
-    this.properties.set(`access_tokens::$${access_token}`, JSON.stringify(accessToken));
+    this.properties.set(`access_tokens::${access_token}`, JSON.stringify(accessToken));
   }
 
   handleAccessDenied(access_token) {

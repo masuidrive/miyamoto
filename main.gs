@@ -193,7 +193,7 @@ var Auth = function () {
   }, {
     key: 'setAccessToken',
     value: function setAccessToken(access_token, accessToken) {
-      this.properties.set('access_tokens::$' + access_token, JSON.stringify(accessToken));
+      this.properties.set('access_tokens::' + access_token, JSON.stringify(accessToken));
     }
   }, {
     key: 'handleAccessDenied',
