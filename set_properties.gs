@@ -10,6 +10,10 @@ function viewProperties() {
   Logger.log(PropertiesService.getScriptProperties().getProperties());
 }
 
+function viewPropertyKeys() {
+  Logger.log(PropertiesService.getScriptProperties().getKeys());
+}
+
 function migrateUsersSpreadsheet() {
   var Prop = PropertiesService.getScriptProperties();
   var users = JSON.parse(Prop.getProperty('users'));
@@ -17,9 +21,8 @@ function migrateUsersSpreadsheet() {
   Object.keys(users).forEach(function (user) {
     new_properties['users::' + user + '::spreadsheet_id'] = users[user];
   });
+  new_properties.users = JSON.stringify(Object.keys(users));
   Prop.setProperties(new_properties);
-
-  Prop.deleteProperty('users');
 }
 
 function migrateAccessTokens() {
