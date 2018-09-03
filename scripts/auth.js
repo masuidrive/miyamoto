@@ -2,11 +2,6 @@ class Auth {
   constructor(properties) {
     this.properties = properties;
     this.datetime = new Date();
-    this.access_tokens = JSON.parse(this.properties.get('access_tokens'));
-  }
-
-  updateAccessTokens() {
-    this.properties.set('access_tokens', JSON.stringify(this.access_tokens));
   }
 
   receiveMessage(parameters) {
@@ -42,13 +37,12 @@ class Auth {
 
   generateAccessToken(parameters) {
     const access_token = Utilities.getUuid();
-    this.access_tokens[access_token] = {
+    this.setAccessToken(access_token, {
       display_name: '',
       real_name: '',
       slack_access_token: '',
       created_at: this.datetime
-    };
-    this.updateAccessTokens();
+    });
 
     return {
       code: 201,
@@ -67,23 +61,32 @@ class Auth {
       }
     }
 
-    const access_token = this.access_tokens[parameters.access_token];
+    const accessToken = this.getAccessToken(parameters.access_token);
     return {
       code: 200,
-      display_name: access_token.display_name,
-      real_name: access_token.real_name,
-      slack_access_token: access_token.slack_access_token,
+      display_name: accessToken.display_name,
+      real_name: accessToken.real_name,
+      slack_access_token: accessToken.slack_access_token,
       datetime: this.datetime
     }
   }
 
   validateAccessToken(access_token) {
-    return access_token in this.access_tokens;
+    return this.properties.get(`access_tokens::${access_token}`) !== null;
+  }
+
+  getAccessToken(access_token) {
+    return JSON.parse(this.properties.get(`access_tokens::${access_token}`));
+  }
+
+  setAccessToken(access_token, accessToken) {
+    this.properties.set(`access_tokens::${access_token}`, JSON.stringify(accessToken));
   }
 
   handleAccessDenied(access_token) {
-    this.access_tokens[access_token].denied_at = this.datetime;
-    this.updateAccessTokens();
+    const accessToken = this.getAccessToken(access_token);
+    accessToken.denied_at = this.datetime;
+    this.setAccessToken(access_token, accessToken);
 
     return '認証に失敗しました';
   }
@@ -96,11 +99,12 @@ class Auth {
     const user_response = this.retrieveUserProfile(slack_access_token);
     if (!user_response.ok) return 'ユーザ情報の取得に失敗しました';
 
-    this.access_tokens[access_token].display_name = user_response.profile.display_name;
-    this.access_tokens[access_token].real_name = user_response.profile.real_name;
-    this.access_tokens[access_token].slack_access_token = slack_access_token;
-    this.access_tokens[access_token].allowed_at = this.datetime;
-    this.updateAccessTokens();
+    const accessToken = this.getAccessToken(access_token);
+    accessToken.display_name = user_response.profile.display_name;
+    accessToken.real_name = user_response.profile.real_name;
+    accessToken.slack_access_token = slack_access_token;
+    accessToken.allowed_at = this.datetime;
+    this.setAccessToken(access_token, accessToken);
 
     return 'Slack ログインが完了しました';
   }
