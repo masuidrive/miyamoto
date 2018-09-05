@@ -62,13 +62,19 @@ class Auth {
     }
 
     const accessToken = this.getAccessToken(parameters.access_token);
-    return {
-      code: 200,
-      display_name: accessToken.display_name,
-      real_name: accessToken.real_name,
-      slack_access_token: accessToken.slack_access_token,
-      datetime: this.datetime
-    }
+    return accessToken.slack_access_token === ''
+      ? {
+        code: 401,
+        message: 'User not authenticated.',
+        datetime: this.datetime
+      }
+      : {
+        code: 200,
+        display_name: accessToken.display_name,
+        real_name: accessToken.real_name,
+        slack_access_token: accessToken.slack_access_token,
+        datetime: this.datetime
+      };
   }
 
   validateAccessToken(access_token) {

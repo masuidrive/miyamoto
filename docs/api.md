@@ -85,8 +85,15 @@ Sample response:
 ```
 ```json
 {
+  "code": 401,
+  "message": "User not authenticated.",
+  "datetime": "2018-08-16T05:44:00.000Z"
+}
+```
+```json
+{
   "code": 404,
-  "message": "User not found.",
+  "message": "Invalid access token.",
   "datetime": "2018-08-16T05:44:00.000Z"
 }
 ```

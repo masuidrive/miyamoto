@@ -172,7 +172,11 @@ var Auth = function () {
       }
 
       var accessToken = this.getAccessToken(parameters.access_token);
-      return {
+      return accessToken.slack_access_token === '' ? {
+        code: 401,
+        message: 'User not authenticated.',
+        datetime: this.datetime
+      } : {
         code: 200,
         display_name: accessToken.display_name,
         real_name: accessToken.real_name,
