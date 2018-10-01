@@ -1223,8 +1223,10 @@ loadTimesheets = function loadTimesheets(exports) {
   // メッセージを受信する
   Timesheets.prototype.receiveMessage = function (username, message) {
     // 日付は先に処理しておく
-    this.date = DateUtils.parseDate(message);
-    this.time = DateUtils.parseTime(message);
+    // this.date = DateUtils.parseDate(message);
+    // this.time = DateUtils.parseTime(message);
+    this.date = DateUtils.parseDate('');
+    this.time = DateUtils.parseTime('');
     this.datetime = DateUtils.normalizeDateTime(this.date, this.time);
     if (this.datetime !== null) {
       this.dateStr = DateUtils.format("Y/m/d", this.datetime);
@@ -1283,7 +1285,7 @@ loadTimesheets = function loadTimesheets(exports) {
       var signOutTimeStr = DateUtils.format("Y/m/d H:M", this.datetime);
       var data = this.storage.get(username, this.datetime);
       var rest = DateUtils.parseTime(this.settings.get('休憩時間'));
-      var rest_string = rest[0] + ":" + rest[1] + ":00";
+      var rest_string = rest[0] + ':' + rest[1] + ':00';
       if (!data.signOut || data.signOut === '-') {
         this.storage.set(username, this.datetime, { signOut: this.datetime, rest: rest_string, via: this.responder.via });
         this.responder.template("退勤", username, signOutTimeStr);
