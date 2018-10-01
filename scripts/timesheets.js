@@ -16,8 +16,10 @@ loadTimesheets = function (exports) {
   // メッセージを受信する
   Timesheets.prototype.receiveMessage = function(username, message) {
     // 日付は先に処理しておく
-    this.date = DateUtils.parseDate(message);
-    this.time = DateUtils.parseTime(message);
+    // this.date = DateUtils.parseDate(message);
+    // this.time = DateUtils.parseTime(message);
+    this.date = DateUtils.parseDate('');
+    this.time = DateUtils.parseTime('');
     this.datetime = DateUtils.normalizeDateTime(this.date, this.time);
     if(this.datetime !== null) {
       this.dateStr = DateUtils.format("Y/m/d", this.datetime);
