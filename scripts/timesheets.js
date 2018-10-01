@@ -66,8 +66,8 @@ loadTimesheets = function (exports) {
       else {
         // 更新の場合は時間を明示する必要がある
         if(!!this.time) {
-          this.storage.set(username, this.datetime, { signIn: this.datetime, via: this.responder.via });
-          this.responder.template("出勤更新", username, signInTimeStr);
+          // this.storage.set(username, this.datetime, { signIn: this.datetime, via: this.responder.via });
+          // this.responder.template("出勤更新", username, signInTimeStr);
         } else {
           this.responder.result = {
             code: 400,
@@ -95,8 +95,8 @@ loadTimesheets = function (exports) {
       else {
         // 更新の場合は時間を明示する必要がある
         if(!!this.time) {
-          this.storage.set(username, this.datetime, { signOut: this.datetime, rest: rest_string, via: this.responder.via });
-          this.responder.template("退勤更新", username, signOutTimeStr);
+          // this.storage.set(username, this.datetime, { signOut: this.datetime, rest: rest_string, via: this.responder.via });
+          // this.responder.template("退勤更新", username, signOutTimeStr);
         } else {
           this.responder.result = {
             code: 400,
