@@ -501,6 +501,7 @@ loadGSTimesheets = function () {
       return v == null ? '' : v;
     });
     sheet.getRange("A"+rowNo+":"+String.fromCharCode(65 + this.scheme.columns.length - 1)+rowNo).setValues([data]);
+    sheet.getRange("B"+rowNo+":C"+rowNo).setNumberFormat('hh:mm')
 
     return row;
   };
