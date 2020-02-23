@@ -49,6 +49,8 @@ If you push your code to the master branch, the script will automatically deploy
 
 Please don't modify main.gs directory. it will be created by `make upload` command during the deployment process.
 
+Please see [DEVELOPMENT.md] for the development details.
+
 ## Todo
 
 See issues

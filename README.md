@@ -54,6 +54,8 @@ Spreadsheetの「_メッセージ」シートに各メッセージのテンプ�
 
 If you push your code to the master branch, the script will automatically deployed to the Google App Script.
 
+Please see [DEVELOPMENT.md] for the development details.
+
 ## Todo
 
 - 出勤日数の管理
