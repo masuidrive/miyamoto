@@ -349,7 +349,7 @@ loadGSTemplate = function() {
   var GSTemplate = function(spreadsheet) {
     this.spreadsheet = spreadsheet;
 
-    // メッセージテンプレート設定
+    // メッセージテンプレート設定 
     this.sheet = this.spreadsheet.getSheetByName('_メッセージ');
     if(!this.sheet) {
       this.sheet = this.spreadsheet.insertSheet('_メッセージ');
@@ -644,7 +644,7 @@ function migrate() {
   if(typeof GASProperties === 'undefined') GASProperties = loadGASProperties();
 
   var global_settings = new GASProperties();
-  global_settings.set('version', "20200222.0");
+  global_settings.set('version', "20200223.0");
   console.log("バージョンアップが完了しました。");
 }
 
@@ -741,12 +741,12 @@ loadTimesheets = function (exports) {
 
     // コマンド集
     var commands = [
-      ['actionSignOut', /(バ[ー〜ァ]*イ|ば[ー〜ぁ]*い|おやすみ|お[つっ]ー|おつ|さらば|お先|お疲|帰|乙|bye|night|(c|see)\s*(u|you)|退勤|ごきげんよ|グ[ッ]?バイ)/],
+      ['actionSignOut', /(バ[ー〜ァ]*イ|ば[ー〜ぁ]*い|おやすみ|お[つっ]ー|おつ|さらば|お先|お疲|帰|乙|bye|night|(c|see)\s*(u|you)|left|退勤|ごきげんよ|グ[ッ]?バイ)/],
       ['actionWhoIsOff', /(だれ|誰|who\s*is).*(休|やす(ま|み|む))/],
       ['actionWhoIsIn', /(だれ|誰|who\s*is)/],
       ['actionCancelOff', /(休|やす(ま|み|む)|休暇).*(キャンセル|消|止|やめ|ません)/],
       ['actionOff', /(休|やす(ま|み|む)|休暇)/],
-      ['actionSignIn', /(モ[ー〜]+ニン|も[ー〜]+にん|おっは|おは|へろ|はろ|ヘロ|ハロ|hi|hello|morning|出勤)/],
+      ['actionSignIn', /(モ[ー〜]+ニン|も[ー〜]+にん|おっは|おは|へろ|はろ|ヘロ|ハロ|hi|hello|morning|ohayo|出勤)/],
       ['confirmSignIn', /__confirmSignIn__/],
       ['confirmSignOut', /__confirmSignOut__/],
     ];
