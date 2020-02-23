@@ -20,14 +20,14 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-      env: # Or as an environment variable
-        CLIENT_ID: ${{ secrets.GAS_CLIENT_ID }}
-        CLIENT_SECRET: ${{ secrets.GAS_CLIENT_SECRET }}
-        REFREASH_TOKEN: ${{ secrets.GAS_REFREASH_TOKEN }}
     - name: Create gas-config.json
       run: echo "{\"client_id\": \"${CLIENT_ID}\"," > gas-config.json
       run: echo "\"client_secret\": \"${CLIENT_SECRET}\"," >> gas-config.json
       run: echo "\"refresh_token\": \"${REFREASH_TOKEN}\"}" >> gas-config.json
+      env: # Or as an environment variable
+        CLIENT_ID: ${{ secrets.GAS_CLIENT_ID }}
+        CLIENT_SECRET: ${{ secrets.GAS_CLIENT_SECRET }}
+        REFREASH_TOKEN: ${{ secrets.GAS_REFREASH_TOKEN }}
     - run: npm install
     - run: make test
     - run: make upload
