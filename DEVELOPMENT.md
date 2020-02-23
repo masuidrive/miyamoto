@@ -58,7 +58,12 @@ It will deploy new Google Apps Script to the App script.
 
 ## Create timesheet
 
-Please open the updated script and copy `Current web app URL`. You can get the info from the menu > Publish > Deploy as Web App.
+Please open the updated script and publish it as a web API.
+You can publish it from the menu > Publish > Deploy as Web App.
+
+![publish](https://i.gyazo.com/204a0b29dc9e7d50977804de5867fc47.png)
+
+Then, copy `Current web app URL`. 
 
 After that, you will need to run 'setUp' function once. It will create a Google Spreadsheed called `Slack Timesheet`
 
