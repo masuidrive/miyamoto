@@ -5,7 +5,7 @@ loadGSTemplate = function() {
   var GSTemplate = function(spreadsheet) {
     this.spreadsheet = spreadsheet;
 
-    // メッセージテンプレート設定
+    // メッセージテンプレート設定 
     this.sheet = this.spreadsheet.getSheetByName('_メッセージ');
     if(!this.sheet) {
       this.sheet = this.spreadsheet.insertSheet('_メッセージ');
