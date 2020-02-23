@@ -1,5 +1,8 @@
 # 勤怠管理bot - みやもとさん
 
+- [English version](README_en.md)
+- [Japanese version](README.md)
+
 Google Apps Scriptで書かれた、Slack上で動く勤怠管理Bot。
 Georepublic Japan 内での利用用にカスタマイズしています。
 
@@ -34,8 +37,6 @@ Slackの#_timesheetチャンネルで「おはよう」と発言すると、先�
 
 週の休日は「Day Off」の欄に,(カンマ)区切りで入力します。
 
-![gs2](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/gs2.png)
-
 ## メッセージの変更/Change messages
 
 Spreadsheetの「_メッセージ」シートに各メッセージのテンプレートが書かれています。縦に複数設定すると、ランダムで選択されます。
@@ -51,7 +52,7 @@ Spreadsheetの「_メッセージ」シートに各メッセージのテンプ�
 
 # 開発/Development
 
-If you puwh your code to the master branch, the script will automatically deployed to the Google App Script
+If you push your code to the master branch, the script will automatically deployed to the Google App Script.
 
 ## Todo
 
@@ -73,7 +74,10 @@ make test
 - main.js
   - HTTPを受け取る
 
-- 入力内容を解析して、メソッドを呼び出す
+- timesheets.js
+  - 入力内容を解析して、メソッドを呼び出す
+
+- slack.js
   - Slackへの入出力
 
 - gs_template.js
