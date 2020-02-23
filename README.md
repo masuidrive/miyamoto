@@ -3,6 +3,8 @@
 Google Apps Scriptで書かれた、Slack上で動く勤怠管理Bot。
 Georepublic Japan 内での利用用にカスタマイズしています。
 
+オリジナル版は[こちら](https://github.com/masuidrive/miyamoto)
+
 Slackで下記の様につぶやくと、みやもとさんがGoogle Spreadsheetに勤怠を記録してくれます。
 
 ![demo1](https://raw.githubusercontent.com/masuidrive/miyamoto/master/docs/images/demo1.png)
