@@ -20,22 +20,45 @@ Press ^C at any time to quit.
 Do you have client_id & client_secret for Google OAuth2? [yes/no] 
 ```
 
-Please follow the instructions. It will create a file named `gas-config.json`
+By following the instructions. It will create a file named `gas-config.json`. Please locate it on the project root.
+
+You don't need to create project setting. Please answer `no` to below question.
+
+```
+Do you want to creating Project settings?  [yes/no] no
+```
 
 ## Create Google Apps Script
+
+Go to [Google Apps Script](https://script.google.com/home) and create new script and save as your favorite name.
+
+If your script file name in the left pane is `コード.gs`, please change it to `main.gs`.
+
+Then copy the file's ID from the URL and close the editor.
+https://script.google.com/a/georepublic.de/d/[FILE_ID]/edit?splash=yes
+
+
+Then, create a development project config from `gas-project.json`
+
+```
+cp gas-project.json gas-project-dev.json
+```
+
+Replace `fileId` field of `gas-project-dev.json` with the `FILE_ID` value.
+
+## Deploy latest script
 
 Run below command
 
 ```
-% make upload
+% make dev
 ```
 
-It will deploy new Google Apps Script.
+It will deploy new Google Apps Script to the App script.
 
 ## Create timesheet
 
-Previous process will create new Google Apps Script.
-Please open it and copy `Current web app URL`. You can get the info from the menu > Publish > Deploy as Web App.
+Please open the updated script and copy `Current web app URL`. You can get the info from the menu > Publish > Deploy as Web App.
 
 After that, you will need to run 'setUp' function once. It will create a Google Spreadsheed called `Slack Timesheet`
 
