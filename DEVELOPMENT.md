@@ -61,11 +61,13 @@ It will deploy new Google Apps Script to the App script.
 Please open the updated script and publish it as a web API.
 You can publish it from the menu > Publish > Deploy as Web App.
 
+Access permission must be `Anyone, even anonymous`.
+
 ![publish](https://i.gyazo.com/204a0b29dc9e7d50977804de5867fc47.png)
 
 Then, copy `Current web app URL`. 
 
-After that, you will need to run 'setUp' function once. It will create a Google Spreadsheed called `Slack Timesheet`
+After that, you have to run `setUp` function once. It will create a Google Spreadsheed called `Slack Timesheet`
 
 ![gas](https://i.gyazo.com/a6cc4378ca047d95053589d983773b96.png)
 
@@ -76,7 +78,7 @@ Go to Slack and add new integrations. (If you don't have a parmission, please as
 ### Outgoing WebHooks
 
 1. Select your test channel 
-2. Paste `Current web app URL` into URL(s).
+2. Paste `Current web app URL` from the Apps Script into URL(s) field.
 
 ### Incoming WebHooks
 
