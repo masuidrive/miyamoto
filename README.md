@@ -1,7 +1,6 @@
 # 勤怠管理bot - みやもとさん
 
-- [English version](README_en.md)
-- [Japanese version](README.md)
+- [English README](README_en.md)
 
 Google Apps Scriptで書かれた、Slack上で動く勤怠管理Bot。
 Georepublic Japan 内での利用用にカスタマイズしています。
@@ -54,7 +53,7 @@ Spreadsheetの「_メッセージ」シートに各メッセージのテンプ�
 
 If you push your code to the master branch, the script will automatically deployed to the Google App Script.
 
-Please see [DEVELOPMENT.md] for the development details.
+Please see [DEVELOPMENT.md](DEVELOPMENT.md) for the development details.
 
 ## Todo
 
