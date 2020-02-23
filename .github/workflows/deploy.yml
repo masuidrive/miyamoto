@@ -21,11 +21,11 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: Create gas-config.json
-      run: create_gas_config.sh
+      run: ./create_gas_config.sh
       env: # Or as an environment variable
         CLIENT_ID: ${{ secrets.GAS_CLIENT_ID }}
         CLIENT_SECRET: ${{ secrets.GAS_CLIENT_SECRET }}
-        REFREASH_TOKEN: ${{ secrets.GAS_REFREASH_TOKEN }}
+        REFRESH_TOKEN: ${{ secrets.GAS_REFRESH_TOKEN }}
     - run: npm install
     - run: make test
     - run: make upload
