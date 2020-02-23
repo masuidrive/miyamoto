@@ -22,6 +22,16 @@ Do you have client_id & client_secret for Google OAuth2? [yes/no]
 
 Please follow the instructions. It will create a file named `gas-config.json`
 
+## Create Google Apps Script
+
+Run below command
+
+```
+% make upload
+```
+
+It will deploy new Google Apps Script.
+
 ## Create timesheet
 
 Previous process will create new Google Apps Script.
@@ -49,6 +59,11 @@ Go to Slack and add new integrations. (If you don't have a parmission, please as
 5. Add your bot name to the `無視するユーザ`.
 
 ![spread](https://i.gyazo.com/8115e524e1e682db1923f1498d5572c6.png)
+
+
+### Test
+
+Please say `hi` on your test channel. The bot will create new record on the timesheet and reploy something.
 
 That's All! Pull Requests are very welcome!
 
