@@ -710,8 +710,20 @@ loadGSTimesheets = function loadGSTimesheets() {
     this._sheets = {};
     this.users = JSON.parse(this.properties.get('users'));
 
+    var rest = DateUtils.parseTime(this.settings.get('休憩時間'));
+    var rest_string = rest[0] + ':' + rest[1] + ':00';
+
     this.scheme = {
-      columns: [{ name: '日付', format: 'yyyy"年"m"月"d"日（"ddd"）"', width: 150 }, { name: '出勤（打刻）', format: 'H:mm', width: 100 }, { name: '退勤（打刻）', format: 'H:mm', width: 100 }, { name: '出勤', format: 'H:mm', formula: '=CEILING(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 }, { name: '退勤', format: 'H:mm', formula: '=FLOOR(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 }, { name: '休憩時間', format: '[h]:mm', width: 75 }, { name: '勤務時間', format: '[h]:mm', formula: '=IF(OR(ISBLANK(RC[-5]),ISBLANK(RC[-4]),ISBLANK(RC[-1])),0,MAX(RC[-2]-RC[-3]-RC[-1],0))', width: 75 }, { name: 'メモ', width: 300 }, { name: '承認者', width: 100 }, { name: '経由', width: 50 }],
+      columns: [
+        { name: '日付', format: 'yyyy"年"m"月"d"日（"ddd"）"', width: 150 },
+        { name: '出勤（打刻）', format: 'H:mm', width: 100 },
+        { name: '退勤（打刻）', format: 'H:mm', width: 100 },
+        { name: '出勤', format: 'H:mm', formula: '=CEILING(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 },
+        { name: '退勤', format: 'H:mm', formula: '=FLOOR(RC[-2],TIME(0,' + this.settings.get('丸め単位（分）') + ',0))', width: 50 },
+        { name: '休憩時間', format: '[h]:mm', formula: '=IF(OR(ISBLANK(RC[-3]),ISBLANK(RC[-4])), "", IF(RC[-1]-RC[-2] > TIME(6, 0, 0), TIMEVALUE("' + rest_string + '"), TIMEVALUE("0:00:00")))', width: 75 },
+        { name: '勤務時間', format: '[h]:mm', formula: '=IF(OR(ISBLANK(RC[-5]),ISBLANK(RC[-4]),ISBLANK(RC[-1])),0,MAX(RC[-2]-RC[-3]-RC[-1],0))', width: 75 },
+        { name: 'メモ', width: 300 }, { name: '承認者', width: 100 }, { name: '経由', width: 50 }
+      ],
       properties: [{ name: 'DayOff', value: '土,日', comment: '← 月,火,水みたいに入力してください。アカウント停止のためには「全部」と入れてください。' }, { name: '入社日', value: new Date().toLocaleDateString(), comment: 'デフォルトでシート作成日が入っているので，入社日に修正してください。' }, { name: '勤務形態', value: '正社員', comment: 'デフォルトで「正社員」が入っているので，正しいものを選択してください。編集権限がない場合はコーポレート部門に連絡してください。' }]
     };
 
@@ -931,7 +943,8 @@ loadGSTimesheets = function loadGSTimesheets() {
     var rowNo = this._getRowNo(date);
 
     this._setValues(sheet.getRange(rowNo, 2, 1, 2), [row.signIn, row.signOut]);
-    this._setValues(sheet.getRange(rowNo, 6, 1, 1), [row.rest]);
+    // 休憩時間は数式で設定するようにするため、この処理はコメントアウト
+    // this._setValues(sheet.getRange(rowNo, 6, 1, 1), [row.rest]);
     this._setValues(sheet.getRange(rowNo, 8, 1, 3), [row.note, row.supervisor, row.via]);
 
     return row;
