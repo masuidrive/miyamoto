@@ -609,7 +609,7 @@ function setUp() {
     settings.setNote('無視するユーザ', '反応をしないユーザを,区切りで設定する。botは必ず指定してください。');
 
     // 休日を設定 (iCal)
-    var calendarId = 'ja.japanese#holiday@group.v.calendar.google.com';
+    var calendarId = 'japanese__ja@holiday.calendar.google.com';
     var calendar = CalendarApp.getCalendarById(calendarId);
     var startDate = DateUtils.now();
     var endDate = new Date(startDate.getFullYear() + 1, startDate.getMonth());
